@@ -1702,7 +1702,7 @@
           <i class="fas fa-history"></i>
           <h2>Recent Activity</h2>
           <span class="section-count">{{ recent_activities|length if recent_activities else 0 }}</span>
-          <a href="{{ url_for('student.my_notifications') }}" class="section-link">View All →</a>
+          <a href="{{ url_for('student.notifications') }}" class="section-link">View All →</a>
         </div>
         <div class="activity-list">
           {% if recent_activities %}
@@ -1736,7 +1736,7 @@
           <i class="fas fa-calendar-alt"></i>
           <h2>Upcoming Deadlines</h2>
           <span class="section-count">{{ upcoming_deadlines|length if upcoming_deadlines else 0 }}</span>
-          <a href="{{ url_for('student.my_calendar') }}" class="section-link">Calendar →</a>
+          <a href="{{ url_for('student.calendar') }}" class="section-link">Calendar →</a>
         </div>
         <div class="deadline-list">
           {% if upcoming_deadlines %}
