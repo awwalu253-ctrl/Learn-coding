@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: teachingsite-lms
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn run:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: FLASK_DEBUG
+        value: false
+      - key: RENDER
+        value: true

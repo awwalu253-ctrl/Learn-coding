@@ -2,6 +2,7 @@
 import os
 from backend import create_app
 
+# Create the app instance that gunicorn will use
 app = create_app()
 
 if __name__ == '__main__':
