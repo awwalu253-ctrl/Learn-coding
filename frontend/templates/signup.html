@@ -413,15 +413,6 @@
   }
 
   /* ============================================
-     NAME ROW
-     ============================================ */
-  .name-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  /* ============================================
      PASSWORD STRENGTH - Gold Theme
      ============================================ */
   .password-strength {
@@ -778,11 +769,6 @@
       font-size: 1.4rem;
     }
 
-    .name-row {
-      grid-template-columns: 1fr;
-      gap: 0;
-    }
-
     .form-group .input-wrapper input {
       padding: 11px 14px;
       padding-right: 44px;
@@ -1088,48 +1074,10 @@
 
     <!-- Form -->
     <form method="POST" class="signup-form" id="signupForm" novalidate>
-      <!-- Full Name -->
-      <div class="name-row">
-        <div class="form-group">
-          <label for="first_name">
-            <i class="fas fa-user"></i> First Name
-            <span class="required">*</span>
-          </label>
-          <div class="input-wrapper">
-            <input 
-              type="text" 
-              id="first_name" 
-              name="first_name" 
-              class="form-control" 
-              placeholder="First name" 
-              required
-              autocomplete="given-name"
-            >
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="last_name">
-            <i class="fas fa-user"></i> Last Name
-            <span class="required">*</span>
-          </label>
-          <div class="input-wrapper">
-            <input 
-              type="text" 
-              id="last_name" 
-              name="last_name" 
-              class="form-control" 
-              placeholder="Last name" 
-              required
-              autocomplete="family-name"
-            >
-          </div>
-        </div>
-      </div>
-
       <!-- Username -->
       <div class="form-group">
         <label for="username">
-          <i class="fas fa-user-tag"></i> Username
+          <i class="fas fa-user"></i> Username
           <span class="required">*</span>
         </label>
         <div class="input-wrapper">
@@ -1230,6 +1178,24 @@
         </div>
       </div>
 
+      <!-- Phone (Optional) -->
+      <div class="form-group">
+        <label for="phone">
+          <i class="fas fa-phone"></i> Phone Number
+          <span class="optional">(Optional)</span>
+        </label>
+        <div class="input-wrapper">
+          <input 
+            type="tel" 
+            id="phone" 
+            name="phone" 
+            class="form-control" 
+            placeholder="Enter your phone number (optional)" 
+            autocomplete="tel"
+          >
+        </div>
+      </div>
+
       <!-- Select Courses -->
       <div class="form-group">
         <label>
@@ -1277,7 +1243,7 @@
 
     <!-- Footer -->
     <div class="signup-footer">
-      <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+      <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></p>
     </div>
   </div>
 </div>
@@ -1285,8 +1251,6 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('signupForm');
-    const firstName = document.getElementById('first_name');
-    const lastName = document.getElementById('last_name');
     const username = document.getElementById('username');
     const email = document.getElementById('email');
     const password = document.getElementById('password');
@@ -1379,8 +1343,6 @@
     });
 
     // Remove error on input
-    firstName.addEventListener('input', function() { this.classList.remove('error'); });
-    lastName.addEventListener('input', function() { this.classList.remove('error'); });
     username.addEventListener('input', function() {
       this.classList.remove('error');
       usernameError.style.display = 'none';
@@ -1400,16 +1362,6 @@
     // Form validation
     form.addEventListener('submit', function(e) {
       let isValid = true;
-
-      if (!firstName.value.trim()) {
-        firstName.classList.add('error');
-        isValid = false;
-      }
-
-      if (!lastName.value.trim()) {
-        lastName.classList.add('error');
-        isValid = false;
-      }
 
       if (!username.value.trim() || username.value.trim().length < 3) {
         username.classList.add('error');
@@ -1453,11 +1405,7 @@
 
       if (!isValid) {
         e.preventDefault();
-        if (firstName.classList.contains('error')) {
-          firstName.focus();
-        } else if (lastName.classList.contains('error')) {
-          lastName.focus();
-        } else if (username.classList.contains('error')) {
+        if (username.classList.contains('error')) {
           username.focus();
         } else if (email.classList.contains('error')) {
           email.focus();

@@ -106,12 +106,12 @@ def signup():
     courses = Course.query.all()
     
     if request.method == 'POST':
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
         selected_courses = request.form.getlist('courses')
-        phone = request.form.get('phone', '')
+        phone = request.form.get('phone', '').strip()
         
         # Validation
         if not username or not email or not password:
@@ -126,6 +126,10 @@ def signup():
             flash('Password must be at least 6 characters.', 'error')
             return render_template('signup.html', courses=courses)
         
+        if not selected_courses:
+            flash('Please select at least one course.', 'error')
+            return render_template('signup.html', courses=courses)
+        
         # Check if username exists
         if User.query.filter_by(username=username).first():
             flash('Username already taken.', 'error')
@@ -136,46 +140,57 @@ def signup():
             flash('Email already registered.', 'error')
             return render_template('signup.html', courses=courses)
         
-        # Create new student
-        student = User(
-            username=username,
-            email=email,
-            role='student',
-            is_approved=False,
-            phone=phone if phone else None
-        )
-        student.set_password(password)
-        db.session.add(student)
-        db.session.flush()  # Get the ID
-        
-        # Add course enrollments
-        for course_id in selected_courses:
-            course = Course.query.get(course_id)
-            if course:
-                enrollment = CourseEnrollment(
-                    student_id=student.id,
-                    course_id=course_id,
-                    status='pending'
-                )
-                db.session.add(enrollment)
-        
-        db.session.commit()
-        
-        # Notify admins about new registration
-        admins = User.query.filter(User.role.in_(['admin', 'super_admin'])).all()
-        for admin in admins:
-            create_notification(
-                user_id=admin.id,
-                title='📝 New Student Registration',
-                message=f'New student "{username}" has registered and is pending approval.',
-                type='info',
-                link=url_for('admin.manage_students'),
-                icon='fa-user-plus',
-                icon_color='gold'
+        try:
+            # Create new student
+            student = User(
+                username=username,
+                email=email,
+                role='student',
+                is_approved=False,
+                phone=phone if phone else None
             )
-        
-        flash('Account created successfully! Please wait for admin approval.', 'success')
-        return redirect(url_for('auth.login'))
+            student.set_password(password)
+            db.session.add(student)
+            db.session.flush()  # Get the ID
+            
+            # Add course enrollments
+            for course_id in selected_courses:
+                course = Course.query.get(course_id)
+                if course:
+                    enrollment = CourseEnrollment(
+                        student_id=student.id,
+                        course_id=course_id,
+                        status='pending'
+                    )
+                    db.session.add(enrollment)
+            
+            db.session.commit()
+            
+            # Send notifications to admins
+            try:
+                admins = User.query.filter(User.role.in_(['admin', 'super_admin'])).all()
+                for admin in admins:
+                    create_notification(
+                        user_id=admin.id,
+                        title='📝 New Student Registration',
+                        message=f'New student "{username}" has registered and is pending approval.',
+                        type='info',
+                        link=url_for('admin.manage_students'),
+                        icon='fa-user-plus',
+                        icon_color='gold'
+                    )
+            except Exception as e:
+                print(f"Notification error: {e}")
+                # Continue anyway
+            
+            flash('Account created successfully! Please wait for admin approval.', 'success')
+            return redirect(url_for('auth.login'))
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"Signup error: {e}")
+            flash('An error occurred during registration. Please try again.', 'error')
+            return render_template('signup.html', courses=courses)
     
     return render_template('signup.html', courses=courses)
 
@@ -386,4 +401,3 @@ def uploaded_file(filename):
     """Serve uploaded files"""
     from flask import send_from_directory
     return send_from_directory(os.path.join(current_app.config['UPLOAD_FOLDER'], 'profile_pictures'), filename)
-

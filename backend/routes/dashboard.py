@@ -11,6 +11,6 @@ def index():
         return redirect(url_for('admin.dashboard'))
     
     if not current_user.is_approved:
-        return redirect(url_for('student.pending_approval'))
+        return redirect(url_for('auth.pending_approval'))
     
     return redirect(url_for('student.dashboard'))
