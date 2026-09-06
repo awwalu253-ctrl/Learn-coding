@@ -457,7 +457,7 @@ def dashboard():
 
 
 # ============================================================================
-# STUDENT MANAGEMENT - FIXED WITH FILTERING
+# STUDENT MANAGEMENT
 # ============================================================================
 
 @admin_bp.route('/students')
@@ -861,6 +861,48 @@ def unsuspend_student(student_id):
     return redirect(url_for('admin.manage_students'))
 
 
+@admin_bp.route('/students/<int:student_id>/reject-course/<int:course_id>', methods=['POST'])
+@login_required
+@admin_required
+def reject_course(student_id, course_id):
+    """Reject a student from a specific course"""
+    student = User.query.get_or_404(student_id)
+    course = Course.query.get_or_404(course_id)
+    
+    if not current_user.is_super_admin() and course not in current_user.managed_courses:
+        flash('You do not have permission to reject this course.', 'error')
+        return redirect(url_for('admin.manage_students'))
+    
+    message = request.form.get('message', 'No reason provided.')
+    
+    enrollment = CourseEnrollment.query.filter_by(
+        student_id=student.id,
+        course_id=course.id
+    ).first()
+    
+    if enrollment:
+        enrollment.status = 'rejected'
+        enrollment.rejected_at = datetime.utcnow()
+        enrollment.rejection_reason = message
+        
+        rejection = RejectionMessage(
+            student_id=student.id,
+            course_id=course.id,
+            message=message
+        )
+        db.session.add(rejection)
+        db.session.commit()
+        
+        from ..services.notification_service import notify_student_rejected
+        notify_student_rejected(student.id, course.name, message)
+        
+        flash(f'{student.username} rejected from {course.name}.', 'warning')
+    else:
+        flash('No enrollment found for this student and course.', 'error')
+    
+    return redirect(url_for('admin.course_detail', course_id=course.id))
+
+
 # ============================================================================
 # COURSE MANAGEMENT
 # ============================================================================
@@ -894,41 +936,140 @@ def course_list():
 @login_required
 @admin_required
 def course_detail(course_id):
-    """View course details"""
+    """View course details with all enrollments"""
     course = Course.query.get_or_404(course_id)
+    
+    # Check permission
+    if not current_user.is_super_admin() and course not in current_user.managed_courses:
+        flash('You do not have permission to view this course.', 'error')
+        return redirect(url_for('admin.course_list'))
+    
+    # Get assigned admins
+    admins = course.admins if hasattr(course, 'admins') else []
+    if not admins:
+        admins = User.query.filter(User.role.in_(['admin', 'super_admin'])).all()
+    
+    # Get all enrollments for this course
+    enrollments = CourseEnrollment.query.filter_by(course_id=course.id).all()
+    
+    # Prepare student data
+    students_data = []
+    for enrollment in enrollments:
+        student = User.query.get(enrollment.student_id)
+        if student:
+            students_data.append({
+                'student': student,
+                'status': enrollment.status,
+                'requested_at': enrollment.requested_at,
+                'approved_at': enrollment.approved_at,
+                'rejected_at': enrollment.rejected_at,
+                'rejection_reason': enrollment.rejection_reason
+            })
+    
+    # Get notes, quizzes, assignments
+    notes = Note.query.filter_by(course_id=course.id).order_by(Note.created_at.desc()).all()
+    quizzes = QuizGroup.query.filter_by(course_id=course.id).all()
+    assignments = Assignment.query.filter_by(course_id=course.id).all()
+    
+    # Calculate stats
+    total_students = len(students_data)
+    approved_count = sum(1 for s in students_data if s['status'] == 'approved')
+    pending_count = sum(1 for s in students_data if s['status'] == 'pending')
+    rejected_count = sum(1 for s in students_data if s['status'] == 'rejected')
+    
+    return render_template('admin/course_detail.html',
+                         course=course,
+                         admins=admins,
+                         students=students_data,
+                         total_students=total_students,
+                         approved_count=approved_count,
+                         pending_count=pending_count,
+                         rejected_count=rejected_count,
+                         notes=notes,
+                         quizzes=quizzes,
+                         assignments=assignments,
+                         is_super_admin=current_user.is_super_admin())
+
+
+@admin_bp.route('/courses/<int:course_id>/student/<int:student_id>/view')
+@login_required
+@admin_required
+def view_student_in_course(course_id, student_id):
+    """View a student's progress in a specific course"""
+    course = Course.query.get_or_404(course_id)
+    student = User.query.get_or_404(student_id)
     
     if not current_user.is_super_admin() and course not in current_user.managed_courses:
         flash('You do not have permission to view this course.', 'error')
         return redirect(url_for('admin.course_list'))
     
-    # Get enrollments
-    enrollments = CourseEnrollment.query.filter_by(course_id=course.id).all()
+    # Check if student is enrolled
+    enrollment = CourseEnrollment.query.filter_by(
+        student_id=student.id,
+        course_id=course.id
+    ).first()
     
-    # Get notes
-    notes = Note.query.filter_by(course_id=course.id).order_by(Note.created_at.desc()).all()
+    if not enrollment:
+        flash('Student is not enrolled in this course.', 'error')
+        return redirect(url_for('admin.course_detail', course_id=course_id))
     
-    # Get quizzes
-    quizzes = QuizGroup.query.filter_by(course_id=course.id).all()
+    # Get student progress
+    progress = course.get_progress_for_student(student.id)
     
-    # Get assignments
-    assignments = Assignment.query.filter_by(course_id=course.id).all()
+    # Get quiz results for this course
+    quiz_answers = QuizAnswer.query.filter_by(student_id=student.id).all()
+    quiz_results = []
+    for answer in quiz_answers:
+        if answer.quiz_group and answer.quiz_group.course_id == course.id:
+            score = answer.quiz_group.get_student_score(student.id)
+            if score:
+                quiz_results.append({
+                    'title': answer.quiz_group.title,
+                    'score': score
+                })
     
-    # Calculate stats
-    total_students = len(enrollments)
-    approved_count = sum(1 for e in enrollments if e.status == 'approved')
-    pending_count = sum(1 for e in enrollments if e.status == 'pending')
-    rejected_count = sum(1 for e in enrollments if e.status == 'rejected')
+    # Get assignment submissions for this course
+    submissions = AssignmentSubmission.query.filter_by(student_id=student.id).all()
+    assignment_results = []
+    for sub in submissions:
+        if sub.assignment and sub.assignment.course_id == course.id:
+            assignment_results.append({
+                'title': sub.assignment.title,
+                'submitted_at': sub.submitted_at,
+                'score': sub.score,
+                'is_graded': sub.is_graded,
+                'feedback': sub.feedback
+            })
     
-    return render_template('admin/course_detail.html',
+    return render_template('admin/student_course_detail.html',
                          course=course,
-                         enrollments=enrollments,
-                         notes=notes,
-                         quizzes=quizzes,
-                         assignments=assignments,
-                         total_students=total_students,
-                         approved_count=approved_count,
-                         pending_count=pending_count,
-                         rejected_count=rejected_count)
+                         student=student,
+                         enrollment=enrollment,
+                         progress=progress,
+                         quiz_results=quiz_results,
+                         assignment_results=assignment_results)
+
+
+@admin_bp.route('/courses/<int:course_id>/remove-admin/<int:admin_id>', methods=['POST'])
+@login_required
+@super_admin_required
+def remove_admin_from_course(course_id, admin_id):
+    """Remove an admin from a course"""
+    course = Course.query.get_or_404(course_id)
+    admin = User.query.get_or_404(admin_id)
+    
+    if admin in course.admins:
+        if len(course.admins) <= 1:
+            flash('Cannot remove the last admin from a course.', 'error')
+            return redirect(url_for('admin.course_detail', course_id=course_id))
+        
+        course.admins.remove(admin)
+        db.session.commit()
+        flash(f'{admin.username} has been removed from {course.name}.', 'success')
+    else:
+        flash(f'{admin.username} is not assigned to this course.', 'warning')
+    
+    return redirect(url_for('admin.course_detail', course_id=course_id))
 
 
 @admin_bp.route('/courses/create', methods=['GET', 'POST'])
@@ -1242,8 +1383,6 @@ def admin_messages():
 # ============================================================================
 # STUDENT DIRECTORY
 # ============================================================================
-
-# backend/routes/admin.py - Add/update this route
 
 @admin_bp.route('/student-directory')
 @login_required

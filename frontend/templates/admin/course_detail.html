@@ -119,18 +119,6 @@
     transform: translateY(-2px);
   }
 
-  .btn-danger {
-    background: linear-gradient(135deg, #EF4444, #DC2626);
-    color: var(--white, #FFFFFF);
-    box-shadow: 0 2px 16px rgba(239, 68, 68, 0.15);
-  }
-
-  .btn-danger:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 24px rgba(239, 68, 68, 0.25);
-    color: var(--white, #FFFFFF);
-  }
-
   .btn-sm {
     padding: 5px 14px;
     font-size: 0.7rem;
@@ -536,7 +524,6 @@
       <p class="subtitle">{{ course.description or 'No description available.' }}</p>
     </div>
     <div class="header-actions">
-      <!-- FIXED: Changed admin_course_list to admin.course_list -->
       <a href="{{ url_for('admin.course_list') }}" class="btn btn-outline">
         <i class="fas fa-arrow-left"></i> Back to Courses
       </a>
@@ -593,7 +580,7 @@
         <div class="admin-tag">
           <span class="admin-avatar-small">
             {% if admin.profile_picture %}
-              <img src="{{ url_for('uploaded_file', filename=admin.profile_picture) }}" alt="{{ admin.username }}">
+              <img src="{{ url_for('auth.uploaded_file', filename=admin.profile_picture) }}" alt="{{ admin.username }}">
             {% else %}
               {{ admin.username[0]|upper }}
             {% endif %}
@@ -603,7 +590,6 @@
             {% if admin.is_super_admin() %}Super Admin{% else %}Admin{% endif %}
           </span>
           {% if is_super_admin and admin != current_user %}
-            <!-- FIXED: Changed remove_admin_from_course to admin.remove_admin_from_course -->
             <form method="POST" action="{{ url_for('admin.remove_admin_from_course', course_id=course.id, admin_id=admin.id) }}" style="display:inline;">
               <button type="submit" class="remove-btn" title="Remove Admin" onclick="return confirm('Remove {{ admin.username }} from this course?')">
                 <i class="fas fa-times"></i>
@@ -645,7 +631,7 @@
                 <div class="student-name">
                   <span class="student-avatar">
                     {% if data.student.profile_picture %}
-                      <img src="{{ url_for('uploaded_file', filename=data.student.profile_picture) }}" alt="{{ data.student.username }}">
+                      <img src="{{ url_for('auth.uploaded_file', filename=data.student.profile_picture) }}" alt="{{ data.student.username }}">
                     {% else %}
                       {{ data.student.username[0]|upper }}
                     {% endif %}
@@ -663,7 +649,6 @@
               <td>{{ data.requested_at.strftime('%b %d, %Y') if data.requested_at else '-' }}</td>
               <td>{{ course.get_progress_for_student(data.student.id) }}%</td>
               <td>
-                <!-- FIXED: Changed view_student_in_course to admin.view_student_in_course -->
                 <a href="{{ url_for('admin.view_student_in_course', course_id=course.id, student_id=data.student.id) }}" class="btn-view-student">
                   <i class="fas fa-eye"></i> View
                 </a>
