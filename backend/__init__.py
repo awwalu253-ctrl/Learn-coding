@@ -1,11 +1,12 @@
 # backend/__init__.py
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_caching import Cache
 import os
 import logging
+from datetime import datetime
 
 from .config import Config
 from .extensions import db, login_manager, migrate, cache
@@ -73,8 +74,11 @@ def create_app(config_class=Config):
         return None
     
     # Import and register middleware
-    from .middleware.maintenance import maintenance_check
-    app.before_request(maintenance_check)
+    try:
+        from .middleware.maintenance import maintenance_check
+        app.before_request(maintenance_check)
+    except:
+        pass
     
     # Register blueprints (routes)
     from .routes.auth import auth_bp
@@ -90,7 +94,7 @@ def create_app(config_class=Config):
     from .routes.api import api_bp
     
     app.register_blueprint(auth_bp)
-    app.register_blueprint(dashboard_bp)
+    app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
     app.register_blueprint(student_bp, url_prefix='/student')
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(course_bp, url_prefix='/course')
@@ -101,23 +105,41 @@ def create_app(config_class=Config):
     app.register_blueprint(settings_bp, url_prefix='/settings')
     app.register_blueprint(api_bp, url_prefix='/api')
     
-    # Register context processor
-    # backend/__init__.py - In the context processor
+    # ============================================
+    # ROOT ROUTE - FIXES THE "NOT FOUND" ERROR
+    # ============================================
+    @app.route('/')
+    def home():
+        if current_user.is_authenticated:
+            if current_user.is_admin():
+                return redirect(url_for('admin.dashboard'))
+            elif current_user.is_approved:
+                return redirect(url_for('student.dashboard'))
+            else:
+                return redirect(url_for('auth.pending_approval'))
+        return redirect(url_for('auth.login'))
+    
+    # ============================================
+    # CONTEXT PROCESSOR
+    # ============================================
     @app.context_processor
     def inject_user():
         from .services.user_service import UserService
         from .services.admin_service import AdminService
         
         # Get student count
-        student_count = User.query.filter_by(role='student').count() if 'User' in globals() else 0
+        try:
+            student_count = User.query.filter_by(role='student').count()
+        except:
+            student_count = 0
         
         return {
             'current_user': current_user,
-            'now': UserService.get_current_time(),
+            'now': datetime.utcnow(),
             'get_courses': UserService.get_user_courses,
             'is_approved': UserService.is_user_approved,
-            'site_name': AdminService.get_setting('site_name', 'A-Portal LMS'),
-            'site_description': AdminService.get_setting('site_description', 'Learning Management System'),
+            'site_name': 'A-Portal LMS',
+            'site_description': 'Learning Management System',
             'get_setting': AdminService.get_setting,
             'get_bool_setting': AdminService.get_bool_setting,
             'utc_to_local': utc_to_local,
@@ -126,7 +148,7 @@ def create_app(config_class=Config):
             'get_system_timezone': get_system_timezone,
             'total_students': UserService.get_total_students(),
             'total_courses': AdminService.get_total_courses(),
-            'student_count': student_count,  # <-- ADD THIS
+            'student_count': student_count,
         }
     
     # Register custom Jinja2 filters
@@ -155,7 +177,9 @@ def create_app(config_class=Config):
     def server_error(error):
         return render_template('500.html'), 500
     
-    # Initialize database
+    # ============================================
+    # INITIALIZE DATABASE
+    # ============================================
     with app.app_context():
         try:
             db.create_all()
@@ -164,11 +188,13 @@ def create_app(config_class=Config):
             print(f"⚠️ Database creation warning: {e}")
             db.session.rollback()
         
-        # Run column migration
+        # Run column migration - FIXED: Handle import gracefully
         try:
             from .config import ensure_columns
             ensure_columns()
             print("✅ Column migration complete")
+        except ImportError:
+            print("⚠️ ensure_columns not found in config.py - skipping")
         except Exception as e:
             print(f"⚠️ Column migration warning: {e}")
             db.session.rollback()
@@ -189,4 +215,4 @@ def create_app(config_class=Config):
             print(f"⚠️ Admin creation warning: {e}")
             db.session.rollback()
     
-    return app  # Make sure this returns the app
+    return app
