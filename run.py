@@ -2,7 +2,7 @@
 import os
 from backend import create_app
 
-# Create the app instance that gunicorn will use
+# Create the app instance
 app = create_app()
 
 if __name__ == '__main__':
@@ -16,4 +16,5 @@ if __name__ == '__main__':
     print(f"🐛 Debug mode: {debug}")
     print("=" * 60)
     
+    # Bind to all interfaces
     app.run(debug=debug, host='0.0.0.0', port=port)
