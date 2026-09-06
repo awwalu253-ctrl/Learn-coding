@@ -13,6 +13,7 @@ from ..models.notification import Notification, RejectionMessage
 from ..models.announcement import Announcement
 from ..models.system import SystemSetting
 from ..utils.decorators import admin_required, super_admin_required
+from ..services.notification_service import create_notification, notify_course_approved, notify_student_approved, notify_student_rejected, notify_student_suspended, notify_student_unsuspended
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -578,42 +579,73 @@ def manage_students():
                          status_filter=status_filter)
 
 
-# ============================================================================
-# STUDENT MANAGEMENT - INDIVIDUAL ACTIONS
-# ============================================================================
-
 @admin_bp.route('/students/bulk-approve-courses', methods=['POST'])
 @login_required
-@super_admin_required
+@admin_required
 def bulk_approve_courses():
     """Bulk approve all pending course requests"""
-    pending_enrollments = CourseEnrollment.query.filter_by(status='pending').all()
-    
-    if not pending_enrollments:
-        flash('No pending course requests found.', 'info')
-        return redirect(url_for('admin.manage_students'))
-    
-    approved_count = 0
-    for enrollment in pending_enrollments:
-        enrollment.status = 'approved'
-        enrollment.approved_at = datetime.utcnow()
-        approved_count += 1
+    try:
+        # Get all pending enrollments
+        pending_enrollments = CourseEnrollment.query.filter_by(status='pending').all()
         
-        # Also approve the student if they're not already approved
-        student = User.query.get(enrollment.student_id)
-        if student and not student.is_approved:
-            student.is_approved = True
+        if not pending_enrollments:
+            flash('No pending course requests found.', 'info')
+            return redirect(url_for('admin.manage_students'))
+        
+        approved_count = 0
+        students_approved = set()
+        
+        for enrollment in pending_enrollments:
+            try:
+                enrollment.status = 'approved'
+                enrollment.approved_at = datetime.utcnow()
+                approved_count += 1
+                students_approved.add(enrollment.student_id)
+            except Exception as e:
+                print(f"Error approving enrollment {enrollment.id}: {e}")
+                continue
+        
+        # Approve the students who had courses approved
+        for student_id in students_approved:
+            try:
+                student = User.query.get(student_id)
+                if student and not student.is_approved:
+                    student.is_approved = True
+            except Exception as e:
+                print(f"Error approving student {student_id}: {e}")
+        
+        db.session.commit()
+        
+        # Send notifications to students
+        for enrollment in pending_enrollments:
+            try:
+                student = User.query.get(enrollment.student_id)
+                if student:
+                    # Get course object for the link
+                    course = Course.query.get(enrollment.course_id)
+                    if course:
+                        notify_course_approved(student.id, course.name)
+                    else:
+                        # Fallback without course object
+                        create_notification(
+                            user_id=student.id,
+                            title='✅ Course Approved!',
+                            message=f'You have been approved for a course.',
+                            type='success',
+                            link=url_for('student.courses'),
+                            icon='fa-check-circle',
+                            icon_color='green'
+                        )
+            except Exception as e:
+                print(f"Error sending notification for enrollment {enrollment.id}: {e}")
+        
+        flash(f'{approved_count} course requests approved successfully!', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error in bulk_approve_courses: {e}")
+        flash(f'Error approving courses: {str(e)}', 'error')
     
-    db.session.commit()
-    
-    # Send notifications to students
-    from ..services.notification_service import notify_course_approved
-    for enrollment in pending_enrollments:
-        student = User.query.get(enrollment.student_id)
-        if student:
-            notify_course_approved(student.id, enrollment.course.name)
-    
-    flash(f'{approved_count} course requests approved successfully!', 'success')
     return redirect(url_for('admin.manage_students'))
 
 
@@ -672,7 +704,6 @@ def approve_student(student_id):
     student.is_approved = True
     db.session.commit()
     
-    from ..services.notification_service import notify_student_approved
     notify_student_approved(student.id)
     
     flash(f'{student.username} has been approved.', 'success')
@@ -729,7 +760,6 @@ def bulk_approve_students():
                 enrollment.approved_at = datetime.utcnow()
             approved_count += 1
             
-            from ..services.notification_service import notify_student_approved
             notify_student_approved(student.id)
     
     db.session.commit()
@@ -755,7 +785,6 @@ def approve_course(student_id, course_id):
         enrollment.approved_at = datetime.utcnow()
         db.session.commit()
         
-        from ..services.notification_service import notify_course_approved
         notify_course_approved(student.id, course.name)
         
         flash(f'{student.username} approved for {course.name}.', 'success')
@@ -802,7 +831,6 @@ def reject_student(student_id):
             )
             db.session.add(rejection)
             
-            from ..services.notification_service import notify_student_rejected
             notify_student_rejected(student.id, enrollment.course.name, message)
             
             db.session.commit()
@@ -833,7 +861,6 @@ def suspend_student(student_id):
         
         db.session.commit()
         
-        from ..services.notification_service import notify_student_suspended
         notify_student_suspended(student.id, reason)
         
         flash(f'{student.username} has been suspended.', 'warning')
@@ -854,53 +881,10 @@ def unsuspend_student(student_id):
     
     db.session.commit()
     
-    from ..services.notification_service import notify_student_unsuspended
     notify_student_unsuspended(student.id)
     
     flash(f'{student.username} has been unsuspended.', 'success')
     return redirect(url_for('admin.manage_students'))
-
-
-@admin_bp.route('/students/<int:student_id>/reject-course/<int:course_id>', methods=['POST'])
-@login_required
-@admin_required
-def reject_course(student_id, course_id):
-    """Reject a student from a specific course"""
-    student = User.query.get_or_404(student_id)
-    course = Course.query.get_or_404(course_id)
-    
-    if not current_user.is_super_admin() and course not in current_user.managed_courses:
-        flash('You do not have permission to reject this course.', 'error')
-        return redirect(url_for('admin.manage_students'))
-    
-    message = request.form.get('message', 'No reason provided.')
-    
-    enrollment = CourseEnrollment.query.filter_by(
-        student_id=student.id,
-        course_id=course.id
-    ).first()
-    
-    if enrollment:
-        enrollment.status = 'rejected'
-        enrollment.rejected_at = datetime.utcnow()
-        enrollment.rejection_reason = message
-        
-        rejection = RejectionMessage(
-            student_id=student.id,
-            course_id=course.id,
-            message=message
-        )
-        db.session.add(rejection)
-        db.session.commit()
-        
-        from ..services.notification_service import notify_student_rejected
-        notify_student_rejected(student.id, course.name, message)
-        
-        flash(f'{student.username} rejected from {course.name}.', 'warning')
-    else:
-        flash('No enrollment found for this student and course.', 'error')
-    
-    return redirect(url_for('admin.course_detail', course_id=course.id))
 
 
 # ============================================================================
@@ -1048,28 +1032,6 @@ def view_student_in_course(course_id, student_id):
                          progress=progress,
                          quiz_results=quiz_results,
                          assignment_results=assignment_results)
-
-
-@admin_bp.route('/courses/<int:course_id>/remove-admin/<int:admin_id>', methods=['POST'])
-@login_required
-@super_admin_required
-def remove_admin_from_course(course_id, admin_id):
-    """Remove an admin from a course"""
-    course = Course.query.get_or_404(course_id)
-    admin = User.query.get_or_404(admin_id)
-    
-    if admin in course.admins:
-        if len(course.admins) <= 1:
-            flash('Cannot remove the last admin from a course.', 'error')
-            return redirect(url_for('admin.course_detail', course_id=course_id))
-        
-        course.admins.remove(admin)
-        db.session.commit()
-        flash(f'{admin.username} has been removed from {course.name}.', 'success')
-    else:
-        flash(f'{admin.username} is not assigned to this course.', 'warning')
-    
-    return redirect(url_for('admin.course_detail', course_id=course_id))
 
 
 @admin_bp.route('/courses/create', methods=['GET', 'POST'])

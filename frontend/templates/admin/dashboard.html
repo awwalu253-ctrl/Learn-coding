@@ -296,38 +296,6 @@
     color: var(--white);
   }
 
-  .notice-card.priority-high {
-    border-left: 3px solid #EF4444;
-  }
-
-  .notice-card.priority-medium {
-    border-left: 3px solid var(--primary-gold);
-  }
-
-  .notice-card.priority-low {
-    border-left: 3px solid #3B82F6;
-  }
-
-  .notice-card.type-error {
-    background: rgba(239, 68, 68, 0.04);
-    border-color: rgba(239, 68, 68, 0.08);
-  }
-
-  .notice-card.type-warning {
-    background: rgba(245, 158, 11, 0.04);
-    border-color: rgba(245, 158, 11, 0.08);
-  }
-
-  .notice-card.type-info {
-    background: rgba(59, 130, 246, 0.04);
-    border-color: rgba(59, 130, 246, 0.08);
-  }
-
-  .notice-card.type-success {
-    background: rgba(5, 150, 105, 0.04);
-    border-color: rgba(5, 150, 105, 0.08);
-  }
-
   /* ============================================
      STATS ROW - Clickable with View All
      ============================================ */
@@ -1554,8 +1522,7 @@
             · <strong>{{ pending_approvals }} pending approval{{ 's' if pending_approvals > 1 }}</strong>
             {% endif %}
             {% if pending_course_requests_count > 0 %}
-            · <strong>{{ pending_course_requests_count }} pending course request{{ 's' if pending_course_requests_count
-              > 1 }}</strong>
+            · <strong>{{ pending_course_requests_count }} pending course request{{ 's' if pending_course_requests_count > 1 }}</strong>
             {% endif %}
           </p>
           <div class="last-updated">
@@ -2004,6 +1971,13 @@
           <h3><i class="fas fa-book-open" style="color: var(--primary-gold);"></i> Pending Course Requests</h3>
           <div class="pending-header-actions">
             <span style="font-size:0.75rem; color:var(--text-muted);">{{ pending_course_requests|length }} student{{ 's' if pending_course_requests|length > 1 }} waiting</span>
+            <!-- ✅ Bulk Approve button visible to all admins -->
+            <form method="POST" action="{{ url_for('admin.bulk_approve_courses') }}" style="display:inline;" 
+                  onsubmit="return confirm('Are you sure you want to approve all pending course requests? This will approve all pending enrollments for all students.')">
+              <button type="submit" class="btn-sm btn-success-sm">
+                <i class="fas fa-check-double"></i> Approve All Requests
+              </button>
+            </form>
             <a href="{{ url_for('admin.manage_students') }}" class="card-link">
               View All <i class="fas fa-arrow-right"></i>
             </a>
