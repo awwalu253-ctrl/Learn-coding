@@ -1,0 +1,703 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Admin - A-Portal{% endblock %}
+
+{% block content %}
+<style>
+    .edit-admin-page {
+        max-width: 650px;
+        margin: 0 auto;
+        padding: 0;
+    }
+
+    .admin-container {
+        background: var(--secondary-bg, #253449);
+        border-radius: var(--radius, 16px);
+        border: 1px solid rgba(201, 168, 75, 0.06);
+        box-shadow: var(--shadow-lg, 0 12px 48px rgba(10, 21, 39, 0.12));
+        padding: 40px 40px 36px;
+        transition: var(--transition, 0.3s ease);
+        opacity: 0;
+        animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .admin-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+        opacity: 0.8;
+    }
+
+    .admin-container::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(201, 168, 75, 0.02), transparent);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .admin-container:hover {
+        box-shadow: var(--shadow-xl, 0 20px 60px rgba(10, 21, 39, 0.16));
+        border-color: rgba(201, 168, 75, 0.08);
+    }
+
+    .admin-header {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .admin-header .icon-wrapper {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(201, 168, 75, 0.08), rgba(143, 126, 72, 0.06));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: var(--primary-gold, #C9A84B);
+        transition: var(--transition, 0.3s ease);
+        border: 1px solid rgba(201, 168, 75, 0.04);
+    }
+
+    .admin-container:hover .icon-wrapper {
+        transform: scale(1.04) rotate(-2deg);
+        box-shadow: 0 4px 20px rgba(201, 168, 75, 0.08);
+        border-color: rgba(201, 168, 75, 0.08);
+    }
+
+    .admin-header h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--white, #FFFFFF);
+        letter-spacing: -0.02em;
+        margin: 0 0 6px;
+    }
+
+    .admin-header h2 span {
+        background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .admin-header p {
+        font-size: 0.9rem;
+        color: var(--text-gray, #C8CED8);
+        margin: 0;
+    }
+
+    .admin-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-group label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-gray, #C8CED8);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-group label i {
+        color: var(--primary-gold, #C9A84B);
+        font-size: 0.85rem;
+        width: 18px;
+        text-align: center;
+    }
+
+    .form-group label .required {
+        color: #EF4444;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+
+    .form-group label .optional {
+        font-weight: 400;
+        color: var(--text-muted, #8A94A6);
+        font-size: 0.7rem;
+    }
+
+    .form-group .helper-text {
+        font-size: 0.75rem;
+        color: var(--text-muted, #8A94A6);
+        margin-top: 2px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .form-group .helper-text i {
+        font-size: 0.7rem;
+        color: var(--primary-gold, #C9A84B);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: var(--radius-sm, 10px);
+        border: 1.5px solid rgba(201, 168, 75, 0.04);
+        background: var(--primary-bg, #0A1527);
+        font-size: 0.9rem;
+        font-family: 'Inter', sans-serif;
+        color: var(--text-gray, #C8CED8);
+        transition: var(--transition, 0.3s ease);
+        outline: none;
+        appearance: none;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-gold, #C9A84B);
+        box-shadow: 0 0 0 3px rgba(201, 168, 75, 0.06);
+        background: var(--primary-bg, #0A1527);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-muted, #8A94A6);
+        font-size: 0.85rem;
+    }
+
+    .form-control.error {
+        border-color: #EF4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08);
+    }
+
+    select.form-control {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C8CED8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        padding-right: 40px;
+        cursor: pointer;
+    }
+
+    select.form-control option {
+        padding: 8px;
+        background: var(--secondary-bg, #253449);
+        color: var(--text-gray, #C8CED8);
+    }
+
+    .course-select-wrapper {
+        max-height: 200px;
+        overflow-y: auto;
+        padding: 8px 12px;
+        border-radius: var(--radius-sm, 10px);
+        border: 1.5px solid rgba(201, 168, 75, 0.04);
+        background: var(--primary-bg, #0A1527);
+    }
+
+    .course-select-wrapper::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .course-select-wrapper::-webkit-scrollbar-track {
+        background: rgba(201, 168, 75, 0.02);
+    }
+
+    .course-select-wrapper::-webkit-scrollbar-thumb {
+        background: var(--primary-gold, #C9A84B);
+        border-radius: 10px;
+    }
+
+    .course-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 8px;
+        border-radius: 6px;
+        transition: var(--transition, 0.3s ease);
+        cursor: pointer;
+    }
+
+    .course-checkbox:hover {
+        background: rgba(201, 168, 75, 0.04);
+    }
+
+    .course-checkbox input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--primary-gold, #C9A84B);
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .course-checkbox label {
+        font-size: 0.85rem;
+        color: var(--text-gray, #C8CED8);
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .course-checkbox .course-code {
+        font-size: 0.7rem;
+        color: var(--text-muted, #8A94A6);
+        margin-left: 4px;
+    }
+
+    .error-message {
+        font-size: 0.78rem;
+        color: #EF4444;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .error-message i {
+        font-size: 0.7rem;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 12px 28px;
+        border-radius: 60px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: var(--transition, 0.3s ease);
+        border: none;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+        color: var(--white, #FFFFFF);
+        box-shadow: 0 2px 16px rgba(201, 168, 75, 0.15);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 28px rgba(201, 168, 75, 0.25);
+        color: var(--white, #FFFFFF);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--text-gray, #C8CED8);
+        border: 1.5px solid rgba(201, 168, 75, 0.06);
+        margin-top: 8px;
+    }
+
+    .btn-outline:hover {
+        background: rgba(201, 168, 75, 0.04);
+        border-color: var(--primary-gold, #C9A84B);
+        color: var(--primary-gold, #C9A84B);
+        transform: translateY(-2px);
+    }
+
+    .btn-outline i {
+        color: var(--primary-gold, #C9A84B);
+    }
+
+    @keyframes fadeUp {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .admin-container {
+            padding: 28px 20px 24px;
+        }
+
+        .admin-header .icon-wrapper {
+            width: 56px;
+            height: 56px;
+            font-size: 1.5rem;
+        }
+
+        .admin-header h2 {
+            font-size: 1.3rem;
+        }
+
+        .form-control {
+            padding: 10px 14px;
+            font-size: 0.85rem;
+        }
+
+        .btn {
+            padding: 11px 20px;
+            font-size: 0.85rem;
+        }
+
+        .course-checkbox {
+            padding: 4px 6px;
+        }
+
+        .course-checkbox label {
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .admin-container {
+            padding: 20px 14px 18px;
+            border-radius: var(--radius-sm, 10px);
+        }
+
+        .admin-header .icon-wrapper {
+            width: 48px;
+            height: 48px;
+            font-size: 1.3rem;
+        }
+
+        .admin-header h2 {
+            font-size: 1.1rem;
+        }
+
+        .admin-header p {
+            font-size: 0.82rem;
+        }
+
+        .form-group label {
+            font-size: 0.78rem;
+        }
+
+        .form-control {
+            padding: 9px 12px;
+            font-size: 0.82rem;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            font-size: 0.82rem;
+        }
+
+        .course-checkbox input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+        }
+
+        .course-checkbox label {
+            font-size: 0.75rem;
+        }
+
+        .course-checkbox .course-code {
+            font-size: 0.65rem;
+        }
+
+        select.form-control {
+            background-position: right 12px center;
+            padding-right: 34px;
+        }
+    }
+
+    /* Dark Mode */
+    [data-theme="dark"] .admin-container {
+        background: var(--secondary-bg, #253449);
+        border-color: rgba(201, 168, 75, 0.04);
+    }
+
+    [data-theme="dark"] .admin-container::before {
+        background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    }
+
+    [data-theme="dark"] .admin-header h2 {
+        color: var(--white, #FFFFFF);
+    }
+
+    [data-theme="dark"] .admin-header .icon-wrapper {
+        background: rgba(201, 168, 75, 0.08);
+        border-color: rgba(201, 168, 75, 0.04);
+    }
+
+    [data-theme="dark"] .admin-container:hover .icon-wrapper {
+        border-color: rgba(201, 168, 75, 0.08);
+    }
+
+    [data-theme="dark"] .form-group label {
+        color: var(--text-gray, #C8CED8);
+    }
+
+    [data-theme="dark"] .form-control {
+        background: var(--primary-bg, #0A1527);
+        border-color: rgba(201, 168, 75, 0.04);
+        color: var(--text-gray, #C8CED8);
+    }
+
+    [data-theme="dark"] .form-control:focus {
+        border-color: var(--primary-gold, #C9A84B);
+        box-shadow: 0 0 0 3px rgba(201, 168, 75, 0.06);
+        background: var(--primary-bg, #0A1527);
+    }
+
+    [data-theme="dark"] .form-control::placeholder {
+        color: var(--text-muted, #8A94A6);
+    }
+
+    [data-theme="dark"] select.form-control {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C8CED8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    }
+
+    [data-theme="dark"] select.form-control option {
+        background: var(--secondary-bg, #253449);
+        color: var(--text-gray, #C8CED8);
+    }
+
+    [data-theme="dark"] .btn-outline {
+        color: var(--text-gray, #C8CED8);
+        border-color: rgba(201, 168, 75, 0.06);
+    }
+
+    [data-theme="dark"] .btn-outline:hover {
+        background: rgba(201, 168, 75, 0.04);
+        border-color: var(--primary-gold, #C9A84B);
+        color: var(--primary-gold, #C9A84B);
+    }
+
+    [data-theme="dark"] .course-checkbox:hover {
+        background: rgba(201, 168, 75, 0.04);
+    }
+
+    [data-theme="dark"] .course-checkbox label {
+        color: var(--text-gray, #C8CED8);
+    }
+
+    [data-theme="dark"] .course-select-wrapper {
+        border-color: rgba(201, 168, 75, 0.04);
+        background: var(--primary-bg, #0A1527);
+    }
+
+    [data-theme="dark"] .form-group .helper-text {
+        color: var(--text-muted, #8A94A6);
+    }
+
+    [data-theme="dark"] .form-group .helper-text i {
+        color: var(--primary-gold, #C9A84B);
+    }
+
+    [data-theme="dark"] .admin-header p {
+        color: var(--text-gray, #C8CED8);
+    }
+</style>
+
+<div class="edit-admin-page">
+    <div class="admin-container">
+        <!-- Header -->
+        <div class="admin-header">
+            <div class="icon-wrapper">
+                <i class="fas fa-user-edit"></i>
+            </div>
+            <h2>Edit <span>Admin</span></h2>
+            <p>Update administrator account details</p>
+        </div>
+
+        <!-- Form -->
+        <form method="POST" class="admin-form" id="adminForm" novalidate>
+            <!-- Username -->
+            <div class="form-group">
+                <label for="username">
+                    <i class="fas fa-user"></i> Username
+                    <span class="required">*</span>
+                </label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    class="form-control" 
+                    value="{{ admin.username }}" 
+                    required
+                    autofocus
+                    maxlength="80"
+                >
+                <div class="error-message" id="usernameError" style="display: none;">
+                    <i class="fas fa-exclamation-circle"></i> Username is required
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label for="email">
+                    <i class="fas fa-envelope"></i> Email
+                    <span class="required">*</span>
+                </label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    class="form-control" 
+                    value="{{ admin.email }}" 
+                    required
+                    maxlength="120"
+                >
+                <div class="error-message" id="emailError" style="display: none;">
+                    <i class="fas fa-exclamation-circle"></i> Please enter a valid email
+                </div>
+            </div>
+
+            <!-- Assigned Courses -->
+            <div class="form-group">
+                <label>
+                    <i class="fas fa-book"></i> Assigned Courses
+                    <span class="optional">(Select courses to assign)</span>
+                </label>
+                <div class="course-select-wrapper">
+                    {% for course in courses %}
+                        <div class="course-checkbox">
+                            <input 
+                                type="checkbox" 
+                                id="course_{{ course.id }}" 
+                                name="courses" 
+                                value="{{ course.id }}"
+                                {% if course in admin.managed_courses %}checked{% endif %}
+                            >
+                            <label for="course_{{ course.id }}">
+                                {{ course.name }}
+                                <span class="course-code">({{ course.code }})</span>
+                            </label>
+                        </div>
+                    {% else %}
+                        <div style="text-align: center; padding: 16px; color: var(--text-muted);">
+                            <i class="fas fa-info-circle"></i>
+                            <p style="margin: 4px 0 0; font-size: 0.85rem;">No courses available to assign</p>
+                        </div>
+                    {% endfor %}
+                </div>
+                <span class="helper-text">
+                    <i class="fas fa-info-circle"></i> 
+                    Select courses this admin will manage
+                </span>
+            </div>
+
+            <!-- Buttons -->
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+                <i class="fas fa-save"></i> Update Admin
+            </button>
+
+            <!-- FIXED: Changed manage_admins to admin.manage_admins -->
+            <a href="{{ url_for('admin.manage_admins') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Admins
+            </a>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('adminForm');
+        const username = document.getElementById('username');
+        const email = document.getElementById('email');
+        const usernameError = document.getElementById('usernameError');
+        const emailError = document.getElementById('emailError');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // ============================================
+        // REAL-TIME VALIDATION
+        // ============================================
+        username.addEventListener('input', function() {
+            if (this.value.trim().length < 2) {
+                this.classList.add('error');
+                usernameError.style.display = 'flex';
+            } else {
+                this.classList.remove('error');
+                usernameError.style.display = 'none';
+            }
+        });
+
+        email.addEventListener('input', function() {
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(this.value.trim())) {
+                this.classList.add('error');
+                emailError.style.display = 'flex';
+            } else {
+                this.classList.remove('error');
+                emailError.style.display = 'none';
+            }
+        });
+
+        // ============================================
+        // FORM VALIDATION
+        // ============================================
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            const usernameVal = username.value.trim();
+            const emailVal = email.value.trim();
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            // Validate username
+            if (!usernameVal || usernameVal.length < 2) {
+                username.classList.add('error');
+                usernameError.style.display = 'flex';
+                isValid = false;
+            } else {
+                username.classList.remove('error');
+                usernameError.style.display = 'none';
+            }
+
+            // Validate email
+            if (!emailVal || !emailPattern.test(emailVal)) {
+                email.classList.add('error');
+                emailError.style.display = 'flex';
+                isValid = false;
+            } else {
+                email.classList.remove('error');
+                emailError.style.display = 'none';
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                if (username.classList.contains('error')) {
+                    username.focus();
+                } else if (email.classList.contains('error')) {
+                    email.focus();
+                }
+                return;
+            }
+
+            // Confirm update
+            if (!confirm(`Update admin "${usernameVal}"?`)) {
+                e.preventDefault();
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+        });
+
+        // ============================================
+        // SELECT ALL / DESELECT ALL (optional)
+        // ============================================
+        const checkboxes = document.querySelectorAll('input[name="courses"]');
+        if (checkboxes.length > 0) {
+            // You can add a select all button if needed
+        }
+
+        console.log('✨ Edit Admin - Gold Theme Loaded!');
+    });
+</script>
+{% endblock %}

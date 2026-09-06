@@ -1,0 +1,1896 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - {{ site_name }}{% endblock %}
+
+{% block content %}
+<style>
+  /* ============================================
+     STUDENT DASHBOARD - Premium Navy + Gold Theme
+     ============================================ */
+  .student-dashboard {
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  /* ============================================
+     HEADER - Gold Theme
+     ============================================ */
+  .page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .page-header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm, 10px);
+    background: linear-gradient(135deg, rgba(201, 168, 75, 0.08), rgba(143, 126, 72, 0.06));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-gold, #C9A84B);
+    font-size: 1.3rem;
+    border: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .page-header h1 span {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .page-header .subtitle {
+    font-size: 0.85rem;
+    color: var(--text-gray, #C8CED8);
+    margin: 2px 0 0;
+  }
+
+  .page-header .greeting {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 100px;
+    background: rgba(201, 168, 75, 0.06);
+    color: var(--primary-gold, #C9A84B);
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  .page-header .greeting i {
+    font-size: 0.8rem;
+  }
+
+  .page-header .greeting strong {
+    font-weight: 700;
+  }
+
+  /* ============================================
+     PENDING ACCOUNT NOTICE - Gold Theme
+     ============================================ */
+  .pending-account-notice {
+    background: rgba(201, 168, 75, 0.04);
+    border: 1px solid rgba(201, 168, 75, 0.12);
+    border-radius: var(--radius-sm, 10px);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    animation: slideInRight 0.4s ease forwards;
+  }
+
+  .pending-account-notice .notice-icon {
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .pending-account-notice .notice-content strong {
+    color: var(--white, #FFFFFF);
+    display: block;
+    font-size: 0.95rem;
+  }
+
+  .pending-account-notice .notice-content p {
+    margin: 2px 0 0;
+    color: var(--text-gray, #C8CED8);
+    font-size: 0.9rem;
+  }
+
+  /* ============================================
+     PENDING COURSES NOTICE - Gold Theme
+     ============================================ */
+  .pending-courses-notice {
+    background: rgba(201, 168, 75, 0.04);
+    border: 1px solid rgba(201, 168, 75, 0.08);
+    border-radius: var(--radius-sm, 10px);
+    padding: 14px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    animation: slideInRight 0.4s ease forwards;
+    flex-wrap: wrap;
+  }
+
+  .pending-courses-notice .notice-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .pending-courses-notice .notice-content {
+    flex: 1;
+  }
+
+  .pending-courses-notice .notice-content strong {
+    color: var(--white, #FFFFFF);
+  }
+
+  .pending-courses-notice .notice-content .pending-course-tag {
+    display: inline-block;
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+    padding: 2px 12px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin: 2px 4px 2px 0;
+    border: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  .pending-courses-notice .notice-content .pending-status {
+    color: var(--text-muted, #8A94A6);
+    font-size: 0.85rem;
+  }
+
+  /* ============================================
+     NO COURSES NOTICE
+     ============================================ */
+  .no-courses-notice {
+    background: rgba(37, 99, 235, 0.04);
+    border: 1px solid rgba(37, 99, 235, 0.08);
+    border-radius: var(--radius-sm, 10px);
+    padding: 14px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    animation: slideInRight 0.4s ease forwards;
+    flex-wrap: wrap;
+  }
+
+  .no-courses-notice .notice-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .no-courses-notice .notice-content {
+    flex: 1;
+  }
+
+  .no-courses-notice .notice-content strong {
+    color: var(--white, #FFFFFF);
+  }
+
+  .no-courses-notice .notice-content p {
+    margin: 2px 0 0;
+    color: var(--text-gray, #C8CED8);
+    font-size: 0.9rem;
+  }
+
+  .no-courses-notice .notice-action {
+    padding: 6px 16px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.78rem;
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    color: var(--white, #FFFFFF);
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+    white-space: nowrap;
+    box-shadow: 0 2px 12px rgba(201, 168, 75, 0.12);
+  }
+
+  .no-courses-notice .notice-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(201, 168, 75, 0.2);
+    color: var(--white, #FFFFFF);
+  }
+
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(-16px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ============================================
+     STATS ROW - Gold Theme
+     ============================================ */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
+  }
+
+  .stat-card {
+    background: var(--secondary-bg, #253449);
+    padding: 20px 18px 18px;
+    border-radius: var(--radius, 14px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(10, 21, 39, 0.08));
+    text-align: center;
+    transition: var(--transition, 0.3s ease);
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    opacity: 0;
+    transition: var(--transition, 0.3s ease);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md, 0 4px 20px rgba(10, 21, 39, 0.12));
+    border-color: rgba(201, 168, 75, 0.08);
+  }
+
+  .stat-card:hover::before {
+    opacity: 1;
+  }
+
+  .stat-card .stat-icon {
+    font-size: 1.4rem;
+    margin-bottom: 6px;
+    display: inline-block;
+  }
+
+  .stat-card:nth-child(1) .stat-icon { color: var(--primary-gold, #C9A84B); }
+  .stat-card:nth-child(2) .stat-icon { color: var(--primary-gold, #C9A84B); }
+  .stat-card:nth-child(3) .stat-icon { color: var(--primary-gold, #C9A84B); }
+  .stat-card:nth-child(4) .stat-icon { color: var(--primary-gold, #C9A84B); }
+
+  .stat-number {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--white, #FFFFFF);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted, #8A94A6);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
+
+  .stat-card .stat-action {
+    font-size: 0.65rem;
+    color: var(--primary-gold, #C9A84B);
+    margin-top: 4px;
+    font-weight: 600;
+    opacity: 0.7;
+    transition: var(--transition, 0.3s ease);
+  }
+
+  .stat-card:hover .stat-action {
+    opacity: 1;
+  }
+
+  /* ============================================
+     QUICK ACTIONS - Gold Theme
+     ============================================ */
+  .quick-actions-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards;
+  }
+
+  .quick-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 14px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(10, 21, 39, 0.08));
+    text-decoration: none;
+    color: var(--text-gray, #C8CED8);
+    transition: var(--transition, 0.3s ease);
+    cursor: pointer;
+  }
+
+  .quick-action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md, 0 4px 20px rgba(10, 21, 39, 0.12));
+    border-color: rgba(201, 168, 75, 0.08);
+  }
+
+  .quick-action-btn .action-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  .quick-action-btn .action-icon.gold {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  .quick-action-btn .action-icon.purple {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  .quick-action-btn .action-icon.orange {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  .quick-action-btn .action-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .quick-action-btn .action-content .action-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--white, #FFFFFF);
+  }
+
+  .quick-action-btn .action-content .action-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted, #8A94A6);
+  }
+
+  .quick-action-btn .action-arrow {
+    font-size: 0.9rem;
+    color: var(--text-muted, #8A94A6);
+    transition: var(--transition, 0.3s ease);
+  }
+
+  .quick-action-btn:hover .action-arrow {
+    color: var(--primary-gold, #C9A84B);
+    transform: translateX(4px);
+  }
+
+  /* ============================================
+     DASHBOARD GRID - Gold Theme
+     ============================================ */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+  }
+
+  .dashboard-section {
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 16px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(10, 21, 39, 0.08));
+    padding: 24px 24px 28px;
+    transition: var(--transition, 0.3s ease);
+  }
+
+  .dashboard-section:hover {
+    box-shadow: var(--shadow-md, 0 4px 20px rgba(10, 21, 39, 0.12));
+    border-color: rgba(201, 168, 75, 0.06);
+  }
+
+  .dashboard-section .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .dashboard-section .section-header h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    margin: 0;
+  }
+
+  .dashboard-section .section-header i {
+    color: var(--primary-gold, #C9A84B);
+    font-size: 1.1rem;
+  }
+
+  .dashboard-section .section-header .section-count {
+    margin-left: auto;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted, #8A94A6);
+    background: rgba(201, 168, 75, 0.02);
+    padding: 2px 12px;
+    border-radius: 100px;
+    border: 1px solid rgba(201, 168, 75, 0.02);
+  }
+
+  .dashboard-section .section-header .section-link {
+    font-size: 0.8rem;
+    color: var(--primary-gold, #C9A84B);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition, 0.3s ease);
+  }
+
+  .dashboard-section .section-header .section-link:hover {
+    color: var(--dark-gold, #8F7E48);
+  }
+
+  /* ============================================
+     COURSE CARD - Gold Theme
+     ============================================ */
+  .course-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .course-card {
+    background: var(--primary-bg, #0A1527);
+    border-radius: var(--radius-sm, 10px);
+    padding: 16px 18px;
+    transition: var(--transition, 0.3s ease);
+    border: 1px solid rgba(201, 168, 75, 0.02);
+  }
+
+  .course-card:hover {
+    background: rgba(201, 168, 75, 0.02);
+    border-color: rgba(201, 168, 75, 0.06);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(10, 21, 39, 0.08));
+    transform: translateX(4px);
+  }
+
+  .course-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .course-card-header h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--white, #FFFFFF);
+    margin: 0;
+  }
+
+  .course-card-header .course-code {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted, #8A94A6);
+    background: rgba(201, 168, 75, 0.04);
+    padding: 2px 12px;
+    border-radius: 100px;
+    font-family: 'Inter', monospace;
+    letter-spacing: 0.03em;
+    border: 1px solid rgba(201, 168, 75, 0.02);
+  }
+
+  .course-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .course-progress .progress-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(201, 168, 75, 0.06);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .course-progress .progress-track .fill {
+    height: 100%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    width: 0%;
+  }
+
+  .course-progress .progress-text {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--primary-gold, #C9A84B);
+    min-width: 40px;
+    text-align: right;
+  }
+
+  .course-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-sm::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: skewX(-20deg);
+    transition: var(--transition, 0.6s ease);
+  }
+
+  .btn-sm:hover::after {
+    left: 100%;
+  }
+
+  .btn-primary-sm {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    color: var(--white, #FFFFFF);
+    box-shadow: 0 2px 12px rgba(201, 168, 75, 0.12);
+  }
+
+  .btn-primary-sm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(201, 168, 75, 0.2);
+    color: var(--white, #FFFFFF);
+  }
+
+  .btn-outline-sm {
+    background: transparent;
+    color: var(--text-gray, #C8CED8);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  .btn-outline-sm:hover {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+    transform: translateY(-2px);
+  }
+
+  .btn-outline-sm i {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  /* ============================================
+     QUIZ RESULTS - Gold Theme
+     ============================================ */
+  .quiz-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .quiz-result-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm, 10px);
+    background: var(--primary-bg, #0A1527);
+    transition: var(--transition, 0.3s ease);
+    border: 1px solid rgba(201, 168, 75, 0.02);
+  }
+
+  .quiz-result-item:hover {
+    background: rgba(201, 168, 75, 0.02);
+    border-color: rgba(201, 168, 75, 0.04);
+    transform: translateX(4px);
+  }
+
+  .quiz-result-item .quiz-title {
+    font-weight: 500;
+    font-size: 0.88rem;
+    color: var(--text-gray, #C8CED8);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .quiz-result-item .quiz-title i {
+    color: var(--primary-gold, #C9A84B);
+    font-size: 0.8rem;
+  }
+
+  .quiz-result-item .quiz-score {
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 2px 12px;
+    border-radius: 100px;
+  }
+
+  .quiz-result-item .quiz-score.high {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  .quiz-result-item .quiz-score.medium {
+    background: rgba(245, 158, 11, 0.08);
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.04);
+  }
+
+  .quiz-result-item .quiz-score.low {
+    background: rgba(239, 68, 68, 0.08);
+    color: #EF4444;
+    border: 1px solid rgba(239, 68, 68, 0.04);
+  }
+
+  /* ============================================
+     ANNOUNCEMENT PREVIEW - Gold Theme
+     ============================================ */
+  .announcement-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .announcement-preview {
+    background: var(--primary-bg, #0A1527);
+    border-radius: var(--radius-sm, 10px);
+    padding: 14px 16px;
+    transition: var(--transition, 0.3s ease);
+    border-left: 3px solid transparent;
+    border: 1px solid rgba(201, 168, 75, 0.02);
+    border-left-width: 3px;
+  }
+
+  .announcement-preview:hover {
+    background: rgba(201, 168, 75, 0.02);
+    border-left-color: var(--primary-gold, #C9A84B);
+  }
+
+  .announcement-preview-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+
+  .announcement-preview-header h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--white, #FFFFFF);
+    margin: 0;
+  }
+
+  .announcement-preview .pin-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 10px;
+    border-radius: 100px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  .announcement-preview p {
+    font-size: 0.85rem;
+    color: var(--text-gray, #C8CED8);
+    margin: 0 0 4px;
+    line-height: 1.5;
+  }
+
+  .announcement-preview .announcement-date {
+    font-size: 0.7rem;
+    color: var(--text-muted, #8A94A6);
+  }
+
+  /* ============================================
+     UPCOMING DEADLINES
+     ============================================ */
+  .deadline-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .deadline-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm, 10px);
+    background: var(--primary-bg, #0A1527);
+    border: 1px solid rgba(201, 168, 75, 0.02);
+    transition: var(--transition, 0.3s ease);
+  }
+
+  .deadline-item:hover {
+    background: rgba(201, 168, 75, 0.02);
+    border-color: rgba(201, 168, 75, 0.04);
+    transform: translateX(4px);
+  }
+
+  .deadline-item .deadline-date {
+    min-width: 44px;
+    text-align: center;
+    padding: 4px 6px;
+    border-radius: var(--radius-sm, 6px);
+    background: rgba(201, 168, 75, 0.06);
+  }
+
+  .deadline-item .deadline-date .day {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    display: block;
+    line-height: 1.2;
+  }
+
+  .deadline-item .deadline-date .month {
+    font-size: 0.55rem;
+    font-weight: 600;
+    color: var(--text-muted, #8A94A6);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .deadline-item .deadline-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .deadline-item .deadline-info .title {
+    font-weight: 600;
+    color: var(--white, #FFFFFF);
+    font-size: 0.85rem;
+  }
+
+  .deadline-item .deadline-info .course {
+    font-size: 0.7rem;
+    color: var(--text-muted, #8A94A6);
+  }
+
+  .deadline-item .deadline-status {
+    font-size: 0.6rem;
+    font-weight: 600;
+    padding: 2px 12px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  .deadline-item .deadline-status.upcoming {
+    background: rgba(5, 150, 105, 0.08);
+    color: #059669;
+    border: 1px solid rgba(5, 150, 105, 0.04);
+  }
+
+  .deadline-item .deadline-status.overdue {
+    background: rgba(239, 68, 68, 0.08);
+    color: #EF4444;
+    border: 1px solid rgba(239, 68, 68, 0.04);
+  }
+
+  .deadline-item .deadline-status.today {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  /* ============================================
+     RECENT ACTIVITY
+     ============================================ */
+  .activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm, 10px);
+    background: var(--primary-bg, #0A1527);
+    border: 1px solid rgba(201, 168, 75, 0.02);
+    transition: var(--transition, 0.3s ease);
+  }
+
+  .activity-item:hover {
+    background: rgba(201, 168, 75, 0.02);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  .activity-item .activity-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    margin-top: 2px;
+  }
+
+  .activity-item .activity-icon.gold { background: rgba(201,168,75,0.08); color: var(--primary-gold, #C9A84B); }
+  .activity-item .activity-icon.green { background: rgba(5,150,105,0.08); color: #059669; }
+  .activity-item .activity-icon.blue { background: rgba(59,130,246,0.08); color: #3B82F6; }
+  .activity-item .activity-icon.red { background: rgba(239,68,68,0.08); color: #EF4444; }
+  .activity-item .activity-icon.orange { background: rgba(245,158,11,0.08); color: #F59E0B; }
+  .activity-item .activity-icon.purple { background: rgba(139,92,246,0.08); color: #8B5CF6; }
+
+  .activity-item .activity-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .activity-item .activity-content .text {
+    font-size: 0.85rem;
+    color: var(--text-gray, #C8CED8);
+    line-height: 1.4;
+  }
+
+  .activity-item .activity-content .text strong {
+    color: var(--white, #FFFFFF);
+  }
+
+  .activity-item .activity-content .time {
+    font-size: 0.65rem;
+    color: var(--text-muted, #8A94A6);
+    margin-top: 2px;
+  }
+
+  /* ============================================
+     EMPTY STATE - Gold Theme
+     ============================================ */
+  .empty-state {
+    text-align: center;
+    padding: 32px 16px;
+  }
+
+  .empty-state i {
+    font-size: 2rem;
+    color: var(--primary-gold, #C9A84B);
+    opacity: 0.15;
+    margin-bottom: 8px;
+  }
+
+  .empty-state p {
+    color: var(--text-gray, #C8CED8);
+    font-size: 0.9rem;
+    margin: 0 0 12px;
+  }
+
+  .empty-state .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    color: var(--white, #FFFFFF);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 16px rgba(201, 168, 75, 0.15);
+  }
+
+  .empty-state .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 24px rgba(201, 168, 75, 0.25);
+    color: var(--white, #FFFFFF);
+  }
+
+  /* ============================================
+     VIEW ALL LINK
+     ============================================ */
+  .view-all-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--primary-gold, #C9A84B);
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+  }
+
+  .view-all-link:hover {
+    color: var(--dark-gold, #8F7E48);
+    transform: translateX(4px);
+  }
+
+  /* ============================================
+     ANIMATIONS
+     ============================================ */
+  @keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(16px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============================================
+     RESPONSIVE
+     ============================================ */
+  @media (max-width: 1024px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .stats-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .quick-actions-section {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .page-header-left {
+      width: 100%;
+    }
+
+    .page-header .greeting {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .stats-row {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stat-card {
+      padding: 16px 12px 14px;
+    }
+
+    .stat-number {
+      font-size: 1.4rem;
+    }
+
+    .quick-actions-section {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .quick-action-btn {
+      padding: 14px 16px;
+    }
+
+    .quick-action-btn .action-icon {
+      width: 36px;
+      height: 36px;
+      font-size: 1.1rem;
+    }
+
+    .dashboard-section {
+      padding: 18px 16px 20px;
+    }
+
+    .course-card {
+      padding: 14px 14px;
+    }
+
+    .course-card-header h3 {
+      font-size: 0.88rem;
+    }
+
+    .quiz-result-item {
+      padding: 10px 14px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .quiz-result-item .quiz-score {
+      align-self: flex-start;
+    }
+
+    .pending-courses-notice {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .no-courses-notice {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .deadline-item {
+      padding: 10px 12px;
+      flex-wrap: wrap;
+    }
+
+    .deadline-item .deadline-status {
+      margin-left: auto;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .page-header h1 {
+      font-size: 1.2rem;
+    }
+
+    .page-header-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 1rem;
+    }
+
+    .page-header .greeting {
+      font-size: 0.78rem;
+      padding: 4px 12px;
+    }
+
+    .stats-row {
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .stat-card {
+      padding: 14px 10px 12px;
+    }
+
+    .stat-number {
+      font-size: 1.2rem;
+    }
+
+    .stat-label {
+      font-size: 0.6rem;
+    }
+
+    .stat-card .stat-icon {
+      font-size: 1.1rem;
+    }
+
+    .quick-action-btn {
+      padding: 12px 14px;
+    }
+
+    .quick-action-btn .action-icon {
+      width: 32px;
+      height: 32px;
+      font-size: 1rem;
+    }
+
+    .quick-action-btn .action-content .action-title {
+      font-size: 0.85rem;
+    }
+
+    .dashboard-section {
+      padding: 14px 12px 16px;
+      border-radius: var(--radius-sm, 10px);
+    }
+
+    .dashboard-section .section-header h2 {
+      font-size: 0.95rem;
+    }
+
+    .course-card {
+      padding: 12px 12px;
+    }
+
+    .course-card-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .course-card-header h3 {
+      font-size: 0.85rem;
+    }
+
+    .course-progress .progress-text {
+      font-size: 0.7rem;
+      min-width: 34px;
+    }
+
+    .btn-sm {
+      font-size: 0.72rem;
+      padding: 5px 12px;
+    }
+
+    .quiz-result-item .quiz-title {
+      font-size: 0.82rem;
+    }
+
+    .quiz-result-item .quiz-score {
+      font-size: 0.78rem;
+      padding: 1px 10px;
+    }
+
+    .announcement-preview {
+      padding: 10px 12px;
+    }
+
+    .announcement-preview-header h4 {
+      font-size: 0.82rem;
+    }
+
+    .announcement-preview p {
+      font-size: 0.78rem;
+    }
+
+    .empty-state i {
+      font-size: 1.6rem;
+    }
+
+    .empty-state p {
+      font-size: 0.82rem;
+    }
+
+    .empty-state .btn {
+      font-size: 0.78rem;
+      padding: 7px 16px;
+    }
+
+    .pending-account-notice {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .pending-courses-notice {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .no-courses-notice {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .no-courses-notice .notice-action {
+      width: 100%;
+      text-align: center;
+    }
+
+    .deadline-item .deadline-date {
+      min-width: 36px;
+    }
+
+    .deadline-item .deadline-date .day {
+      font-size: 0.8rem;
+    }
+
+    .deadline-item .deadline-info .title {
+      font-size: 0.8rem;
+    }
+
+    .deadline-item .deadline-status {
+      font-size: 0.55rem;
+      padding: 1px 10px;
+    }
+
+    .activity-item {
+      padding: 8px 10px;
+    }
+
+    .activity-item .activity-icon {
+      width: 28px;
+      height: 28px;
+      font-size: 0.7rem;
+    }
+
+    .activity-item .activity-content .text {
+      font-size: 0.78rem;
+    }
+  }
+
+  /* ============================================
+     DARK MODE SUPPORT
+     ============================================ */
+  [data-theme="dark"] .stat-card {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .stat-card .stat-number {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .quick-action-btn {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .quick-action-btn .action-content .action-title {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .quick-action-btn .action-content .action-sub {
+    color: var(--text-muted, #8A94A6);
+  }
+
+  [data-theme="dark"] .dashboard-section {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .dashboard-section .section-header h2 {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .course-card {
+    background: var(--primary-bg, #0A1527);
+    border-color: rgba(201, 168, 75, 0.02);
+  }
+
+  [data-theme="dark"] .course-card:hover {
+    background: rgba(201, 168, 75, 0.02);
+    border-color: rgba(201, 168, 75, 0.06);
+  }
+
+  [data-theme="dark"] .course-card-header h3 {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .course-card-header .course-code {
+    background: rgba(201, 168, 75, 0.04);
+    color: var(--text-muted, #8A94A6);
+    border-color: rgba(201, 168, 75, 0.02);
+  }
+
+  [data-theme="dark"] .course-progress .progress-track {
+    background: rgba(201, 168, 75, 0.06);
+  }
+
+  [data-theme="dark"] .course-progress .progress-text {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .quiz-result-item {
+    background: var(--primary-bg, #0A1527);
+    border-color: rgba(201, 168, 75, 0.02);
+  }
+
+  [data-theme="dark"] .quiz-result-item:hover {
+    background: rgba(201, 168, 75, 0.02);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .quiz-result-item .quiz-title {
+    color: var(--text-gray, #C8CED8);
+  }
+
+  [data-theme="dark"] .announcement-preview {
+    background: var(--primary-bg, #0A1527);
+    border-color: rgba(201, 168, 75, 0.02);
+  }
+
+  [data-theme="dark"] .announcement-preview:hover {
+    background: rgba(201, 168, 75, 0.02);
+  }
+
+  [data-theme="dark"] .announcement-preview-header h4 {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .announcement-preview p {
+    color: var(--text-gray, #C8CED8);
+  }
+
+  [data-theme="dark"] .deadline-item {
+    background: var(--primary-bg, #0A1527);
+    border-color: rgba(201, 168, 75, 0.02);
+  }
+
+  [data-theme="dark"] .deadline-item:hover {
+    background: rgba(201, 168, 75, 0.02);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .deadline-item .deadline-info .title {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .activity-item {
+    background: var(--primary-bg, #0A1527);
+    border-color: rgba(201, 168, 75, 0.02);
+  }
+
+  [data-theme="dark"] .activity-item:hover {
+    background: rgba(201, 168, 75, 0.02);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .activity-item .activity-content .text {
+    color: var(--text-gray, #C8CED8);
+  }
+
+  [data-theme="dark"] .page-header h1 {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .page-header .greeting {
+    background: rgba(201, 168, 75, 0.06);
+    color: var(--primary-gold, #C9A84B);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .btn-outline-sm {
+    color: var(--text-gray, #C8CED8);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .btn-outline-sm:hover {
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .btn-outline-sm i {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .empty-state p {
+    color: var(--text-gray, #C8CED8);
+  }
+
+  [data-theme="dark"] .dashboard-section .section-header .section-count {
+    background: rgba(201, 168, 75, 0.02);
+    color: var(--text-muted, #8A94A6);
+    border-color: rgba(201, 168, 75, 0.02);
+  }
+
+  [data-theme="dark"] .quiz-result-item .quiz-score.high {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .quiz-result-item .quiz-score.medium {
+    background: rgba(245, 158, 11, 0.08);
+    color: #FBBF24;
+    border-color: rgba(245, 158, 11, 0.04);
+  }
+
+  [data-theme="dark"] .quiz-result-item .quiz-score.low {
+    background: rgba(239, 68, 68, 0.08);
+    color: #F87171;
+    border-color: rgba(239, 68, 68, 0.04);
+  }
+
+  [data-theme="dark"] .view-all-link {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .view-all-link:hover {
+    color: var(--dark-gold, #8F7E48);
+  }
+
+  [data-theme="dark"] .stat-card .stat-action {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .quick-action-btn .action-icon.gold {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .quick-action-btn .action-icon.purple {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .quick-action-btn .action-icon.orange {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .pending-account-notice {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: rgba(201, 168, 75, 0.08);
+  }
+
+  [data-theme="dark"] .pending-account-notice .notice-content strong {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .pending-account-notice .notice-content p {
+    color: var(--text-gray, #C8CED8);
+  }
+
+  [data-theme="dark"] .pending-courses-notice {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: rgba(201, 168, 75, 0.06);
+  }
+
+  [data-theme="dark"] .pending-courses-notice .notice-content strong {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .pending-courses-notice .notice-content .pending-course-tag {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .no-courses-notice {
+    background: rgba(37, 99, 235, 0.04);
+    border-color: rgba(37, 99, 235, 0.06);
+  }
+
+  [data-theme="dark"] .no-courses-notice .notice-content strong {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .no-courses-notice .notice-content p {
+    color: var(--text-gray, #C8CED8);
+  }
+
+  [data-theme="dark"] .stat-card:nth-child(1) .stat-icon { color: var(--primary-gold, #C9A84B); }
+  [data-theme="dark"] .stat-card:nth-child(2) .stat-icon { color: var(--primary-gold, #C9A84B); }
+  [data-theme="dark"] .stat-card:nth-child(3) .stat-icon { color: var(--primary-gold, #C9A84B); }
+  [data-theme="dark"] .stat-card:nth-child(4) .stat-icon { color: var(--primary-gold, #C9A84B); }
+
+  [data-theme="dark"] .deadline-item .deadline-status.upcoming {
+    background: rgba(5, 150, 105, 0.08);
+    color: #34D399;
+    border-color: rgba(5, 150, 105, 0.04);
+  }
+
+  [data-theme="dark"] .deadline-item .deadline-status.overdue {
+    background: rgba(239, 68, 68, 0.08);
+    color: #F87171;
+    border-color: rgba(239, 68, 68, 0.04);
+  }
+
+  [data-theme="dark"] .deadline-item .deadline-status.today {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+</style>
+
+<!-- ========================================== -->
+<!-- PENDING ACCOUNT APPROVAL NOTICE -->
+<!-- ========================================== -->
+{% if not current_user.is_approved %}
+<div class="pending-account-notice">
+    <span class="notice-icon">⏳</span>
+    <div class="notice-content">
+        <strong>Account Pending Approval</strong>
+        <p>Your account is waiting for admin approval. You will not be able to access course content until approved.</p>
+    </div>
+</div>
+{% endif %}
+
+<!-- ========================================== -->
+<!-- PENDING COURSE REQUESTS NOTICE -->
+<!-- ========================================== -->
+{% if pending_courses %}
+<div class="pending-courses-notice">
+    <span class="notice-icon">📚</span>
+    <div class="notice-content">
+        <strong>Pending Course Requests</strong>
+        <p style="margin: 2px 0 0;">
+            You have requested access to:
+            {% for course in pending_courses %}
+                <span class="pending-course-tag">{{ course.name }}</span>
+            {% endfor %}
+            <span class="pending-status">⏳ Waiting for admin approval.</span>
+        </p>
+    </div>
+</div>
+{% endif %}
+
+<!-- ========================================== -->
+<!-- NO COURSES NOTICE (when no approved or pending) -->
+<!-- ========================================== -->
+{% if not approved_courses and not pending_courses and current_user.is_approved %}
+<div class="no-courses-notice">
+    <span class="notice-icon">📖</span>
+    <div class="notice-content">
+        <strong>No Courses Enrolled</strong>
+        <p>You are not enrolled in any courses yet. Browse available courses to get started.</p>
+    </div>
+    <a href="{{ url_for('student.courses') }}" class="notice-action">
+        Browse Courses <i class="fas fa-arrow-right"></i>
+    </a>
+</div>
+{% endif %}
+
+<!-- ========================================== -->
+<!-- MAIN DASHBOARD CONTENT -->
+<!-- ========================================== -->
+<div class="student-dashboard">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-header-icon">
+        <i class="fas fa-tachometer-alt"></i>
+      </div>
+      <div>
+        <h1>Student <span>Dashboard</span></h1>
+        <p class="subtitle">Track your learning progress and activity</p>
+      </div>
+    </div>
+    <div class="greeting">
+      <i class="fas fa-wave"></i>
+      Welcome back, <strong>{{ current_user.username }}</strong>!
+    </div>
+  </div>
+
+  <!-- Stats Row - Clickable -->
+  <div class="stats-row">
+    <div class="stat-card" onclick="window.location.href='{{ url_for('student.courses') }}'">
+      <div class="stat-icon"><i class="fas fa-book"></i></div>
+      <div class="stat-number">{{ approved_courses|length }}</div>
+      <div class="stat-label">Approved Courses</div>
+      <div class="stat-action"><i class="fas fa-arrow-right"></i> View All</div>
+    </div>
+    <div class="stat-card" onclick="window.location.href='{{ url_for('student.courses') }}'">
+      <div class="stat-icon"><i class="fas fa-play-circle"></i></div>
+      <div class="stat-number">
+        {% set started = 0 %}
+        {% for data in progress_data %}
+          {% if data.progress > 0 %}
+            {% set started = started + 1 %}
+          {% endif %}
+        {% endfor %}
+        {{ started }}
+      </div>
+      <div class="stat-label">Courses Started</div>
+      <div class="stat-action"><i class="fas fa-arrow-right"></i> Continue</div>
+    </div>
+    <div class="stat-card" onclick="window.location.href='{{ url_for('quiz.student_quizzes') }}'">
+      <div class="stat-icon"><i class="fas fa-puzzle-piece"></i></div>
+      <div class="stat-number">{{ quiz_results|length }}</div>
+      <div class="stat-label">Quizzes Taken</div>
+      <div class="stat-action"><i class="fas fa-arrow-right"></i> Take Quiz</div>
+    </div>
+    <div class="stat-card" onclick="window.location.href='{{ url_for('student.announcements') }}'">
+      <div class="stat-icon"><i class="fas fa-bullhorn"></i></div>
+      <div class="stat-number">{{ announcements|length if announcements else 0 }}</div>
+      <div class="stat-label">Announcements</div>
+      <div class="stat-action"><i class="fas fa-arrow-right"></i> Read</div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions-section">
+    <a href="{{ url_for('quiz.student_quizzes') }}" class="quick-action-btn">
+      <div class="action-icon gold"><i class="fas fa-puzzle-piece"></i></div>
+      <div class="action-content">
+        <div class="action-title">Take a Quiz</div>
+        <div class="action-sub">Test your knowledge</div>
+      </div>
+      <div class="action-arrow"><i class="fas fa-chevron-right"></i></div>
+    </a>
+    <a href="{{ url_for('assignment.student_assignments') }}" class="quick-action-btn">
+      <div class="action-icon purple"><i class="fas fa-tasks"></i></div>
+      <div class="action-content">
+        <div class="action-title">View Assignments</div>
+        <div class="action-sub">Submit your work</div>
+      </div>
+      <div class="action-arrow"><i class="fas fa-chevron-right"></i></div>
+    </a>
+    <a href="{{ url_for('leaderboard.index') }}" class="quick-action-btn">
+      <div class="action-icon orange"><i class="fas fa-trophy"></i></div>
+      <div class="action-content">
+        <div class="action-title">Leaderboard</div>
+        <div class="action-sub">See rankings</div>
+      </div>
+      <div class="action-arrow"><i class="fas fa-chevron-right"></i></div>
+    </a>
+  </div>
+
+  <!-- Dashboard Grid -->
+  <div class="dashboard-grid">
+    <!-- Left Column -->
+    <div>
+      <!-- Your Courses -->
+      <div class="dashboard-section" style="margin-bottom: 20px;">
+        <div class="section-header">
+          <i class="fas fa-book"></i>
+          <h2>Your Courses</h2>
+          <span class="section-count">{{ progress_data|length }}</span>
+          <a href="{{ url_for('student.courses') }}" class="section-link">View All →</a>
+        </div>
+        <div class="course-grid">
+          {% if progress_data %}
+            {% for data in progress_data %}
+              <div class="course-card">
+                <div class="course-card-header">
+                  <h3>{{ data.course.name }}</h3>
+                  <span class="course-code">{{ data.course.code }}</span>
+                </div>
+                <div class="course-progress">
+                  <div class="progress-track">
+                    <div class="fill" style="width: {{ data.progress }}%;"></div>
+                  </div>
+                  <span class="progress-text">{{ data.progress }}%</span>
+                </div>
+                <div class="course-actions">
+                  <a href="{{ url_for('course.view', course_id=data.course.id) }}" class="btn-sm btn-primary-sm">
+                    <i class="fas fa-eye"></i> View Course
+                  </a>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state">
+              <i class="fas fa-book-open"></i>
+              <p>You don't have any approved courses yet.</p>
+              {% if pending_courses %}
+                <p style="font-size: 0.8rem; color: var(--text-muted, #8A94A6);">You have pending course requests waiting for approval.</p>
+              {% else %}
+                <a href="{{ url_for('student.courses') }}" class="btn">
+                  <i class="fas fa-search"></i> Browse Courses
+                </a>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="dashboard-section">
+        <div class="section-header">
+          <i class="fas fa-history"></i>
+          <h2>Recent Activity</h2>
+          <span class="section-count">{{ recent_activities|length if recent_activities else 0 }}</span>
+          <a href="{{ url_for('student.my_notifications') }}" class="section-link">View All →</a>
+        </div>
+        <div class="activity-list">
+          {% if recent_activities %}
+            {% for activity in recent_activities[:5] %}
+              <div class="activity-item">
+                <div class="activity-icon {{ activity.color }}">
+                  <i class="fas {{ activity.icon }}"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="text">{{ activity.text|safe }}</div>
+                  <div class="time">{{ activity.time | time_ago }}</div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state">
+              <i class="fas fa-history"></i>
+              <p>No recent activity</p>
+              <p style="font-size: 0.8rem; color: var(--text-muted, #8A94A6);">Start learning to see activity here</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div>
+      <!-- Upcoming Deadlines -->
+      <div class="dashboard-section" style="margin-bottom: 20px;">
+        <div class="section-header">
+          <i class="fas fa-calendar-alt"></i>
+          <h2>Upcoming Deadlines</h2>
+          <span class="section-count">{{ upcoming_deadlines|length if upcoming_deadlines else 0 }}</span>
+          <a href="{{ url_for('student.my_calendar') }}" class="section-link">Calendar →</a>
+        </div>
+        <div class="deadline-list">
+          {% if upcoming_deadlines %}
+            {% for deadline in upcoming_deadlines[:5] %}
+              {% set days = ((deadline.due_date - now).days) %}
+              <div class="deadline-item">
+                <div class="deadline-date">
+                  <span class="day">{{ deadline.due_date.strftime('%d') }}</span>
+                  <span class="month">{{ deadline.due_date.strftime('%b') }}</span>
+                </div>
+                <div class="deadline-info">
+                  <div class="title">{{ deadline.title }}</div>
+                  <div class="course">{{ deadline.course.name }}</div>
+                </div>
+                <span class="deadline-status 
+                  {% if days < 0 %}overdue
+                  {% elif days == 0 %}today
+                  {% else %}upcoming{% endif %}">
+                  {% if days < 0 %}Overdue
+                  {% elif days == 0 %}Today
+                  {% else %}{{ days }}d left{% endif %}
+                </span>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state">
+              <i class="fas fa-calendar-check"></i>
+              <p>No upcoming deadlines</p>
+              <p style="font-size: 0.8rem; color: var(--text-muted, #8A94A6);">You're all caught up! 🎉</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Recent Quiz Results -->
+      <div class="dashboard-section" style="margin-bottom: 20px;">
+        <div class="section-header">
+          <i class="fas fa-puzzle-piece"></i>
+          <h2>Recent Quiz Results</h2>
+          <span class="section-count">{{ quiz_results|length }}</span>
+          <a href="{{ url_for('quiz.student_quizzes') }}" class="section-link">View All →</a>
+        </div>
+        <div class="quiz-results-list">
+          {% if quiz_results %}
+            {% for result in quiz_results %}
+              <div class="quiz-result-item">
+                <span class="quiz-title">
+                  <i class="fas fa-file-alt"></i>
+                  {{ result.title }}
+                </span>
+                <span class="quiz-score {% if result.score.score >= 70 %}high{% elif result.score.score >= 50 %}medium{% else %}low{% endif %}">
+                  {{ result.score.score }}%
+                </span>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state">
+              <i class="fas fa-puzzle-piece"></i>
+              <p>You haven't taken any quizzes yet.</p>
+              {% if approved_courses %}
+                <a href="{{ url_for('quiz.student_quizzes') }}" class="btn">
+                  <i class="fas fa-play"></i> Take a Quiz
+                </a>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Latest Announcements -->
+      <div class="dashboard-section">
+        <div class="section-header">
+          <i class="fas fa-bullhorn"></i>
+          <h2>Latest Announcements</h2>
+          <span class="section-count">{{ announcements|length if announcements else 0 }}</span>
+          <a href="{{ url_for('student.announcements') }}" class="section-link">View All →</a>
+        </div>
+        <div class="announcement-list">
+          {% if announcements %}
+            {% for announcement in announcements[:3] %}
+              <div class="announcement-preview">
+                <div class="announcement-preview-header">
+                  <h4>{{ announcement.title }}</h4>
+                  {% if announcement.is_pinned %}
+                    <span class="pin-badge"><i class="fas fa-thumbtack"></i> Pinned</span>
+                  {% endif %}
+                </div>
+                <p>{{ announcement.content|truncate(120)|safe }}</p>
+                <span class="announcement-date">{{ announcement.created_at | local_date }}</span>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state">
+              <i class="fas fa-bullhorn"></i>
+              <p>No announcements yet.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // ==========================================
+    // ANIMATE PROGRESS BARS ON LOAD
+    // ==========================================
+    const fills = document.querySelectorAll('.progress-track .fill');
+    fills.forEach(bar => {
+      const target = bar.style.width;
+      bar.style.width = '0%';
+      setTimeout(() => {
+        bar.style.width = target;
+      }, 300);
+    });
+
+    // ==========================================
+    // STATS COUNTER ANIMATION
+    // ==========================================
+    const statNumbers = document.querySelectorAll('.stat-number');
+    statNumbers.forEach(stat => {
+      const text = stat.textContent;
+      const number = parseInt(text);
+      if (!isNaN(number)) {
+        let current = 0;
+        const increment = Math.ceil(number / 25);
+        const counter = setInterval(() => {
+          current += increment;
+          if (current >= number) {
+            stat.textContent = text;
+            clearInterval(counter);
+          } else {
+            stat.textContent = current;
+          }
+        }, 40);
+      }
+    });
+
+    // ==========================================
+    // CARD ENTRY ANIMATION
+    // ==========================================
+    const cards = document.querySelectorAll('.course-card, .quiz-result-item, .announcement-preview, .deadline-item, .activity-item');
+    cards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(10px)';
+      setTimeout(() => {
+        card.style.transition = 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, 150 + index * 60);
+    });
+
+    console.log('✨ Student Dashboard - Gold Theme with Timezone Fix Loaded!');
+  });
+</script>
+{% endblock %}

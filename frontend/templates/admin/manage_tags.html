@@ -1,0 +1,896 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Tags - A-Portal{% endblock %}
+
+{% block content %}
+<style>
+  /* ============================================
+     MANAGE TAGS - Premium Navy + Gold Theme
+     ============================================ */
+  .manage-tags {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  /* ============================================
+     HEADER - Gold Theme
+     ============================================ */
+  .page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .page-header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm, 10px);
+    background: linear-gradient(135deg, rgba(201, 168, 75, 0.08), rgba(143, 126, 72, 0.06));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-gold, #C9A84B);
+    font-size: 1.3rem;
+    border: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .page-header h1 span {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .page-header .subtitle {
+    font-size: 0.85rem;
+    color: var(--text-gray, #C8CED8);
+    margin: 2px 0 0;
+  }
+
+  /* ============================================
+     STATS ROW - Gold Theme
+     ============================================ */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
+  }
+
+  .stat-mini {
+    background: var(--secondary-bg, #253449);
+    padding: 16px 18px;
+    border-radius: var(--radius, 14px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(10, 21, 39, 0.08));
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: var(--transition, 0.3s ease);
+  }
+
+  .stat-mini:hover {
+    box-shadow: var(--shadow-md, 0 4px 20px rgba(10, 21, 39, 0.12));
+    transform: translateY(-2px);
+    border-color: rgba(201, 168, 75, 0.08);
+  }
+
+  .stat-mini .stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm, 8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .stat-mini .stat-icon.gold {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  .stat-mini .stat-icon.green {
+    background: rgba(5, 150, 105, 0.08);
+    color: #059669;
+  }
+
+  .stat-mini .stat-icon.orange {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  .stat-mini .stat-number {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    line-height: 1.2;
+  }
+
+  .stat-mini .stat-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--text-muted, #8A94A6);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* ============================================
+     ADD TAG CARD - Gold Theme
+     ============================================ */
+  .add-tag-card {
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 16px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(10, 21, 39, 0.08));
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    transition: var(--transition, 0.3s ease);
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .add-tag-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    opacity: 0.6;
+  }
+
+  .add-tag-card:hover {
+    box-shadow: var(--shadow-md, 0 4px 20px rgba(10, 21, 39, 0.12));
+    border-color: rgba(201, 168, 75, 0.06);
+  }
+
+  .add-tag-card .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .add-tag-card .card-header i {
+    color: var(--primary-gold, #C9A84B);
+    font-size: 1.2rem;
+  }
+
+  .add-tag-card .card-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    margin: 0;
+  }
+
+  .add-tag-form {
+    display: flex;
+    gap: 10px;
+  }
+
+  .add-tag-form .form-group {
+    flex: 1;
+    display: flex;
+    gap: 8px;
+  }
+
+  .add-tag-form .form-control {
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm, 10px);
+    border: 1.5px solid rgba(201, 168, 75, 0.04);
+    background: var(--primary-bg, #0A1527);
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-gray, #C8CED8);
+    transition: var(--transition, 0.3s ease);
+    outline: none;
+    min-width: 0;
+  }
+
+  .add-tag-form .form-control:focus {
+    border-color: var(--primary-gold, #C9A84B);
+    box-shadow: 0 0 0 3px rgba(201, 168, 75, 0.06);
+    background: var(--primary-bg, #0A1527);
+  }
+
+  .add-tag-form .form-control::placeholder {
+    color: var(--text-muted, #8A94A6);
+    font-size: 0.85rem;
+  }
+
+  .btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    color: var(--white, #FFFFFF);
+    border: none;
+    cursor: pointer;
+    transition: var(--transition, 0.3s ease);
+    box-shadow: 0 2px 16px rgba(201, 168, 75, 0.15);
+    white-space: nowrap;
+  }
+
+  .btn-add:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 24px rgba(201, 168, 75, 0.25);
+    color: var(--white, #FFFFFF);
+  }
+
+  .btn-add:active {
+    transform: translateY(0);
+  }
+
+  /* ============================================
+     TABLE - Gold Theme
+     ============================================ */
+  .table-wrapper {
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 16px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(10, 21, 39, 0.08));
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+    transition: var(--transition, 0.3s ease);
+  }
+
+  .table-wrapper:hover {
+    box-shadow: var(--shadow-md, 0 4px 20px rgba(10, 21, 39, 0.12));
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+    padding: 0 4px 4px 0;
+  }
+
+  .tag-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  .tag-table thead {
+    background: rgba(201, 168, 75, 0.02);
+    border-bottom: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  .tag-table thead th {
+    padding: 14px 20px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted, #8A94A6);
+    white-space: nowrap;
+  }
+
+  .tag-table tbody tr {
+    border-bottom: 1px solid rgba(201, 168, 75, 0.03);
+    transition: var(--transition, 0.3s ease);
+  }
+
+  .tag-table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .tag-table tbody tr:hover {
+    background: rgba(201, 168, 75, 0.02);
+  }
+
+  .tag-table tbody td {
+    padding: 14px 20px;
+    vertical-align: middle;
+    color: var(--text-gray, #C8CED8);
+  }
+
+  /* ============================================
+     TAG BADGE - Gold Theme
+     ============================================ */
+  .tag-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .tag-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 16px;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    font-family: 'Inter', monospace;
+    transition: var(--transition, 0.3s ease);
+  }
+
+  .tag-badge:hover {
+    background: rgba(201, 168, 75, 0.12);
+    transform: scale(1.02);
+  }
+
+  .tag-badge i {
+    font-size: 0.7rem;
+    opacity: 0.7;
+  }
+
+  .count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 12px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(201, 168, 75, 0.06);
+    color: var(--primary-gold, #C9A84B);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  .count-badge i {
+    font-size: 0.65rem;
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  .date-text {
+    font-size: 0.82rem;
+    color: var(--text-gray, #C8CED8);
+  }
+
+  /* ============================================
+     ACTION BUTTONS - Gold Theme
+     ============================================ */
+  .action-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .btn-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm, 8px);
+    border: none;
+    cursor: pointer;
+    transition: var(--transition, 0.3s ease);
+    text-decoration: none;
+    font-size: 0.8rem;
+  }
+
+  .btn-action i {
+    font-size: 0.8rem;
+  }
+
+  .btn-delete {
+    background: rgba(239, 68, 68, 0.06);
+    color: #EF4444;
+  }
+
+  .btn-delete:hover {
+    background: rgba(239, 68, 68, 0.12);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
+  }
+
+  /* ============================================
+     EMPTY STATE - Gold Theme
+     ============================================ */
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+  }
+
+  .empty-state i {
+    font-size: 2.5rem;
+    color: var(--primary-gold, #C9A84B);
+    opacity: 0.15;
+    margin-bottom: 12px;
+  }
+
+  .empty-state h3 {
+    font-size: 1.1rem;
+    color: var(--white, #FFFFFF);
+    margin-bottom: 4px;
+  }
+
+  .empty-state p {
+    color: var(--text-gray, #C8CED8);
+    font-size: 0.9rem;
+  }
+
+  /* ============================================
+     ANIMATIONS
+     ============================================ */
+  @keyframes fadeUp {
+    0% {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes goldPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(201, 168, 75, 0); }
+    50% { box-shadow: 0 0 40px rgba(201, 168, 75, 0.1); }
+  }
+
+  /* ============================================
+     RESPONSIVE
+     ============================================ */
+  @media (max-width: 768px) {
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .page-header-left {
+      width: 100%;
+    }
+
+    .add-tag-card {
+      padding: 20px 18px;
+    }
+
+    .add-tag-form {
+      flex-direction: column;
+    }
+
+    .add-tag-form .form-group {
+      flex-direction: column;
+    }
+
+    .btn-add {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .stats-row {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stat-mini {
+      padding: 12px 14px;
+    }
+
+    .stat-mini .stat-number {
+      font-size: 1.1rem;
+    }
+
+    .tag-table thead th {
+      padding: 10px 14px;
+      font-size: 0.65rem;
+    }
+
+    .tag-table tbody td {
+      padding: 10px 14px;
+      font-size: 0.82rem;
+    }
+
+    .tag-badge {
+      font-size: 0.75rem;
+      padding: 3px 12px;
+    }
+
+    .action-group {
+      gap: 4px;
+    }
+
+    .btn-action {
+      width: 28px;
+      height: 28px;
+      font-size: 0.7rem;
+    }
+
+    .btn-action i {
+      font-size: 0.7rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .page-header h1 {
+      font-size: 1.2rem;
+    }
+
+    .page-header-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 1rem;
+    }
+
+    .add-tag-card {
+      padding: 16px 14px;
+    }
+
+    .add-tag-card .card-header h3 {
+      font-size: 0.9rem;
+    }
+
+    .add-tag-form .form-control {
+      font-size: 0.82rem;
+      padding: 9px 12px;
+    }
+
+    .btn-add {
+      font-size: 0.82rem;
+      padding: 9px 16px;
+    }
+
+    .stats-row {
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .stat-mini {
+      padding: 10px 12px;
+    }
+
+    .stat-mini .stat-icon {
+      width: 32px;
+      height: 32px;
+      font-size: 0.9rem;
+    }
+
+    .stat-mini .stat-number {
+      font-size: 1rem;
+    }
+
+    .stat-mini .stat-label {
+      font-size: 0.6rem;
+    }
+
+    .tag-table thead th {
+      padding: 6px 8px;
+      font-size: 0.55rem;
+    }
+
+    .tag-table tbody td {
+      padding: 8px 8px;
+      font-size: 0.75rem;
+    }
+
+    .tag-badge {
+      font-size: 0.7rem;
+      padding: 2px 10px;
+    }
+
+    .date-text {
+      font-size: 0.7rem;
+    }
+
+    .count-badge {
+      font-size: 0.65rem;
+      padding: 1px 8px;
+    }
+  }
+
+  /* ============================================
+     DARK MODE SUPPORT
+     ============================================ */
+  [data-theme="dark"] .add-tag-card {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .add-tag-card .card-header h3 {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .add-tag-form .form-control {
+    background: var(--primary-bg, #0A1527);
+    border-color: rgba(201, 168, 75, 0.04);
+    color: var(--text-gray, #C8CED8);
+  }
+
+  [data-theme="dark"] .add-tag-form .form-control:focus {
+    border-color: var(--primary-gold, #C9A84B);
+    box-shadow: 0 0 0 3px rgba(201, 168, 75, 0.06);
+    background: var(--primary-bg, #0A1527);
+  }
+
+  [data-theme="dark"] .add-tag-form .form-control::placeholder {
+    color: var(--text-muted, #8A94A6);
+  }
+
+  [data-theme="dark"] .table-wrapper {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .tag-table thead {
+    background: rgba(201, 168, 75, 0.02);
+    border-bottom: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .tag-table tbody tr {
+    border-bottom: 1px solid rgba(201, 168, 75, 0.02);
+  }
+
+  [data-theme="dark"] .tag-table tbody tr:hover {
+    background: rgba(201, 168, 75, 0.02);
+  }
+
+  [data-theme="dark"] .tag-badge {
+    background: rgba(201, 168, 75, 0.08);
+    border-color: rgba(201, 168, 75, 0.04);
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .stat-mini {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .stat-mini .stat-number {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .count-badge {
+    background: rgba(201, 168, 75, 0.06);
+    color: var(--primary-gold, #C9A84B);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .count-badge i {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .btn-delete {
+    background: rgba(239, 68, 68, 0.08);
+    color: #EF4444;
+  }
+
+  [data-theme="dark"] .btn-delete:hover {
+    background: rgba(239, 68, 68, 0.16);
+  }
+
+  [data-theme="dark"] .page-header h1 {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .empty-state h3 {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .empty-state p {
+    color: var(--text-gray, #C8CED8);
+  }
+
+  [data-theme="dark"] .date-text {
+    color: var(--text-gray, #C8CED8);
+  }
+
+  [data-theme="dark"] .add-tag-card .card-header i {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .stat-mini .stat-icon.gold {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .stat-mini .stat-icon.orange {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+  }
+</style>
+
+<div class="manage-tags">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-header-icon">
+        <i class="fas fa-tags"></i>
+      </div>
+      <div>
+        <h1>Manage <span>Tags</span></h1>
+        <p class="subtitle">Organize your notes with custom tags</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-mini">
+      <div class="stat-icon gold"><i class="fas fa-tags"></i></div>
+      <div>
+        <div class="stat-number">{{ tags|length }}</div>
+        <div class="stat-label">Total Tags</div>
+      </div>
+    </div>
+    <div class="stat-mini">
+      <div class="stat-icon green"><i class="fas fa-file-alt"></i></div>
+      <div>
+        <div class="stat-number">{{ tags|sum(attribute='notes|length') if tags else 0 }}</div>
+        <div class="stat-label">Tagged Notes</div>
+      </div>
+    </div>
+    <div class="stat-mini">
+      <div class="stat-icon orange"><i class="fas fa-hashtag"></i></div>
+      <div>
+        <div class="stat-number">{{ tags|selectattr('notes', 'defined')|list|length if tags else 0 }}</div>
+        <div class="stat-label">Active Tags</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Tag -->
+  <div class="add-tag-card">
+    <div class="card-header">
+      <i class="fas fa-plus-circle"></i>
+      <h3>Add New Tag</h3>
+    </div>
+    <form method="POST" action="{{ url_for('admin.create_tag') }}" class="add-tag-form">
+      <div class="form-group">
+        <input 
+          type="text" 
+          name="name" 
+          class="form-control" 
+          placeholder="Enter tag name..." 
+          required 
+          autofocus
+        >
+        <button type="submit" class="btn-add">
+          <i class="fas fa-plus"></i> Add Tag
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrapper">
+    <div class="table-scroll">
+      <table class="tag-table">
+        <thead>
+          <tr>
+            <th>Tag</th>
+            <th>Notes</th>
+            <th>Created</th>
+            <th style="text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tag in tags %}
+            <tr>
+              <td>
+                <div class="tag-name-cell">
+                  <span class="tag-badge">
+                    <i class="fas fa-hashtag"></i> {{ tag.name }}
+                  </span>
+                </div>
+              </td>
+              <td>
+                <span class="count-badge">
+                  <i class="fas fa-file-alt"></i> {{ tag.notes|length }}
+                </span>
+              </td>
+              <td>
+                <span class="date-text">{{ tag.created_at.strftime('%b %d, %Y') }}</span>
+              </td>
+              <td style="text-align: right;">
+                <div class="action-group" style="justify-content: flex-end;">
+                  <form method="POST" action="{{ url_for('admin.delete_tag', tag_id=tag.id) }}" style="display: inline;">
+                    <button type="submit" class="btn-action btn-delete confirm-delete" title="Delete Tag">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="4">
+                <div class="empty-state">
+                  <i class="fas fa-tags"></i>
+                  <h3>No tags available</h3>
+                  <p>Create your first tag to start organizing your notes.</p>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // ============================================
+    // CONFIRM DELETE
+    // ============================================
+    document.querySelectorAll('.confirm-delete').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        const tagName = this.closest('tr')?.querySelector('.tag-badge')?.textContent?.trim() || 'this tag';
+        if (!confirm(`Are you sure you want to delete ${tagName}? This action cannot be undone.`)) {
+          e.preventDefault();
+        }
+      });
+    });
+
+    // ============================================
+    // AUTO-FOCUS INPUT ON PAGE LOAD
+    // ============================================
+    const input = document.querySelector('input[name="name"]');
+    if (input) {
+      input.focus();
+    }
+
+    // ============================================
+    // GOLD THEME - ANIMATE ON LOAD
+    // ============================================
+    const container = document.querySelector('.manage-tags');
+    if (container) {
+      container.style.opacity = '0';
+      setTimeout(() => {
+        container.style.opacity = '1';
+        container.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        container.style.transform = 'translateY(0)';
+      }, 100);
+    }
+
+    // ============================================
+    // ADD TAG FORM - ENTER KEY SUPPORT
+    // ============================================
+    const form = document.querySelector('.add-tag-form');
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        const input = this.querySelector('input[name="name"]');
+        if (input && input.value.trim().length < 2) {
+          e.preventDefault();
+          alert('Tag name must be at least 2 characters.');
+          input.focus();
+          return;
+        }
+      });
+    }
+
+    console.log('✨ Manage Tags - Gold Theme Loaded!');
+  });
+</script>
+{% endblock %}

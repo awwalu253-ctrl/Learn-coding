@@ -1,0 +1,658 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Email Template - A-Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-template-page {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0;
+    }
+
+    .page-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 28px;
+        opacity: 0;
+        animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .page-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .page-header-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-sm, 10px);
+        background: linear-gradient(135deg, rgba(201, 168, 75, 0.08), rgba(143, 126, 72, 0.06));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-gold, #C9A84B);
+        font-size: 1.3rem;
+        border: 1px solid rgba(201, 168, 75, 0.04);
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--white, #FFFFFF);
+        letter-spacing: -0.02em;
+        margin: 0;
+    }
+
+    .page-header h1 span {
+        background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .page-header .subtitle {
+        font-size: 0.85rem;
+        color: var(--text-gray, #C8CED8);
+        margin: 2px 0 0;
+    }
+
+    /* Template Container */
+    .template-container {
+        background: var(--secondary-bg, #253449);
+        border-radius: var(--radius, 16px);
+        border: 1px solid rgba(201, 168, 75, 0.04);
+        box-shadow: var(--shadow-lg, 0 12px 48px rgba(10, 21, 39, 0.12));
+        padding: 40px 40px 36px;
+        transition: var(--transition, 0.3s ease);
+        opacity: 0;
+        animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .template-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+        opacity: 0.8;
+    }
+
+    .template-container:hover {
+        box-shadow: var(--shadow-xl, 0 20px 60px rgba(10, 21, 39, 0.16));
+        border-color: rgba(201, 168, 75, 0.08);
+    }
+
+    .template-header {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .template-header .icon-wrapper {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(201, 168, 75, 0.08), rgba(143, 126, 72, 0.06));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: var(--primary-gold, #C9A84B);
+        transition: var(--transition, 0.3s ease);
+        border: 1px solid rgba(201, 168, 75, 0.04);
+    }
+
+    .template-container:hover .icon-wrapper {
+        transform: scale(1.04) rotate(-2deg);
+        box-shadow: 0 4px 20px rgba(201, 168, 75, 0.08);
+        border-color: rgba(201, 168, 75, 0.08);
+    }
+
+    .template-header h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--white, #FFFFFF);
+        letter-spacing: -0.02em;
+        margin: 0 0 6px;
+    }
+
+    .template-header h2 span {
+        background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .template-header p {
+        font-size: 0.9rem;
+        color: var(--text-gray, #C8CED8);
+        margin: 0;
+    }
+
+    /* Form */
+    .template-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-group label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-gray, #C8CED8);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-group label i {
+        color: var(--primary-gold, #C9A84B);
+        font-size: 0.85rem;
+        width: 18px;
+        text-align: center;
+    }
+
+    .form-group label .required {
+        color: #EF4444;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: var(--radius-sm, 10px);
+        border: 1.5px solid rgba(201, 168, 75, 0.04);
+        background: var(--primary-bg, #0A1527);
+        font-size: 0.9rem;
+        font-family: 'Inter', sans-serif;
+        color: var(--text-gray, #C8CED8);
+        transition: var(--transition, 0.3s ease);
+        outline: none;
+        appearance: none;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-gold, #C9A84B);
+        box-shadow: 0 0 0 3px rgba(201, 168, 75, 0.06);
+        background: var(--primary-bg, #0A1527);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-muted, #8A94A6);
+        font-size: 0.85rem;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 150px;
+        line-height: 1.7;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Checkbox */
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--primary-gold, #C9A84B);
+        cursor: pointer;
+        border-radius: 4px;
+        transition: var(--transition, 0.3s ease);
+    }
+
+    .checkbox-group input[type="checkbox"]:checked {
+        animation: checkPop 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes checkPop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+
+    .checkbox-group label {
+        font-size: 0.9rem;
+        color: var(--text-gray, #C8CED8);
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    /* Buttons */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 12px 28px;
+        border-radius: 60px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: var(--transition, 0.3s ease);
+        border: none;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+        color: var(--white, #FFFFFF);
+        box-shadow: 0 2px 16px rgba(201, 168, 75, 0.15);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 28px rgba(201, 168, 75, 0.25);
+        color: var(--white, #FFFFFF);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--text-gray, #C8CED8);
+        border: 1.5px solid rgba(201, 168, 75, 0.06);
+        margin-top: 8px;
+    }
+
+    .btn-secondary:hover {
+        background: rgba(201, 168, 75, 0.04);
+        border-color: var(--primary-gold, #C9A84B);
+        color: var(--primary-gold, #C9A84B);
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary i {
+        color: var(--primary-gold, #C9A84B);
+    }
+
+    /* Character Count */
+    .char-counter {
+        display: flex;
+        justify-content: flex-end;
+        font-size: 0.7rem;
+        color: var(--text-muted, #8A94A6);
+        margin-top: 4px;
+    }
+
+    .char-counter .count {
+        font-weight: 600;
+    }
+
+    .char-counter .count.warning {
+        color: var(--primary-gold, #C9A84B);
+    }
+
+    .char-counter .count.danger {
+        color: #EF4444;
+    }
+
+    /* Error */
+    .error-message {
+        font-size: 0.78rem;
+        color: #EF4444;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .error-message i {
+        font-size: 0.7rem;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .template-container {
+            padding: 28px 20px 24px;
+        }
+
+        .template-header .icon-wrapper {
+            width: 56px;
+            height: 56px;
+            font-size: 1.5rem;
+        }
+
+        .template-header h2 {
+            font-size: 1.3rem;
+        }
+
+        .form-control {
+            padding: 10px 14px;
+            font-size: 0.85rem;
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+        }
+
+        .btn {
+            padding: 11px 20px;
+            font-size: 0.85rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .template-container {
+            padding: 20px 14px 18px;
+            border-radius: var(--radius-sm, 10px);
+        }
+
+        .template-header .icon-wrapper {
+            width: 48px;
+            height: 48px;
+            font-size: 1.3rem;
+        }
+
+        .template-header h2 {
+            font-size: 1.1rem;
+        }
+
+        .template-header p {
+            font-size: 0.82rem;
+        }
+
+        .form-group label {
+            font-size: 0.78rem;
+        }
+
+        .form-control {
+            padding: 9px 12px;
+            font-size: 0.82rem;
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            font-size: 0.82rem;
+        }
+    }
+
+    /* Dark Mode */
+    [data-theme="dark"] .template-container {
+        background: var(--secondary-bg, #253449);
+        border-color: rgba(201, 168, 75, 0.04);
+    }
+
+    [data-theme="dark"] .template-container::before {
+        background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    }
+
+    [data-theme="dark"] .template-header h2 {
+        color: var(--white, #FFFFFF);
+    }
+
+    [data-theme="dark"] .template-header .icon-wrapper {
+        background: rgba(201, 168, 75, 0.08);
+        border-color: rgba(201, 168, 75, 0.04);
+    }
+
+    [data-theme="dark"] .form-group label {
+        color: var(--text-gray, #C8CED8);
+    }
+
+    [data-theme="dark"] .form-control {
+        background: var(--primary-bg, #0A1527);
+        border-color: rgba(201, 168, 75, 0.04);
+        color: var(--text-gray, #C8CED8);
+    }
+
+    [data-theme="dark"] .form-control:focus {
+        border-color: var(--primary-gold, #C9A84B);
+        box-shadow: 0 0 0 3px rgba(201, 168, 75, 0.06);
+        background: var(--primary-bg, #0A1527);
+    }
+
+    [data-theme="dark"] .form-control::placeholder {
+        color: var(--text-muted, #8A94A6);
+    }
+
+    [data-theme="dark"] .btn-secondary {
+        color: var(--text-gray, #C8CED8);
+        border-color: rgba(201, 168, 75, 0.06);
+    }
+
+    [data-theme="dark"] .btn-secondary:hover {
+        background: rgba(201, 168, 75, 0.04);
+        border-color: var(--primary-gold, #C9A84B);
+        color: var(--primary-gold, #C9A84B);
+    }
+
+    [data-theme="dark"] .checkbox-group label {
+        color: var(--text-gray, #C8CED8);
+    }
+
+    [data-theme="dark"] .checkbox-group input[type="checkbox"] {
+        accent-color: var(--primary-gold, #C9A84B);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-template-page">
+    <div class="page-header">
+        <div class="page-header-left">
+            <div class="page-header-icon">
+                <i class="fas fa-envelope-open-text"></i>
+            </div>
+            <div>
+                <h1>Edit <span>Email Template</span></h1>
+                <p class="subtitle">Update template details and content</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="template-container">
+        <div class="template-header">
+            <div class="icon-wrapper">
+                <i class="fas fa-edit"></i>
+            </div>
+            <h2>Edit <span>Template</span></h2>
+            <p>Update the email template configuration</p>
+        </div>
+
+        <form method="POST" class="template-form" id="templateForm" novalidate>
+            <!-- Template Name -->
+            <div class="form-group">
+                <label for="name">
+                    <i class="fas fa-tag"></i> Template Name
+                    <span class="required">*</span>
+                </label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    class="form-control" 
+                    value="{{ template.name }}"
+                    placeholder="e.g., welcome_email" 
+                    required
+                    autofocus
+                    maxlength="100"
+                >
+            </div>
+
+            <!-- Subject -->
+            <div class="form-group">
+                <label for="subject">
+                    <i class="fas fa-heading"></i> Subject Line
+                    <span class="required">*</span>
+                </label>
+                <input 
+                    type="text" 
+                    id="subject" 
+                    name="subject" 
+                    class="form-control" 
+                    value="{{ template.subject }}"
+                    placeholder="Enter email subject" 
+                    required
+                    maxlength="200"
+                >
+                <div class="char-counter">
+                    <span class="count" id="subjectCount">{{ template.subject|length }}</span> / 200
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="form-group">
+                <label for="body">
+                    <i class="fas fa-align-left"></i> Email Body
+                    <span class="required">*</span>
+                </label>
+                <textarea 
+                    id="body" 
+                    name="body" 
+                    class="form-control" 
+                    rows="8" 
+                    placeholder="Write the email body here..." 
+                    required
+                    maxlength="5000"
+                >{{ template.body }}</textarea>
+                <div class="char-counter">
+                    <span class="count" id="bodyCount">{{ template.body|length }}</span> / 5000
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label for="description">
+                    <i class="fas fa-info-circle"></i> Description
+                    <span style="font-weight:400;color:var(--text-muted);font-size:0.7rem;">(Optional)</span>
+                </label>
+                <input 
+                    type="text" 
+                    id="description" 
+                    name="description" 
+                    class="form-control" 
+                    value="{{ template.description or '' }}"
+                    placeholder="Brief description of this template" 
+                    maxlength="255"
+                >
+            </div>
+
+            <!-- Active Status -->
+            <div class="checkbox-group">
+                <input type="checkbox" id="is_active" name="is_active" {% if template.is_active %}checked{% endif %}>
+                <label for="is_active">
+                    <i class="fas fa-check-circle" style="color: var(--primary-gold, #C9A84B);"></i>
+                    Active (template will be available for use)
+                </label>
+            </div>
+
+            <!-- Buttons -->
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+                <i class="fas fa-save"></i> Update Template
+            </button>
+
+            <!-- FIXED: Changed email_templates to admin.email_templates -->
+            <a href="{{ url_for('admin.email_templates') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Templates
+            </a>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('templateForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const subject = document.getElementById('subject');
+        const body = document.getElementById('body');
+        const subjectCount = document.getElementById('subjectCount');
+        const bodyCount = document.getElementById('bodyCount');
+
+        // ============================================
+        // CHARACTER COUNTERS
+        // ============================================
+        if (subject && subjectCount) {
+            subject.addEventListener('input', function() {
+                const len = this.value.length;
+                subjectCount.textContent = len;
+                subjectCount.className = 'count' + (len > 180 ? ' warning' : '') + (len >= 200 ? ' danger' : '');
+            });
+        }
+
+        if (body && bodyCount) {
+            body.addEventListener('input', function() {
+                const len = this.value.length;
+                bodyCount.textContent = len;
+                bodyCount.className = 'count' + (len > 4500 ? ' warning' : '') + (len >= 5000 ? ' danger' : '');
+            });
+        }
+
+        // ============================================
+        // FORM VALIDATION
+        // ============================================
+        form.addEventListener('submit', function(e) {
+            const name = document.getElementById('name').value.trim();
+            const subjectVal = subject.value.trim();
+            const bodyVal = body.value.trim();
+
+            if (!name) {
+                e.preventDefault();
+                alert('Please enter a template name.');
+                document.getElementById('name').focus();
+                return;
+            }
+
+            if (!subjectVal) {
+                e.preventDefault();
+                alert('Please enter a subject line.');
+                subject.focus();
+                return;
+            }
+
+            if (!bodyVal) {
+                e.preventDefault();
+                alert('Please enter the email body.');
+                body.focus();
+                return;
+            }
+
+            if (!confirm(`Update template "${name}"?`)) {
+                e.preventDefault();
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+        });
+
+        console.log('✨ Edit Email Template - Gold Theme Loaded!');
+    });
+</script>
+{% endblock %}

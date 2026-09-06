@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - {{ site_name }}{% endblock %}
+
+{% block content %}
+<style>
+    .error-page {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        text-align: center;
+    }
+
+    .error-content {
+        max-width: 500px;
+    }
+
+    .error-content .error-code {
+        font-size: 6rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.2;
+    }
+
+    .error-content h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--white, #FFFFFF);
+        margin: 8px 0 12px;
+    }
+
+    .error-content p {
+        color: var(--text-gray, #C8CED8);
+        font-size: 1.05rem;
+        line-height: 1.7;
+        margin-bottom: 24px;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        border-radius: 60px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: var(--transition, 0.3s ease);
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+        color: var(--white, #FFFFFF);
+        box-shadow: 0 2px 16px rgba(201, 168, 75, 0.15);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 24px rgba(201, 168, 75, 0.25);
+        color: var(--white, #FFFFFF);
+    }
+
+    .error-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .error-icon {
+        font-size: 4rem;
+        color: var(--primary-gold, #C9A84B);
+        opacity: 0.2;
+    }
+
+    @media (max-width: 480px) {
+        .error-content .error-code {
+            font-size: 4rem;
+        }
+
+        .error-content h2 {
+            font-size: 1.4rem;
+        }
+
+        .error-content p {
+            font-size: 0.95rem;
+        }
+
+        .error-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .error-actions .btn {
+            justify-content: center;
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="error-page">
+    <div class="error-content">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="error-code">500</div>
+        <h2>Something Went Wrong</h2>
+        <p>
+            We're experiencing some technical difficulties. Our team has been notified
+            and is working to fix the issue.
+        </p>
+        <div class="error-actions">
+            <a href="{{ url_for('auth.index') }}" class="btn btn-primary">
+                <i class="fas fa-home"></i> Go Home
+            </a>
+            <a href="javascript:history.back()" class="btn btn-outline" style="background: transparent; color: var(--text-gray, #C8CED8); border: 1px solid rgba(201, 168, 75, 0.04); text-decoration: none; padding: 12px 28px; border-radius: 60px; font-weight: 600; font-size: 0.9rem; transition: var(--transition, 0.3s ease);">
+                <i class="fas fa-arrow-left"></i> Go Back
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

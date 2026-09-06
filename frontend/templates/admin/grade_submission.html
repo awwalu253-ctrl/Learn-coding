@@ -1,0 +1,688 @@
+{% extends "base.html" %}
+
+{% block title %}Grade Submission - {{ site_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ============================================
+   GRADE SUBMISSION - Premium Navy + Gold Theme
+   ============================================ */
+.grade-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* ============================================
+   HEADER - Gold Theme
+   ============================================ */
+.page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.page-header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm, 10px);
+    background: linear-gradient(135deg, rgba(201, 168, 75, 0.08), rgba(143, 126, 72, 0.06));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-gold, #C9A84B);
+    font-size: 1.3rem;
+    border: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.page-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.page-header h1 span {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-header .subtitle {
+    font-size: 0.85rem;
+    color: var(--text-gray, #C8CED8);
+    margin: 2px 0 0;
+}
+
+/* ============================================
+   GRADE CARD - Gold Theme
+   ============================================ */
+.grade-card {
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 16px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    box-shadow: var(--shadow-lg, 0 12px 48px rgba(10, 21, 39, 0.12));
+    padding: 32px 32px 28px;
+    transition: var(--transition, 0.3s ease);
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.grade-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    opacity: 0.8;
+}
+
+.grade-card:hover {
+    box-shadow: var(--shadow-xl, 0 20px 60px rgba(10, 21, 39, 0.16));
+    border-color: rgba(201, 168, 75, 0.06);
+}
+
+/* ============================================
+   SUBMISSION INFO - Gold Theme
+   ============================================ */
+.submission-info {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    background: var(--primary-bg, #0A1527);
+    border-radius: var(--radius-sm, 10px);
+    border: 1px solid rgba(201, 168, 75, 0.02);
+}
+
+.info-row .info-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(201, 168, 75, 0.06);
+    color: var(--primary-gold, #C9A84B);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.info-row .info-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted, #8A94A6);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    min-width: 80px;
+}
+
+.info-row .info-value {
+    font-size: 0.95rem;
+    color: var(--text-gray, #C8CED8);
+    flex: 1;
+}
+
+/* ============================================
+   SUBMISSION CONTENT - Gold Theme
+   ============================================ */
+.submission-content {
+    background: var(--primary-bg, #0A1527);
+    border-radius: var(--radius-sm, 10px);
+    padding: 16px 20px;
+    border: 1px solid rgba(201, 168, 75, 0.02);
+    margin-bottom: 20px;
+}
+
+.submission-content h3 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    margin: 0 0 8px;
+}
+
+.submission-content .content-text {
+    font-size: 0.92rem;
+    color: var(--text-gray, #C8CED8);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* ============================================
+   ATTACHMENT - Gold Theme
+   ============================================ */
+.attachment-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(201, 168, 75, 0.04);
+    border-radius: var(--radius-sm, 8px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    margin-bottom: 24px;
+}
+
+.attachment-box i {
+    color: var(--primary-gold, #C9A84B);
+    font-size: 1.2rem;
+}
+
+.attachment-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--primary-gold, #C9A84B);
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+}
+
+.attachment-link:hover {
+    color: var(--dark-gold, #8F7E48);
+    text-decoration: underline;
+}
+
+/* ============================================
+   GRADE FORM - Gold Theme
+   ============================================ */
+.grade-form {
+    margin-top: 8px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-gray, #C8CED8);
+    margin-bottom: 6px;
+}
+
+.form-group label i {
+    color: var(--primary-gold, #C9A84B);
+}
+
+.form-group label .required {
+    color: #EF4444;
+    font-weight: 700;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    background: var(--primary-bg, #0A1527);
+    color: var(--text-gray, #C8CED8);
+    font-size: 0.95rem;
+    font-family: 'Inter', sans-serif;
+    transition: var(--transition, 0.3s ease);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-gold, #C9A84B);
+    box-shadow: 0 0 0 3px rgba(201, 168, 75, 0.04);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-group .field-help {
+    font-size: 0.75rem;
+    color: var(--text-muted, #8A94A6);
+    margin-top: 4px;
+}
+
+/* ============================================
+   MAX SCORE DISPLAY - Gold Theme
+   ============================================ */
+.max-score-display {
+    display: inline-block;
+    font-size: 0.8rem;
+    color: var(--text-muted, #8A94A6);
+    margin-left: 6px;
+}
+
+/* ============================================
+   FORM ACTIONS - Gold Theme (FIXED)
+   ============================================ */
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: skewX(-20deg);
+    transition: var(--transition, 0.6s ease);
+}
+
+.btn:hover::after {
+    left: 100%;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    color: var(--white, #FFFFFF);
+    box-shadow: 0 2px 16px rgba(201, 168, 75, 0.15);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 24px rgba(201, 168, 75, 0.25);
+    color: var(--white, #FFFFFF);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--text-gray, #C8CED8);
+    border: 1.5px solid rgba(201, 168, 75, 0.04);
+}
+
+.btn-outline:hover {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+    transform: translateY(-2px);
+}
+
+.btn-outline i {
+    color: var(--primary-gold, #C9A84B);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(16px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .grade-card {
+        padding: 20px 18px 18px;
+    }
+
+    .info-row {
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 10px 12px;
+    }
+
+    .info-row .info-label {
+        min-width: 60px;
+        font-size: 0.65rem;
+    }
+
+    .info-row .info-value {
+        font-size: 0.88rem;
+    }
+
+    .submission-content {
+        padding: 12px 14px;
+    }
+
+    .submission-content .content-text {
+        font-size: 0.85rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header h1 {
+        font-size: 1.2rem;
+    }
+
+    .page-header-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .grade-card {
+        padding: 14px 12px 14px;
+        border-radius: var(--radius-sm, 10px);
+    }
+
+    .info-row {
+        padding: 8px 10px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .info-row .info-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
+    }
+
+    .info-row .info-label {
+        min-width: auto;
+        font-size: 0.6rem;
+    }
+
+    .info-row .info-value {
+        font-size: 0.82rem;
+        word-break: break-word;
+    }
+
+    .submission-content {
+        padding: 10px 12px;
+    }
+
+    .submission-content .content-text {
+        font-size: 0.8rem;
+    }
+
+    .submission-content h3 {
+        font-size: 0.78rem;
+    }
+
+    .btn {
+        font-size: 0.78rem;
+        padding: 8px 16px;
+    }
+
+    .attachment-box {
+        padding: 8px 12px;
+        flex-wrap: wrap;
+    }
+
+    .attachment-link {
+        font-size: 0.78rem;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        font-size: 0.88rem;
+        padding: 8px 12px;
+    }
+}
+
+/* ============================================
+   DARK MODE SUPPORT
+   ============================================ */
+[data-theme="dark"] .grade-card {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .grade-card::before {
+    background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+}
+
+[data-theme="dark"] .info-row {
+    background: var(--primary-bg, #0A1527);
+    border-color: rgba(201, 168, 75, 0.02);
+}
+
+[data-theme="dark"] .info-row .info-value {
+    color: var(--text-gray, #C8CED8);
+}
+
+[data-theme="dark"] .submission-content {
+    background: var(--primary-bg, #0A1527);
+    border-color: rgba(201, 168, 75, 0.02);
+}
+
+[data-theme="dark"] .submission-content .content-text {
+    color: var(--text-gray, #C8CED8);
+}
+
+[data-theme="dark"] .submission-content h3 {
+    color: var(--white, #FFFFFF);
+}
+
+[data-theme="dark"] .attachment-box {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .attachment-link {
+    color: var(--primary-gold, #C9A84B);
+}
+
+[data-theme="dark"] .attachment-link:hover {
+    color: var(--dark-gold, #8F7E48);
+}
+
+[data-theme="dark"] .btn-outline {
+    color: var(--text-gray, #C8CED8);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .btn-outline:hover {
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+}
+
+[data-theme="dark"] .btn-outline i {
+    color: var(--primary-gold, #C9A84B);
+}
+
+[data-theme="dark"] .page-header h1 {
+    color: var(--white, #FFFFFF);
+}
+
+[data-theme="dark"] .form-group label {
+    color: var(--text-gray, #C8CED8);
+}
+
+[data-theme="dark"] .form-group input,
+[data-theme="dark"] .form-group textarea {
+    background: var(--primary-bg, #0A1527);
+    border-color: rgba(201, 168, 75, 0.04);
+    color: var(--text-gray, #C8CED8);
+}
+
+[data-theme="dark"] .form-group input:focus,
+[data-theme="dark"] .form-group textarea:focus {
+    border-color: var(--primary-gold, #C9A84B);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="grade-page">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <div class="page-header-icon">
+                <i class="fas fa-pen"></i>
+            </div>
+            <div>
+                <h1>Grade <span>Submission</span></h1>
+                <p class="subtitle">{{ submission.assignment.title }}</p>
+            </div>
+        </div>
+        <!-- ✅ FIXED: Admin goes back to submissions, not student assignments -->
+        <a href="{{ url_for('assignment.view_submissions', assignment_id=submission.assignment_id) }}" class="btn btn-outline" style="padding: 8px 18px; font-size: 0.8rem;">
+            <i class="fas fa-arrow-left"></i> Back to Submissions
+        </a>
+    </div>
+
+    <!-- Grade Card -->
+    <div class="grade-card">
+        <!-- Submission Info -->
+        <div class="submission-info">
+            <div class="info-row">
+                <div class="info-icon"><i class="fas fa-user-graduate"></i></div>
+                <span class="info-label">Student</span>
+                <span class="info-value">{{ submission.student.username }}</span>
+            </div>
+            <div class="info-row">
+                <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
+                <span class="info-label">Submitted</span>
+                <span class="info-value">{{ submission.submitted_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+            </div>
+            <div class="info-row">
+                <div class="info-icon"><i class="fas fa-file-alt"></i></div>
+                <span class="info-label">Assignment</span>
+                <span class="info-value">{{ submission.assignment.title }}</span>
+            </div>
+            <div class="info-row">
+                <div class="info-icon"><i class="fas fa-star"></i></div>
+                <span class="info-label">Max Score</span>
+                <span class="info-value">{{ submission.assignment.max_score }}</span>
+            </div>
+        </div>
+
+        <!-- Submission Content -->
+        {% if submission.content %}
+        <div class="submission-content">
+            <h3><i class="fas fa-pencil-alt" style="color: var(--primary-gold, #C9A84B);"></i> Submission Content</h3>
+            <div class="content-text">{{ submission.content }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Attachment -->
+        {% if submission.file_path %}
+        <div class="attachment-box">
+            <i class="fas fa-paperclip"></i>
+            <a href="{{ url_for('assignment.download_submission', submission_id=submission.id) }}" class="attachment-link">
+                <i class="fas fa-download"></i> Download Attachment
+                {% if submission.file_name %}
+                ({{ submission.file_name }})
+                {% endif %}
+            </a>
+            {% if submission.file_size %}
+            <span style="font-size: 0.7rem; color: var(--text-muted, #8A94A6); margin-left: auto;">
+                {{ submission.file_size }}
+            </span>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Grade Form -->
+        <form method="POST" class="grade-form">
+            <div class="form-group">
+                <label for="score">
+                    <i class="fas fa-star"></i> Score
+                    <span class="required">*</span>
+                    <span class="max-score-display">(Max: {{ submission.assignment.max_score }})</span>
+                </label>
+                <input type="number" name="score" id="score" 
+                       min="0" max="{{ submission.assignment.max_score }}" 
+                       step="0.5" required
+                       placeholder="Enter score..."
+                       value="{{ submission.score if submission.score else '' }}">
+                <div class="field-help">Enter a score between 0 and {{ submission.assignment.max_score }}</div>
+            </div>
+
+            <div class="form-group">
+                <label for="feedback">
+                    <i class="fas fa-comment"></i> Feedback
+                </label>
+                <textarea name="feedback" id="feedback" placeholder="Provide feedback to the student...">{{ submission.feedback if submission.feedback else '' }}</textarea>
+                <div class="field-help">Optional: Add comments or suggestions for the student</div>
+            </div>
+
+            <!-- ✅ FIXED: Both buttons go back to submissions page -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Grade
+                </button>
+                <a href="{{ url_for('assignment.view_submissions', assignment_id=submission.assignment_id) }}" class="btn btn-outline">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ==========================================
+    // SCORE VALIDATION
+    // ==========================================
+    const scoreInput = document.getElementById('score');
+    const maxScore = {{ submission.assignment.max_score }};
+    
+    scoreInput.addEventListener('change', function() {
+        const value = parseFloat(this.value);
+        if (value > maxScore) {
+            this.value = maxScore;
+            alert('Score cannot exceed the maximum of ' + maxScore);
+        }
+        if (value < 0) {
+            this.value = 0;
+        }
+    });
+
+    console.log('✨ Grade Submission - Gold Theme Loaded!');
+});
+</script>
+{% endblock %}

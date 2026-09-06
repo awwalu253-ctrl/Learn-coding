@@ -1,0 +1,1004 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.name }} - A-Portal{% endblock %}
+
+{% block content %}
+<style>
+  /* ============================================
+     COURSE VIEW - Premium Navy + Gold Theme
+     ============================================ */
+  .course-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  /* ============================================
+     HEADER - Gold Theme
+     ============================================ */
+  .course-header {
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 16px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(10, 21, 39, 0.08));
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    transition: var(--transition, 0.3s ease);
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .course-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    opacity: 0.8;
+  }
+
+  .course-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    right: -20%;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(201, 168, 75, 0.015), transparent);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .course-header:hover {
+    box-shadow: var(--shadow-md, 0 4px 20px rgba(10, 21, 39, 0.12));
+    border-color: rgba(201, 168, 75, 0.06);
+  }
+
+  .course-header-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+
+  .course-header-info {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .course-header-info h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .course-header-info h1 i {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  .course-header-info .course-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: var(--text-gray, #C8CED8);
+  }
+
+  .course-header-info .course-meta .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(201, 168, 75, 0.02);
+    padding: 2px 12px;
+    border-radius: 100px;
+    border: 1px solid rgba(201, 168, 75, 0.02);
+  }
+
+  .course-header-info .course-meta .meta-item i {
+    color: var(--primary-gold, #C9A84B);
+    font-size: 0.75rem;
+  }
+
+  .course-header-info .course-meta .course-code {
+    font-weight: 600;
+    color: var(--primary-gold, #C9A84B);
+    background: rgba(201, 168, 75, 0.06);
+    padding: 2px 14px;
+    border-radius: 100px;
+    font-family: 'Inter', monospace;
+    letter-spacing: 0.03em;
+    border: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  /* ============================================
+     COURSE PROGRESS - Gold Theme
+     ============================================ */
+  .course-progress-large {
+    margin-top: 12px;
+    max-width: 400px;
+  }
+
+  .course-progress-large .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-gray, #C8CED8);
+    margin-bottom: 4px;
+  }
+
+  .course-progress-large .progress-label .percentage {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  .course-progress-large .progress-track {
+    height: 6px;
+    background: rgba(201, 168, 75, 0.06);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .course-progress-large .progress-track .fill {
+    height: 100%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    width: 0%;
+  }
+
+  /* ============================================
+     BACK BUTTON - Gold Theme
+     ============================================ */
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    background: transparent;
+    color: var(--text-gray, #C8CED8);
+    border: 1.5px solid rgba(201, 168, 75, 0.04);
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+    flex-shrink: 0;
+  }
+
+  .btn-back:hover {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+    transform: translateY(-2px);
+  }
+
+  .btn-back i {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  /* ============================================
+     COURSE CONTENT - Gold Theme
+     ============================================ */
+  .course-content {
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards;
+  }
+
+  /* ============================================
+     NOTES SECTION - Gold Theme
+     ============================================ */
+  .notes-section {
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 16px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(10, 21, 39, 0.08));
+    padding: 24px 28px 28px;
+    transition: var(--transition, 0.3s ease);
+  }
+
+  .notes-section:hover {
+    box-shadow: var(--shadow-md, 0 4px 20px rgba(10, 21, 39, 0.12));
+    border-color: rgba(201, 168, 75, 0.06);
+  }
+
+  .section-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .section-header h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-header h2 i {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  .section-header .note-count {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted, #8A94A6);
+    background: rgba(201, 168, 75, 0.02);
+    padding: 2px 12px;
+    border-radius: 100px;
+    border: 1px solid rgba(201, 168, 75, 0.02);
+  }
+
+  /* ============================================
+     SEARCH & FILTER - Gold Theme
+     ============================================ */
+  .search-filter {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .search-filter .form-control {
+    padding: 8px 14px;
+    border-radius: var(--radius-sm, 8px);
+    border: 1.5px solid rgba(201, 168, 75, 0.04);
+    background: var(--primary-bg, #0A1527);
+    font-size: 0.82rem;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-gray, #C8CED8);
+    transition: var(--transition, 0.3s ease);
+    outline: none;
+    min-width: 150px;
+  }
+
+  .search-filter .form-control:focus {
+    border-color: var(--primary-gold, #C9A84B);
+    box-shadow: 0 0 0 3px rgba(201, 168, 75, 0.06);
+    background: var(--primary-bg, #0A1527);
+  }
+
+  .search-filter .form-control::placeholder {
+    color: var(--text-muted, #8A94A6);
+  }
+
+  .search-filter select.form-control {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C8CED8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 34px;
+    cursor: pointer;
+    min-width: 120px;
+  }
+
+  .search-filter select.form-control option {
+    padding: 6px;
+    background: var(--secondary-bg, #253449);
+    color: var(--text-gray, #C8CED8);
+  }
+
+  /* ============================================
+     NOTES LIST - Gold Theme
+     ============================================ */
+  .notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .note-item {
+    background: var(--primary-bg, #0A1527);
+    border-radius: var(--radius-sm, 10px);
+    padding: 18px 20px;
+    border: 1px solid rgba(201, 168, 75, 0.02);
+    transition: var(--transition, 0.3s ease);
+  }
+
+  .note-item:hover {
+    background: rgba(201, 168, 75, 0.02);
+    border-color: rgba(201, 168, 75, 0.06);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(10, 21, 39, 0.08));
+    transform: translateX(4px);
+  }
+
+  .note-item-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .note-item-header h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--white, #FFFFFF);
+    margin: 0;
+  }
+
+  .note-item-header h3 a {
+    color: var(--white, #FFFFFF);
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+  }
+
+  .note-item-header h3 a:hover {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  .note-item-header .badge-new {
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 1px 10px;
+    border-radius: 100px;
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    color: var(--white, #FFFFFF);
+    margin-left: 6px;
+    animation: goldPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes goldPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(201, 168, 75, 0); }
+    50% { box-shadow: 0 0 40px rgba(201, 168, 75, 0.1); }
+  }
+
+  .note-item-header .note-date {
+    font-size: 0.75rem;
+    color: var(--text-muted, #8A94A6);
+    white-space: nowrap;
+  }
+
+  .note-item-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .note-item-meta .tag-badge {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--primary-gold, #C9A84B);
+    background: rgba(201, 168, 75, 0.06);
+    padding: 1px 12px;
+    border-radius: 100px;
+    border: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  .note-item-meta .file-indicator {
+    font-size: 0.7rem;
+    color: #059669;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .note-item-meta .file-indicator i {
+    font-size: 0.65rem;
+  }
+
+  .note-item-meta .note-author {
+    font-size: 0.7rem;
+    color: var(--text-muted, #8A94A6);
+  }
+
+  .note-item-actions {
+    margin-top: 2px;
+  }
+
+  /* ============================================
+     BUTTONS - Gold Theme
+     ============================================ */
+  .btn-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-primary-sm {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    color: var(--white, #FFFFFF);
+    box-shadow: 0 2px 12px rgba(201, 168, 75, 0.12);
+  }
+
+  .btn-primary-sm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(201, 168, 75, 0.2);
+    color: var(--white, #FFFFFF);
+  }
+
+  /* ============================================
+     EMPTY STATE - Gold Theme
+     ============================================ */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .empty-state i {
+    font-size: 2.5rem;
+    color: var(--primary-gold, #C9A84B);
+    opacity: 0.15;
+    margin-bottom: 12px;
+  }
+
+  .empty-state p {
+    color: var(--text-gray, #C8CED8);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .empty-state .text-muted {
+    color: var(--text-muted, #8A94A6);
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+
+  /* ============================================
+     NO RESULTS - Gold Theme
+     ============================================ */
+  .no-results {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--text-muted, #8A94A6);
+  }
+
+  .no-results i {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+    opacity: 0.3;
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  .no-results p {
+    font-size: 0.9rem;
+    margin: 0;
+    color: var(--text-gray, #C8CED8);
+  }
+
+  /* ============================================
+     ANIMATIONS
+     ============================================ */
+  @keyframes fadeUp {
+    0% {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ============================================
+     RESPONSIVE
+     ============================================ */
+  @media (max-width: 768px) {
+    .course-header {
+      padding: 20px 18px;
+    }
+
+    .course-header-top {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .course-header-info h1 {
+      font-size: 1.2rem;
+    }
+
+    .course-header-info .course-meta {
+      gap: 8px;
+    }
+
+    .course-header-info .course-meta .meta-item {
+      font-size: 0.75rem;
+      padding: 1px 10px;
+    }
+
+    .btn-back {
+      align-self: flex-start;
+    }
+
+    .course-progress-large {
+      max-width: 100%;
+    }
+
+    .notes-section {
+      padding: 18px 14px 20px;
+    }
+
+    .section-header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .section-header h2 {
+      font-size: 0.95rem;
+    }
+
+    .search-filter {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .search-filter .form-control {
+      width: 100%;
+      min-width: unset;
+    }
+
+    .note-item {
+      padding: 14px 14px;
+    }
+
+    .note-item-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .note-item-header h3 {
+      font-size: 0.88rem;
+    }
+
+    .note-item-header .note-date {
+      font-size: 0.7rem;
+    }
+
+    .note-item-meta {
+      gap: 6px;
+    }
+
+    .note-item-meta .tag-badge,
+    .note-item-meta .file-indicator,
+    .note-item-meta .note-author {
+      font-size: 0.65rem;
+    }
+
+    .btn-sm {
+      font-size: 0.72rem;
+      padding: 5px 12px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .course-header {
+      padding: 16px 12px;
+      border-radius: var(--radius-sm, 10px);
+    }
+
+    .course-header-info h1 {
+      font-size: 1.05rem;
+    }
+
+    .course-header-info .course-meta .meta-item {
+      font-size: 0.7rem;
+    }
+
+    .course-header-info .course-meta .course-code {
+      font-size: 0.7rem;
+      padding: 1px 10px;
+    }
+
+    .course-progress-large .progress-label {
+      font-size: 0.7rem;
+    }
+
+    .notes-section {
+      padding: 14px 10px 16px;
+      border-radius: var(--radius-sm, 10px);
+    }
+
+    .section-header h2 {
+      font-size: 0.88rem;
+    }
+
+    .section-header .note-count {
+      font-size: 0.6rem;
+    }
+
+    .search-filter .form-control {
+      font-size: 0.78rem;
+      padding: 7px 12px;
+    }
+
+    .note-item {
+      padding: 12px 10px;
+    }
+
+    .note-item-header h3 {
+      font-size: 0.82rem;
+    }
+
+    .note-item-header .badge-new {
+      font-size: 0.5rem;
+      padding: 0 8px;
+    }
+
+    .note-item-meta .tag-badge,
+    .note-item-meta .file-indicator,
+    .note-item-meta .note-author {
+      font-size: 0.6rem;
+    }
+
+    .btn-sm {
+      font-size: 0.68rem;
+      padding: 4px 10px;
+    }
+
+    .empty-state i {
+      font-size: 2rem;
+    }
+
+    .empty-state p {
+      font-size: 0.85rem;
+    }
+
+    .btn-back {
+      font-size: 0.78rem;
+      padding: 7px 16px;
+    }
+  }
+
+  /* ============================================
+     DARK MODE SUPPORT
+     ============================================ */
+  [data-theme="dark"] .course-header {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .course-header::before {
+    background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+  }
+
+  [data-theme="dark"] .course-header-info h1 {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .course-header-info .course-meta .meta-item {
+    background: rgba(201, 168, 75, 0.02);
+    color: var(--text-gray, #C8CED8);
+    border-color: rgba(201, 168, 75, 0.02);
+  }
+
+  [data-theme="dark"] .course-header-info .course-meta .course-code {
+    background: rgba(201, 168, 75, 0.06);
+    color: var(--primary-gold, #C9A84B);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .notes-section {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .section-header h2 {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .section-header .note-count {
+    background: rgba(201, 168, 75, 0.02);
+    color: var(--text-muted, #8A94A6);
+    border-color: rgba(201, 168, 75, 0.02);
+  }
+
+  [data-theme="dark"] .search-filter .form-control {
+    background: var(--primary-bg, #0A1527);
+    border-color: rgba(201, 168, 75, 0.04);
+    color: var(--text-gray, #C8CED8);
+  }
+
+  [data-theme="dark"] .search-filter .form-control:focus {
+    border-color: var(--primary-gold, #C9A84B);
+    box-shadow: 0 0 0 3px rgba(201, 168, 75, 0.06);
+    background: var(--primary-bg, #0A1527);
+  }
+
+  [data-theme="dark"] .search-filter .form-control::placeholder {
+    color: var(--text-muted, #8A94A6);
+  }
+
+  [data-theme="dark"] .search-filter select.form-control {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C8CED8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  }
+
+  [data-theme="dark"] .search-filter select.form-control option {
+    background: var(--secondary-bg, #253449);
+    color: var(--text-gray, #C8CED8);
+  }
+
+  [data-theme="dark"] .note-item {
+    background: var(--primary-bg, #0A1527);
+    border-color: rgba(201, 168, 75, 0.02);
+  }
+
+  [data-theme="dark"] .note-item:hover {
+    background: rgba(201, 168, 75, 0.02);
+    border-color: rgba(201, 168, 75, 0.06);
+  }
+
+  [data-theme="dark"] .note-item-header h3 {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .note-item-header h3 a {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .note-item-header h3 a:hover {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .note-item-header .note-date {
+    color: var(--text-muted, #8A94A6);
+  }
+
+  [data-theme="dark"] .note-item-meta .tag-badge {
+    background: rgba(201, 168, 75, 0.06);
+    border-color: rgba(201, 168, 75, 0.04);
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .note-item-meta .note-author {
+    color: var(--text-muted, #8A94A6);
+  }
+
+  [data-theme="dark"] .btn-back {
+    color: var(--text-gray, #C8CED8);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .btn-back:hover {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .btn-back i {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .course-progress-large .progress-track {
+    background: rgba(201, 168, 75, 0.06);
+  }
+
+  [data-theme="dark"] .course-progress-large .progress-label .percentage {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .empty-state p {
+    color: var(--text-gray, #C8CED8);
+  }
+
+  [data-theme="dark"] .empty-state .text-muted {
+    color: var(--text-muted, #8A94A6);
+  }
+
+  [data-theme="dark"] .note-item-header .badge-new {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+  }
+
+  [data-theme="dark"] .btn-primary-sm {
+    box-shadow: 0 2px 12px rgba(201, 168, 75, 0.12);
+  }
+
+  [data-theme="dark"] .btn-primary-sm:hover {
+    box-shadow: 0 4px 20px rgba(201, 168, 75, 0.2);
+  }
+
+  [data-theme="dark"] .no-results p {
+    color: var(--text-gray, #C8CED8);
+  }
+
+  [data-theme="dark"] .no-results i {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .course-header-info .course-meta .meta-item i {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .section-header h2 i {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  [data-theme="dark"] .course-header-info h1 i {
+    color: var(--primary-gold, #C9A84B);
+  }
+</style>
+
+<div class="course-page">
+  <!-- Header -->
+  <div class="course-header">
+    <div class="course-header-top">
+      <div class="course-header-info">
+        <h1>
+          <i class="fas fa-book"></i>
+          {{ course.name }}
+        </h1>
+        <div class="course-meta">
+          <span class="course-code">{{ course.code }}</span>
+          <span class="meta-item"><i class="fas fa-file-alt"></i> {{ notes|length }} notes</span>
+          <span class="meta-item"><i class="fas fa-user"></i> {{ course.students|length }} students</span>
+          {% if course.quiz_groups %}
+            <span class="meta-item"><i class="fas fa-puzzle-piece"></i> {{ course.quiz_groups|length }} quizzes</span>
+          {% endif %}
+        </div>
+        <div class="course-progress-large">
+          <div class="progress-label">
+            <span>Progress</span>
+            <span class="percentage">{{ progress }}%</span>
+          </div>
+          <div class="progress-track">
+            <div class="fill" style="width: {{ progress }}%;"></div>
+          </div>
+        </div>
+      </div>
+      <a href="{{ url_for('student_courses') }}" class="btn-back">
+        <i class="fas fa-arrow-left"></i> Back to Courses
+      </a>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="course-content">
+    <div class="notes-section">
+      <!-- Section Header -->
+      <div class="section-header">
+        <h2>
+          <i class="fas fa-file-alt"></i>
+          Course Notes
+          <span class="note-count">{{ notes|length }}</span>
+        </h2>
+        <div class="search-filter">
+          <input type="text" id="searchInput" placeholder="Search notes..." class="form-control">
+          <select id="tagFilter" class="form-control">
+            <option value="">All Tags</option>
+            {% for tag in tags %}
+              <option value="{{ tag.id }}">{{ tag.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <!-- Notes List -->
+      <div class="notes-list" id="notesList">
+        {% for note in notes %}
+          <div class="note-item searchable-item" data-tag="{{ note.tag_id }}">
+            <div class="note-item-header">
+              <h3>
+                <a href="{{ url_for('view_note', note_id=note.id) }}">{{ note.title }}</a>
+                {% if note.is_new() %}
+                  <span class="badge-new">NEW</span>
+                {% endif %}
+              </h3>
+              <span class="note-date">{{ note.created_at.strftime('%b %d, %Y') }}</span>
+            </div>
+            <div class="note-item-meta">
+              {% if note.tag %}
+                <span class="tag-badge">#{{ note.tag.name }}</span>
+              {% endif %}
+              {% if note.file_path %}
+                <span class="file-indicator"><i class="fas fa-paperclip"></i> Attached</span>
+              {% endif %}
+              <span class="note-author">By {{ note.author.username if note.author else 'Unknown' }}</span>
+            </div>
+            <div class="note-item-actions">
+              <a href="{{ url_for('view_note', note_id=note.id) }}" class="btn-sm btn-primary-sm">
+                <i class="fas fa-eye"></i> Read
+              </a>
+            </div>
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <i class="fas fa-file-alt"></i>
+            <p>No notes available for this course yet.</p>
+            <p class="text-muted">Check back later for new learning materials.</p>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- No Results Message (hidden by default) -->
+      <div id="noResults" class="no-results" style="display: none;">
+        <i class="fas fa-search"></i>
+        <p>No notes match your search criteria.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const tagFilter = document.getElementById('tagFilter');
+    const noteItems = document.querySelectorAll('.note-item');
+    const noResults = document.getElementById('noResults');
+    const notesList = document.getElementById('notesList');
+
+    function filterNotes() {
+      const query = searchInput.value.toLowerCase().trim();
+      const tagId = tagFilter.value;
+      let visibleCount = 0;
+
+      noteItems.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        const itemTag = item.dataset.tag;
+        let show = true;
+
+        if (query && !text.includes(query)) {
+          show = false;
+        }
+
+        if (tagId && itemTag !== tagId) {
+          show = false;
+        }
+
+        item.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+      });
+
+      // Show/hide no results message
+      if (visibleCount === 0 && noteItems.length > 0) {
+        noResults.style.display = 'block';
+      } else {
+        noResults.style.display = 'none';
+      }
+    }
+
+    searchInput.addEventListener('input', filterNotes);
+    tagFilter.addEventListener('change', filterNotes);
+
+    // Animate progress bar
+    const fill = document.querySelector('.course-progress-large .fill');
+    if (fill) {
+      const target = fill.style.width;
+      fill.style.width = '0%';
+      setTimeout(() => {
+        fill.style.width = target;
+      }, 400);
+    }
+
+    // ============================================
+    // GOLD THEME - ANIMATE ON LOAD
+    // ============================================
+    const container = document.querySelector('.course-page');
+    if (container) {
+      container.style.opacity = '0';
+      setTimeout(() => {
+        container.style.opacity = '1';
+        container.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        container.style.transform = 'translateY(0)';
+      }, 100);
+    }
+
+    console.log('✨ Course View - Gold Theme Loaded!');
+  });
+</script>
+{% endblock %}

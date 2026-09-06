@@ -1,0 +1,707 @@
+{% extends "base.html" %}
+
+{% block title %}View Submissions - {{ assignment.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ============================================
+   VIEW SUBMISSIONS - Premium Navy + Gold Theme
+   ============================================ */
+.view-submissions-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* ============================================
+   HEADER - Gold Theme
+   ============================================ */
+.page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.page-header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm, 10px);
+    background: linear-gradient(135deg, rgba(201, 168, 75, 0.08), rgba(143, 126, 72, 0.06));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-gold, #C9A84B);
+    font-size: 1.3rem;
+    border: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.page-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.page-header h1 span {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-header .subtitle {
+    font-size: 0.85rem;
+    color: var(--text-gray, #C8CED8);
+    margin: 2px 0 0;
+}
+
+.page-header .assignment-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: var(--text-muted, #8A94A6);
+}
+
+.page-header .assignment-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.page-header .assignment-meta i {
+    color: var(--primary-gold, #C9A84B);
+}
+
+/* ============================================
+   STATS ROW
+   ============================================ */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
+}
+
+.stat-card {
+    background: var(--secondary-bg, #253449);
+    padding: 18px 16px 16px;
+    border-radius: var(--radius, 14px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    text-align: center;
+    transition: var(--transition, 0.3s ease);
+}
+
+.stat-card .stat-number {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--white, #FFFFFF);
+    line-height: 1.2;
+}
+
+.stat-card .stat-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted, #8A94A6);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+}
+
+.stat-card .stat-icon {
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+    display: inline-block;
+}
+
+.stat-card:nth-child(1) .stat-icon { color: var(--primary-gold, #C9A84B); }
+.stat-card:nth-child(2) .stat-icon { color: #EF4444; }
+.stat-card:nth-child(3) .stat-icon { color: #059669; }
+.stat-card:nth-child(4) .stat-icon { color: #F59E0B; }
+
+/* ============================================
+   SUBMISSIONS TABLE
+   ============================================ */
+.table-wrapper {
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 14px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    padding: 20px 24px 24px;
+    overflow-x: auto;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.table-header h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    margin: 0;
+}
+
+.btn-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary-sm {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    color: var(--white, #FFFFFF);
+    box-shadow: 0 2px 12px rgba(201, 168, 75, 0.12);
+}
+
+.btn-primary-sm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(201, 168, 75, 0.2);
+    color: var(--white, #FFFFFF);
+}
+
+.btn-outline-sm {
+    background: transparent;
+    color: var(--text-gray, #C8CED8);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.btn-outline-sm:hover {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+}
+
+.btn-success-sm {
+    background: rgba(5, 150, 105, 0.08);
+    color: #059669;
+    border: 1px solid rgba(5, 150, 105, 0.04);
+}
+
+.btn-success-sm:hover {
+    background: #059669;
+    color: white;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+thead th {
+    text-align: left;
+    padding: 12px 10px;
+    color: var(--text-muted, #8A94A6);
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+tbody td {
+    padding: 10px 10px;
+    color: var(--text-gray, #C8CED8);
+    border-bottom: 1px solid rgba(201, 168, 75, 0.02);
+    vertical-align: middle;
+}
+
+tbody tr:hover {
+    background: rgba(201, 168, 75, 0.02);
+}
+
+.student-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    color: var(--white, #FFFFFF);
+    font-weight: 700;
+    font-size: 0.75rem;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.student-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 12px;
+    border-radius: 100px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.status-badge.graded {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.status-badge.pending {
+    background: rgba(245, 158, 11, 0.08);
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.04);
+}
+
+.action-group {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+    border: none;
+    cursor: pointer;
+}
+
+.btn-action.grade {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+}
+
+.btn-action.grade:hover {
+    background: rgba(201, 168, 75, 0.16);
+}
+
+.btn-action.download {
+    background: rgba(59, 130, 246, 0.08);
+    color: #3B82F6;
+}
+
+.btn-action.download:hover {
+    background: rgba(59, 130, 246, 0.16);
+}
+
+.btn-action.view {
+    background: rgba(5, 150, 105, 0.08);
+    color: #059669;
+}
+
+.btn-action.view:hover {
+    background: rgba(5, 150, 105, 0.16);
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    color: var(--primary-gold, #C9A84B);
+    opacity: 0.15;
+    margin-bottom: 12px;
+}
+
+.empty-state h3 {
+    color: var(--white, #FFFFFF);
+    font-size: 1.1rem;
+    margin: 0 0 4px;
+}
+
+.empty-state p {
+    color: var(--text-gray, #C8CED8);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(16px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .stat-card {
+        padding: 14px 12px;
+    }
+
+    .stat-number {
+        font-size: 1.3rem;
+    }
+
+    .table-wrapper {
+        padding: 14px 12px;
+    }
+
+    .table-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    table {
+        font-size: 0.82rem;
+    }
+
+    thead th, tbody td {
+        padding: 8px 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header h1 {
+        font-size: 1.2rem;
+    }
+
+    .page-header-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .stats-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .stat-card {
+        padding: 12px 10px;
+    }
+
+    .stat-number {
+        font-size: 1.1rem;
+    }
+
+    .stat-label {
+        font-size: 0.6rem;
+    }
+
+    .table-wrapper {
+        padding: 10px 8px;
+        border-radius: var(--radius-sm, 10px);
+    }
+
+    table {
+        font-size: 0.7rem;
+    }
+
+    thead th, tbody td {
+        padding: 6px 4px;
+    }
+
+    .btn-sm {
+        font-size: 0.65rem;
+        padding: 4px 10px;
+    }
+
+    .btn-action {
+        font-size: 0.6rem;
+        padding: 3px 8px;
+    }
+
+    .student-avatar {
+        width: 26px;
+        height: 26px;
+        font-size: 0.6rem;
+    }
+}
+
+/* ============================================
+   DARK MODE SUPPORT
+   ============================================ */
+[data-theme="dark"] .stat-card {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .stat-card .stat-number {
+    color: var(--white, #FFFFFF);
+}
+
+[data-theme="dark"] .table-wrapper {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .table-header h2 {
+    color: var(--white, #FFFFFF);
+}
+
+[data-theme="dark"] thead th {
+    color: var(--text-muted, #8A94A6);
+    border-bottom-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] tbody td {
+    color: var(--text-gray, #C8CED8);
+    border-bottom-color: rgba(201, 168, 75, 0.02);
+}
+
+[data-theme="dark"] tbody tr:hover {
+    background: rgba(201, 168, 75, 0.02);
+}
+
+[data-theme="dark"] .status-badge.graded {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .status-badge.pending {
+    background: rgba(245, 158, 11, 0.08);
+    color: #FBBF24;
+    border-color: rgba(245, 158, 11, 0.04);
+}
+
+[data-theme="dark"] .btn-outline-sm {
+    color: var(--text-gray, #C8CED8);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .btn-outline-sm:hover {
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+}
+
+[data-theme="dark"] .btn-action.grade {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+}
+
+[data-theme="dark"] .btn-action.grade:hover {
+    background: rgba(201, 168, 75, 0.16);
+}
+
+[data-theme="dark"] .btn-action.download {
+    background: rgba(59, 130, 246, 0.08);
+    color: #60A5FA;
+}
+
+[data-theme="dark"] .btn-action.download:hover {
+    background: rgba(59, 130, 246, 0.16);
+}
+
+[data-theme="dark"] .btn-action.view {
+    background: rgba(5, 150, 105, 0.08);
+    color: #34D399;
+}
+
+[data-theme="dark"] .btn-action.view:hover {
+    background: rgba(5, 150, 105, 0.16);
+}
+
+[data-theme="dark"] .page-header .subtitle {
+    color: var(--text-gray, #C8CED8);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="view-submissions-page">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <div class="page-header-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div>
+                <h1><span>Submissions</span></h1>
+                <p class="subtitle">{{ assignment.title }}</p>
+                <div class="assignment-meta">
+                    <span><i class="fas fa-book"></i> {{ assignment.course.name }}</span>
+                    <span><i class="fas fa-calendar-alt"></i> Due: {{ assignment.due_date.strftime('%b %d, %Y at %I:%M %p') }}</span>
+                    <span><i class="fas fa-star"></i> Max Score: {{ assignment.max_score }}</span>
+                </div>
+            </div>
+        </div>
+        <a href="{{ url_for('assignment.manage_assignments') }}" class="btn-sm btn-outline-sm">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-number">{{ submissions|length }}</div>
+            <div class="stat-label">Total Submissions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-number">{{ submissions|selectattr('is_graded', 'eq', False)|list|length }}</div>
+            <div class="stat-label">Pending Review</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-number">{{ submissions|selectattr('is_graded', 'eq', True)|list|length }}</div>
+            <div class="stat-label">Graded</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+            <div class="stat-number">{{ submissions|selectattr('file_path', 'ne', None)|list|length }}</div>
+            <div class="stat-label">With Files</div>
+        </div>
+    </div>
+
+    <!-- Submissions Table -->
+    <div class="table-wrapper">
+        <div class="table-header">
+            <h2><i class="fas fa-list" style="color: var(--primary-gold);"></i> All Submissions</h2>
+        </div>
+
+        {% if submissions %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Submitted</th>
+                    <th>Status</th>
+                    <th>Score</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in submissions %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="student-avatar">
+                                {% if sub.student.profile_picture %}
+                                <img src="{{ url_for('auth.uploaded_file', filename=sub.student.profile_picture) }}" alt="{{ sub.student.username }}">
+                                {% else %}
+                                {{ sub.student.username[0]|upper }}
+                                {% endif %}
+                            </div>
+                            <span style="font-weight: 500;">{{ sub.student.username }}</span>
+                        </div>
+                    </td>
+                    <td style="font-size: 0.8rem; color: var(--text-muted, #8A94A6);">
+                        {{ sub.submitted_at.strftime('%b %d, %Y at %I:%M %p') }}
+                    </td>
+                    <td>
+                        {% if sub.is_graded %}
+                            <span class="status-badge graded"><i class="fas fa-check-circle"></i> Graded</span>
+                        {% else %}
+                            <span class="status-badge pending"><i class="fas fa-clock"></i> Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if sub.is_graded %}
+                            <span style="font-weight: 700; color: var(--primary-gold, #C9A84B);">
+                                {{ sub.score }}/{{ assignment.max_score }}
+                            </span>
+                            <span style="font-size: 0.7rem; color: var(--text-muted, #8A94A6);">
+                                ({{ ((sub.score / assignment.max_score) * 100)|round(1) }}%)
+                            </span>
+                        {% else %}
+                            <span style="color: var(--text-muted, #8A94A6);">Not graded</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-group">
+                            {% if not sub.is_graded %}
+                            <a href="{{ url_for('assignment.grade_submission', submission_id=sub.id) }}" class="btn-action grade">
+                                <i class="fas fa-pen"></i> Grade
+                            </a>
+                            {% endif %}
+                            {% if sub.file_path %}
+                            <a href="{{ url_for('assignment.download_submission', submission_id=sub.id) }}" class="btn-action download">
+                                <i class="fas fa-download"></i> File
+                            </a>
+                            {% endif %}
+                            <!-- ✅ FIXED: Use admin_view_submission route -->
+                            <a href="{{ url_for('assignment.admin_view_submission', submission_id=sub.id) }}" class="btn-action view">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-file-alt"></i>
+            <h3>No Submissions Yet</h3>
+            <p>No students have submitted this assignment yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ==========================================
+    // CARD ENTRY ANIMATION
+    // ==========================================
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach((row, index) => {
+        row.style.opacity = '0';
+        row.style.transform = 'translateX(-10px)';
+        setTimeout(() => {
+            row.style.transition = 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)';
+            row.style.opacity = '1';
+            row.style.transform = 'translateX(0)';
+        }, 100 + index * 30);
+    });
+
+    console.log('✨ View Submissions - Gold Theme Loaded!');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,635 @@
+{% extends "base.html" %}
+
+{% block title %}Student Directory - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ============================================
+   STUDENT DIRECTORY - Premium Navy + Gold Theme
+   ============================================ */
+.page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.page-header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm, 10px);
+    background: linear-gradient(135deg, rgba(201, 168, 75, 0.08), rgba(143, 126, 72, 0.06));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-gold, #C9A84B);
+    font-size: 1.3rem;
+    border: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.page-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.page-header h1 span {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-header .subtitle {
+    font-size: 0.85rem;
+    color: var(--text-gray, #C8CED8);
+    margin: 2px 0 0;
+}
+
+/* ============================================
+   FILTER BAR
+   ============================================ */
+.filter-bar {
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 14px);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.filter-bar .filter-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-gray, #C8CED8);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-bar .filter-label i {
+    color: var(--primary-gold, #C9A84B);
+}
+
+.filter-bar select,
+.filter-bar input {
+    padding: 8px 16px;
+    border-radius: 60px;
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    background: var(--primary-bg, #0A1527);
+    color: var(--text-gray, #C8CED8);
+    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    outline: none;
+}
+
+.filter-bar select:focus,
+.filter-bar input:focus {
+    border-color: var(--primary-gold, #C9A84B);
+    box-shadow: 0 0 0 3px rgba(201, 168, 75, 0.04);
+}
+
+.filter-bar select {
+    min-width: 180px;
+}
+
+.filter-bar input {
+    min-width: 200px;
+    flex: 1;
+}
+
+.btn-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary-sm {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    color: var(--white, #FFFFFF);
+    box-shadow: 0 2px 12px rgba(201, 168, 75, 0.12);
+}
+
+.btn-primary-sm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(201, 168, 75, 0.2);
+    color: var(--white, #FFFFFF);
+}
+
+.btn-outline-sm {
+    background: transparent;
+    color: var(--text-gray, #C8CED8);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.btn-outline-sm:hover {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+}
+
+/* ============================================
+   STUDENT GRID
+   ============================================ */
+.student-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.student-card {
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 14px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    padding: 24px 20px 20px;
+    transition: var(--transition, 0.3s ease);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.student-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md, 0 4px 20px rgba(10, 21, 39, 0.12));
+    border-color: rgba(201, 168, 75, 0.08);
+}
+
+.student-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    opacity: 0;
+    transition: var(--transition, 0.3s ease);
+}
+
+.student-card:hover::before {
+    opacity: 1;
+}
+
+.student-card .student-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    overflow: hidden;
+}
+
+.student-card .student-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.student-card .student-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    margin: 0 0 2px;
+}
+
+.student-card .student-email {
+    font-size: 0.82rem;
+    color: var(--text-muted, #8A94A6);
+    margin-bottom: 10px;
+}
+
+.student-card .student-status {
+    display: inline-block;
+    padding: 2px 12px;
+    border-radius: 100px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+}
+
+.student-card .student-status.active {
+    background: rgba(5, 150, 105, 0.08);
+    color: #059669;
+    border: 1px solid rgba(5, 150, 105, 0.04);
+}
+
+.student-card .student-status.pending {
+    background: rgba(245, 158, 11, 0.08);
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.04);
+}
+
+.student-card .student-status.suspended {
+    background: rgba(239, 68, 68, 0.08);
+    color: #EF4444;
+    border: 1px solid rgba(239, 68, 68, 0.04);
+}
+
+.student-card .student-courses {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.student-card .course-tag {
+    display: inline-block;
+    padding: 1px 10px;
+    border-radius: 100px;
+    font-size: 0.6rem;
+    font-weight: 500;
+    background: rgba(201, 168, 75, 0.06);
+    color: var(--primary-gold, #C9A84B);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.student-card .student-meta {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    font-size: 0.7rem;
+    color: var(--text-muted, #8A94A6);
+    margin-bottom: 12px;
+}
+
+.student-card .student-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.student-card .student-meta i {
+    color: var(--primary-gold, #C9A84B);
+}
+
+.student-card .student-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.student-card .btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 14px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.72rem;
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+    border: none;
+    cursor: pointer;
+}
+
+.btn-view {
+    background: rgba(201, 168, 75, 0.06);
+    color: var(--primary-gold, #C9A84B);
+}
+
+.btn-view:hover {
+    background: rgba(201, 168, 75, 0.12);
+}
+
+.btn-edit {
+    background: rgba(59, 130, 246, 0.06);
+    color: #3B82F6;
+}
+
+.btn-edit:hover {
+    background: rgba(59, 130, 246, 0.12);
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 14px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    grid-column: 1 / -1;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: var(--primary-gold, #C9A84B);
+    opacity: 0.15;
+    margin-bottom: 16px;
+}
+
+.empty-state h3 {
+    color: var(--white, #FFFFFF);
+    font-size: 1.2rem;
+    margin: 0 0 8px;
+}
+
+.empty-state p {
+    color: var(--text-gray, #C8CED8);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-bar select,
+    .filter-bar input {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .student-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header h1 {
+        font-size: 1.2rem;
+    }
+
+    .page-header-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .student-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .student-card {
+        padding: 18px 14px 16px;
+    }
+
+    .student-card .student-avatar {
+        width: 56px;
+        height: 56px;
+        font-size: 1.4rem;
+    }
+
+    .student-card .student-name {
+        font-size: 0.95rem;
+    }
+}
+
+[data-theme="dark"] .student-card {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .student-card:hover {
+    border-color: rgba(201, 168, 75, 0.08);
+}
+
+[data-theme="dark"] .student-card .student-name {
+    color: var(--white, #FFFFFF);
+}
+
+[data-theme="dark"] .student-card .student-status.active {
+    background: rgba(5, 150, 105, 0.08);
+    color: #34D399;
+    border-color: rgba(5, 150, 105, 0.04);
+}
+
+[data-theme="dark"] .student-card .student-status.pending {
+    background: rgba(245, 158, 11, 0.08);
+    color: #FBBF24;
+    border-color: rgba(245, 158, 11, 0.04);
+}
+
+[data-theme="dark"] .student-card .student-status.suspended {
+    background: rgba(239, 68, 68, 0.08);
+    color: #F87171;
+    border-color: rgba(239, 68, 68, 0.04);
+}
+
+[data-theme="dark"] .filter-bar {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .filter-bar select,
+[data-theme="dark"] .filter-bar input {
+    background: var(--primary-bg, #0A1527);
+    border-color: rgba(201, 168, 75, 0.04);
+    color: var(--text-gray, #C8CED8);
+}
+
+[data-theme="dark"] .filter-bar select:focus,
+[data-theme="dark"] .filter-bar input:focus {
+    border-color: var(--primary-gold, #C9A84B);
+}
+
+[data-theme="dark"] .empty-state {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .empty-state h3 {
+    color: var(--white, #FFFFFF);
+}
+
+[data-theme="dark"] .empty-state p {
+    color: var(--text-gray, #C8CED8);
+}
+
+[data-theme="dark"] .btn-view {
+    background: rgba(201, 168, 75, 0.06);
+    color: var(--primary-gold, #C9A84B);
+}
+
+[data-theme="dark"] .btn-view:hover {
+    background: rgba(201, 168, 75, 0.12);
+}
+
+[data-theme="dark"] .btn-edit {
+    background: rgba(59, 130, 246, 0.06);
+    color: #60A5FA;
+}
+
+[data-theme="dark"] .btn-edit:hover {
+    background: rgba(59, 130, 246, 0.12);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-header-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <div>
+            <h1>Student <span>Directory</span></h1>
+            <p class="subtitle">Browse all students in the platform</p>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <div class="filter-label">
+        <i class="fas fa-filter"></i> Filter:
+    </div>
+    
+    <form method="GET" action="{{ url_for('admin.student_directory') }}" style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; flex: 1;">
+        <select name="course_id">
+            <option value="">All Courses</option>
+            {% for course in courses %}
+            <option value="{{ course.id }}" {% if selected_course_id == course.id %}selected{% endif %}>
+                {{ course.name }}
+            </option>
+            {% endfor %}
+        </select>
+        
+        <input type="text" name="search" placeholder="Search students by name or email..." value="{{ search_query or '' }}">
+        
+        <button type="submit" class="btn-sm btn-primary-sm">
+            <i class="fas fa-search"></i> Apply
+        </button>
+        
+        {% if selected_course_id or search_query %}
+        <a href="{{ url_for('admin.student_directory') }}" class="btn-sm btn-outline-sm">
+            <i class="fas fa-times"></i> Clear
+        </a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Student Grid -->
+<div class="student-grid">
+    {% if student_data %}
+        {% for data in student_data %}
+        <div class="student-card">
+            <div class="student-avatar">
+                {% if data.student.profile_picture %}
+                <img src="{{ url_for('auth.uploaded_file', filename=data.student.profile_picture) }}" alt="{{ data.student.username }}">
+                {% else %}
+                {{ data.student.username[0]|upper }}
+                {% endif %}
+            </div>
+            
+            <div class="student-name">{{ data.student.username }}</div>
+            <div class="student-email">{{ data.student.email }}</div>
+            
+            <div class="student-status 
+                {% if data.is_suspended %}suspended
+                {% elif data.status == 'Active' %}active
+                {% else %}pending{% endif %}">
+                {% if data.is_suspended %}
+                    <i class="fas fa-ban"></i> Suspended
+                {% elif data.status == 'Active' %}
+                    <i class="fas fa-check-circle"></i> Active
+                {% else %}
+                    <i class="fas fa-clock"></i> Pending
+                {% endif %}
+            </div>
+            
+            <div class="student-courses">
+                {% for course in data.enrolled_courses[:3] %}
+                <span class="course-tag">{{ course.name }}</span>
+                {% endfor %}
+                {% if data.enrolled_courses|length > 3 %}
+                <span class="course-tag">+{{ data.enrolled_courses|length - 3 }} more</span>
+                {% endif %}
+                {% if not data.enrolled_courses %}
+                <span style="font-size: 0.65rem; color: var(--text-muted, #8A94A6);">No courses enrolled</span>
+                {% endif %}
+            </div>
+            
+            <div class="student-meta">
+                <span><i class="fas fa-book"></i> {{ data.course_count }} courses</span>
+                <span><i class="fas fa-calendar-plus"></i> {{ data.student.created_at.strftime('%b %d, %Y') if data.student.created_at else 'N/A' }}</span>
+            </div>
+            
+            <div class="student-actions">
+                <a href="{{ url_for('admin.edit_student', student_id=data.student.id) }}" class="btn-action btn-edit">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="{{ url_for('admin.manage_students') }}" class="btn-action btn-view">
+                    <i class="fas fa-eye"></i> View
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-users"></i>
+        <h3>No Students Found</h3>
+        <p>There are no students matching your search criteria.</p>
+        {% if selected_course_id or search_query %}
+        <p style="font-size: 0.85rem; color: var(--text-muted, #8A94A6); margin-top: 8px;">
+            Try clearing your filters to see all students.
+        </p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ==========================================
+    // CARD ENTRY ANIMATION
+    // ==========================================
+    const cards = document.querySelectorAll('.student-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(15px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100 + index * 60);
+    });
+
+    console.log('✨ Student Directory - Gold Theme Loaded!');
+});
+</script>
+{% endblock %}

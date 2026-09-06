@@ -1,0 +1,2308 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - A-Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ============================================
+     PREMIUM THEME: Deep Navy + Elegant Gold
+     ============================================ */
+  :root {
+    --primary-bg: #0A1527;
+    --secondary-bg: #253449;
+    --primary-gold: #C9A84B;
+    --dark-gold: #8F7E48;
+    --white: #FFFFFF;
+    --text-gray: #C8CED8;
+    --text-muted: #8A94A6;
+    --shadow-xs: 0 1px 2px rgba(10, 21, 39, 0.04);
+    --shadow-sm: 0 2px 8px rgba(10, 21, 39, 0.06);
+    --shadow-md: 0 8px 30px rgba(10, 21, 39, 0.08);
+    --shadow-lg: 0 20px 60px rgba(10, 21, 39, 0.12);
+    --shadow-xl: 0 30px 80px rgba(10, 21, 39, 0.16);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --transition: 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* ============================================
+     DASHBOARD CONTAINER
+     ============================================ */
+  .admin-dashboard {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--primary-bg);
+    min-height: 100vh;
+  }
+
+  /* ============================================
+     TOP WELCOME BANNER - Gold Theme
+     ============================================ */
+  .welcome-banner {
+    background: var(--secondary-bg);
+    border-radius: var(--radius);
+    padding: 32px 40px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(201, 168, 75, 0.08);
+    opacity: 0;
+    animation: fadeSlideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .welcome-banner::before {
+    content: '';
+    position: absolute;
+    top: -60%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(201, 168, 75, 0.10) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .welcome-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -40%;
+    left: 0;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(201, 168, 75, 0.05) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .welcome-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .welcome-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .welcome-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 1.4rem;
+    font-weight: 700;
+    box-shadow: 0 4px 20px rgba(201, 168, 75, 0.25);
+    flex-shrink: 0;
+  }
+
+  .welcome-text h1 {
+    color: var(--white);
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .welcome-text h1 span {
+    background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .welcome-text .welcome-subtitle {
+    color: var(--text-gray);
+    font-size: 0.95rem;
+    margin: 2px 0 0;
+  }
+
+  .welcome-text .welcome-subtitle strong {
+    color: var(--primary-gold);
+    font-weight: 600;
+  }
+
+  .welcome-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn-welcome {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: var(--transition);
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-welcome i {
+    font-size: 0.9em;
+  }
+
+  .btn-welcome-primary {
+    background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+    color: var(--white);
+    box-shadow: 0 4px 20px rgba(201, 168, 75, 0.25);
+  }
+
+  .btn-welcome-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(201, 168, 75, 0.35);
+  }
+
+  .btn-welcome-outline {
+    background: rgba(201, 168, 75, 0.06);
+    color: var(--text-gray);
+    border: 1px solid rgba(201, 168, 75, 0.08);
+  }
+
+  .btn-welcome-outline:hover {
+    background: rgba(201, 168, 75, 0.12);
+    border-color: rgba(201, 168, 75, 0.15);
+    transform: translateY(-2px);
+    color: var(--primary-gold);
+  }
+
+  .last-updated {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .last-updated i {
+    font-size: 0.65rem;
+  }
+
+  /* ============================================
+     NOTICE/ALERTS SYSTEM
+     ============================================ */
+  .notices-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeSlideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.02s forwards;
+  }
+
+  .notice-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 20px;
+    border-radius: var(--radius-sm);
+    background: var(--secondary-bg);
+    border: 1px solid rgba(201, 168, 75, 0.06);
+    transition: var(--transition);
+    position: relative;
+  }
+
+  .notice-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .notice-card .notice-icon {
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  .notice-card .notice-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .notice-card .notice-content .notice-title {
+    font-weight: 600;
+    color: var(--white);
+    font-size: 0.95rem;
+  }
+
+  .notice-card .notice-content .notice-message {
+    color: var(--text-gray);
+    font-size: 0.85rem;
+    margin: 2px 0 0;
+  }
+
+  .notice-card .notice-cta {
+    padding: 6px 18px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-decoration: none;
+    transition: var(--transition);
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+  }
+
+  .notice-card .notice-cta:hover {
+    transform: translateY(-2px);
+  }
+
+  .notice-card .notice-cta.gold {
+    background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+    color: var(--white);
+    box-shadow: 0 2px 12px rgba(201, 168, 75, 0.15);
+  }
+
+  .notice-card .notice-cta.gold:hover {
+    box-shadow: 0 4px 20px rgba(201, 168, 75, 0.25);
+  }
+
+  .notice-card .notice-cta.outline {
+    background: rgba(201, 168, 75, 0.06);
+    color: var(--primary-gold);
+    border: 1px solid rgba(201, 168, 75, 0.08);
+  }
+
+  .notice-card .notice-cta.outline:hover {
+    background: rgba(201, 168, 75, 0.12);
+    border-color: var(--primary-gold);
+  }
+
+  .notice-card .notice-dismiss {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 4px 8px;
+    transition: var(--transition);
+  }
+
+  .notice-card .notice-dismiss:hover {
+    color: var(--white);
+  }
+
+  .notice-card.priority-high {
+    border-left: 3px solid #EF4444;
+  }
+
+  .notice-card.priority-medium {
+    border-left: 3px solid var(--primary-gold);
+  }
+
+  .notice-card.priority-low {
+    border-left: 3px solid #3B82F6;
+  }
+
+  .notice-card.type-error {
+    background: rgba(239, 68, 68, 0.04);
+    border-color: rgba(239, 68, 68, 0.08);
+  }
+
+  .notice-card.type-warning {
+    background: rgba(245, 158, 11, 0.04);
+    border-color: rgba(245, 158, 11, 0.08);
+  }
+
+  .notice-card.type-info {
+    background: rgba(59, 130, 246, 0.04);
+    border-color: rgba(59, 130, 246, 0.08);
+  }
+
+  .notice-card.type-success {
+    background: rgba(5, 150, 105, 0.04);
+    border-color: rgba(5, 150, 105, 0.08);
+  }
+
+  /* ============================================
+     STATS ROW - Clickable with View All
+     ============================================ */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--secondary-bg);
+    padding: 18px 16px 16px;
+    border-radius: var(--radius);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    box-shadow: var(--shadow-xs);
+    text-align: center;
+    transition: var(--transition);
+    opacity: 0;
+    animation: fadeSlideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .stat-card:nth-child(1) { animation-delay: 0.05s; }
+  .stat-card:nth-child(2) { animation-delay: 0.10s; }
+  .stat-card:nth-child(3) { animation-delay: 0.15s; }
+  .stat-card:nth-child(4) { animation-delay: 0.20s; }
+  .stat-card:nth-child(5) { animation-delay: 0.25s; }
+  .stat-card:nth-child(6) { animation-delay: 0.30s; }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-gold), var(--dark-gold));
+    opacity: 0;
+    transition: var(--transition);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: rgba(201, 168, 75, 0.12);
+  }
+
+  .stat-card:hover::before {
+    opacity: 1;
+  }
+
+  .stat-card.has-alert::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #EF4444;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .stat-icon {
+    font-size: 1.4rem;
+    margin-bottom: 6px;
+    display: inline-block;
+  }
+
+  .stat-card:nth-child(1) .stat-icon { color: var(--primary-gold); }
+  .stat-card:nth-child(2) .stat-icon { color: #EF4444; }
+  .stat-card:nth-child(3) .stat-icon { color: var(--primary-gold); }
+  .stat-card:nth-child(4) .stat-icon { color: var(--primary-gold); }
+  .stat-card:nth-child(5) .stat-icon { color: var(--primary-gold); }
+  .stat-card:nth-child(6) .stat-icon { color: var(--primary-gold); }
+
+  .stat-number {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
+
+  .stat-change {
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-top: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    border-radius: 100px;
+  }
+
+  .stat-change.positive {
+    color: var(--primary-gold);
+    background: rgba(201, 168, 75, 0.08);
+  }
+
+  .stat-change.neutral {
+    color: var(--text-muted);
+    background: rgba(201, 168, 75, 0.04);
+  }
+
+  .stat-change.alert {
+    color: #EF4444;
+    background: rgba(239, 68, 68, 0.08);
+    animation: pulse-text 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-text {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .stat-view-all {
+    font-size: 0.65rem;
+    color: var(--primary-gold);
+    margin-top: 6px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.6;
+    transition: var(--transition);
+  }
+
+  .stat-card:hover .stat-view-all {
+    opacity: 1;
+    transform: translateX(3px);
+  }
+
+  /* ============================================
+     MAIN GRID - Enhanced Layout
+     ============================================ */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  .card {
+    background: var(--secondary-bg);
+    border-radius: var(--radius);
+    padding: 24px 24px 28px;
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    box-shadow: var(--shadow-xs);
+    transition: var(--transition);
+    opacity: 0;
+    animation: fadeSlideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+  }
+
+  .card:hover {
+    border-color: rgba(201, 168, 75, 0.06);
+    box-shadow: var(--shadow-md);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+
+  .card-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+  }
+
+  .card-header h3 i {
+    color: var(--primary-gold);
+    font-size: 1.1em;
+  }
+
+  .card-header .card-link {
+    font-size: 0.8rem;
+    color: var(--primary-gold);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+  }
+
+  .card-header .card-link:hover {
+    color: var(--dark-gold);
+  }
+
+  .card-header .badge-count {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: rgba(201, 168, 75, 0.04);
+    padding: 2px 12px;
+    border-radius: 100px;
+    border: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  /* ============================================
+     QUICK ACTION CARDS - Redesigned with Subtitles
+     ============================================ */
+  .quick-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .quick-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 18px 12px 16px;
+    border-radius: var(--radius-sm);
+    background: rgba(201, 168, 75, 0.02);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    color: var(--text-gray);
+    position: relative;
+  }
+
+  .quick-action:hover {
+    background: rgba(201, 168, 75, 0.06);
+    border-color: rgba(201, 168, 75, 0.12);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-3px);
+  }
+
+  .quick-action i {
+    font-size: 1.5rem;
+    color: var(--primary-gold);
+    transition: var(--transition);
+  }
+
+  .quick-action:hover i {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+  }
+
+  .quick-action .action-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--white);
+  }
+
+  .quick-action .action-subtitle {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .quick-action .badge-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #EF4444;
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 100px;
+    border: 2px solid var(--secondary-bg);
+    animation: pulse-badge 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-badge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  /* ============================================
+     ENHANCED ACTIVITY LIST - With Icons & Colors
+     ============================================ */
+  .activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(201, 168, 75, 0.02);
+    transition: var(--transition);
+    border-left: 3px solid transparent;
+  }
+
+  .activity-item:hover {
+    background: rgba(201, 168, 75, 0.04);
+    transform: translateX(4px);
+  }
+
+  .activity-item .activity-icon-wrap {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+  }
+
+  .activity-item .activity-icon-wrap.blue { background: rgba(59, 130, 246, 0.08); color: #3B82F6; }
+  .activity-item .activity-icon-wrap.gold { background: rgba(201, 168, 75, 0.08); color: var(--primary-gold); }
+  .activity-item .activity-icon-wrap.green { background: rgba(5, 150, 105, 0.08); color: #059669; }
+  .activity-item .activity-icon-wrap.purple { background: rgba(139, 92, 246, 0.08); color: #8B5CF6; }
+  .activity-item .activity-icon-wrap.orange { background: rgba(245, 158, 11, 0.08); color: #F59E0B; }
+  .activity-item .activity-icon-wrap.red { background: rgba(239, 68, 68, 0.08); color: #EF4444; }
+
+  .activity-item .activity-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .activity-item .activity-info .title {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-gray);
+  }
+
+  .activity-item .activity-info .title a {
+    color: var(--text-gray);
+    text-decoration: none;
+  }
+
+  .activity-item .activity-info .title a:hover {
+    color: var(--primary-gold);
+  }
+
+  .activity-item .activity-info .description {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin: 1px 0 0;
+  }
+
+  .activity-item .activity-info .meta {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 3px;
+  }
+
+  .activity-item .activity-info .meta .tag {
+    font-size: 0.55rem;
+    padding: 1px 8px;
+    border-radius: 100px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .tag-new { background: rgba(5, 150, 105, 0.08); color: #059669; }
+  .tag-pending { background: rgba(245, 158, 11, 0.08); color: #F59E0B; }
+  .tag-gold { background: rgba(201, 168, 75, 0.08); color: var(--primary-gold); }
+  .tag-orange { background: rgba(245, 158, 11, 0.08); color: #F59E0B; }
+  .tag-green { background: rgba(5, 150, 105, 0.08); color: #059669; }
+
+  .activity-item .activity-time {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  /* ============================================
+     UPCOMING DEADLINES
+     ============================================ */
+  .deadline-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .deadline-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(201, 168, 75, 0.02);
+    border: 1px solid rgba(201, 168, 75, 0.02);
+    transition: var(--transition);
+  }
+
+  .deadline-item:hover {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: rgba(201, 168, 75, 0.06);
+    transform: translateX(4px);
+  }
+
+  .deadline-item .deadline-date {
+    min-width: 44px;
+    text-align: center;
+    padding: 4px 6px;
+    border-radius: var(--radius-sm, 6px);
+    background: rgba(201, 168, 75, 0.06);
+  }
+
+  .deadline-item .deadline-date .day {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--white);
+    display: block;
+    line-height: 1.2;
+  }
+
+  .deadline-item .deadline-date .month {
+    font-size: 0.55rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .deadline-item .deadline-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .deadline-item .deadline-info .title {
+    font-weight: 600;
+    color: var(--white);
+    font-size: 0.85rem;
+  }
+
+  .deadline-item .deadline-info .course {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+
+  .deadline-item .deadline-info .submissions {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+
+  .deadline-item .deadline-status {
+    font-size: 0.6rem;
+    font-weight: 600;
+    padding: 2px 12px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  .deadline-item .deadline-status.upcoming {
+    background: rgba(5, 150, 105, 0.08);
+    color: #059669;
+    border: 1px solid rgba(5, 150, 105, 0.04);
+  }
+
+  .deadline-item .deadline-status.overdue {
+    background: rgba(239, 68, 68, 0.08);
+    color: #EF4444;
+    border: 1px solid rgba(239, 68, 68, 0.04);
+  }
+
+  .deadline-item .deadline-status.today {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  .deadline-item .deadline-status.soon {
+    background: rgba(245, 158, 11, 0.08);
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.04);
+  }
+
+  /* ============================================
+     QUIZ RESULTS - With Color Coding
+     ============================================ */
+  .quiz-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .quiz-result-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(201, 168, 75, 0.02);
+    transition: var(--transition);
+    border: 1px solid rgba(201, 168, 75, 0.02);
+  }
+
+  .quiz-result-item:hover {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: rgba(201, 168, 75, 0.06);
+    transform: translateX(4px);
+  }
+
+  .quiz-result-item .quiz-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .quiz-result-item .quiz-title {
+    font-weight: 500;
+    font-size: 0.88rem;
+    color: var(--text-gray);
+  }
+
+  .quiz-result-item .quiz-course {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+
+  .quiz-result-item .quiz-score {
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 2px 12px;
+    border-radius: 100px;
+  }
+
+  .quiz-result-item .quiz-score.high {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  .quiz-result-item .quiz-score.medium {
+    background: rgba(245, 158, 11, 0.08);
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.04);
+  }
+
+  .quiz-result-item .quiz-score.low {
+    background: rgba(239, 68, 68, 0.08);
+    color: #EF4444;
+    border: 1px solid rgba(239, 68, 68, 0.04);
+  }
+
+  .quiz-result-item .quiz-stats {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+  }
+
+  /* ============================================
+     ANNOUNCEMENTS - With Pinned Badges
+     ============================================ */
+  .announcement-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .announcement-preview {
+    background: rgba(201, 168, 75, 0.02);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    transition: var(--transition);
+    border-left: 3px solid transparent;
+    border: 1px solid rgba(201, 168, 75, 0.02);
+    border-left-width: 3px;
+  }
+
+  .announcement-preview:hover {
+    background: rgba(201, 168, 75, 0.04);
+    border-left-color: var(--primary-gold);
+    transform: translateX(4px);
+  }
+
+  .announcement-preview.pinned {
+    border-left-color: var(--primary-gold);
+    background: rgba(201, 168, 75, 0.04);
+  }
+
+  .announcement-preview-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+
+  .announcement-preview-header h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--white);
+    margin: 0;
+  }
+
+  .announcement-preview .pin-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 10px;
+    border-radius: 100px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  .announcement-preview .announcement-course {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+
+  .announcement-preview p {
+    font-size: 0.85rem;
+    color: var(--text-gray);
+    margin: 0 0 4px;
+    line-height: 1.5;
+  }
+
+  .announcement-preview .announcement-date {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+
+  /* ============================================
+     STUDENT PROGRESS VISUALIZATION
+     ============================================ */
+  .progress-viz-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .progress-viz-item {
+    background: rgba(201, 168, 75, 0.02);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    border: 1px solid rgba(201, 168, 75, 0.02);
+    transition: var(--transition);
+  }
+
+  .progress-viz-item:hover {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: rgba(201, 168, 75, 0.06);
+  }
+
+  .progress-viz-item .viz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .progress-viz-item .viz-header .course-name {
+    font-weight: 600;
+    color: var(--white);
+    font-size: 0.9rem;
+  }
+
+  .progress-viz-item .viz-header .course-code {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    background: rgba(201, 168, 75, 0.04);
+    padding: 2px 10px;
+    border-radius: 100px;
+  }
+
+  .progress-viz-item .viz-stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .progress-viz-item .viz-stats .stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .progress-viz-item .viz-stats .stat strong {
+    color: var(--white);
+    font-weight: 700;
+  }
+
+  .progress-viz-item .viz-stats .stat.gold strong {
+    color: var(--primary-gold);
+  }
+
+  .progress-viz-item .viz-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .progress-viz-item .viz-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(201, 168, 75, 0.06);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .progress-viz-item .viz-bar .fill {
+    height: 100%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--primary-gold), var(--dark-gold));
+    transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    width: 0%;
+  }
+
+  .progress-viz-item .viz-bar-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--primary-gold);
+    min-width: 36px;
+    text-align: right;
+  }
+
+  /* ============================================
+     PENDING STUDENT APPROVALS
+     ============================================ */
+  .pending-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn-bulk-approve {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 14px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.7rem;
+    background: rgba(5, 150, 105, 0.08);
+    color: #059669;
+    border: 1px solid rgba(5, 150, 105, 0.06);
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+  }
+
+  .btn-bulk-approve:hover {
+    background: #059669;
+    color: white;
+    transform: translateY(-1px);
+  }
+
+  .btn-bulk-approve i {
+    font-size: 0.65rem;
+  }
+
+  .pending-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .pending-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(201, 168, 75, 0.02);
+    transition: var(--transition);
+  }
+
+  .pending-item:hover {
+    background: rgba(201, 168, 75, 0.04);
+  }
+
+  .pending-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+
+  .pending-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .pending-info .name {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-gray);
+  }
+
+  .pending-info .course {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .pending-info .course .course-tag-pending {
+    display: inline-block;
+    padding: 1px 10px;
+    border-radius: 100px;
+    font-size: 0.65rem;
+    font-weight: 500;
+    background: rgba(245, 158, 11, 0.06);
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.04);
+  }
+
+  .pending-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .pending-actions .btn-sm {
+    padding: 4px 10px;
+    font-size: 0.7rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+  }
+
+  .btn-approve {
+    background: rgba(5, 150, 105, 0.1);
+    color: #059669;
+  }
+
+  .btn-approve:hover {
+    background: #059669;
+    color: white;
+  }
+
+  .btn-reject {
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+  }
+
+  .btn-reject:hover {
+    background: #EF4444;
+    color: white;
+  }
+
+  /* ============================================
+     PENDING COURSE REQUESTS
+     ============================================ */
+  .course-request-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(201, 168, 75, 0.02);
+    transition: var(--transition);
+    border-left: 3px solid var(--primary-gold);
+  }
+
+  .course-request-item:hover {
+    background: rgba(201, 168, 75, 0.04);
+  }
+
+  .course-request-item .request-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(201, 168, 75, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-gold);
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    border: 1px solid rgba(201, 168, 75, 0.08);
+  }
+
+  .course-request-item .request-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .course-request-item .request-info .student-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-gray);
+  }
+
+  .course-request-item .request-info .requested-courses {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+  }
+
+  .course-request-item .request-info .requested-courses .course-tag {
+    display: inline-block;
+    padding: 1px 10px;
+    border-radius: 100px;
+    font-size: 0.65rem;
+    font-weight: 500;
+    background: rgba(201, 168, 75, 0.06);
+    color: var(--primary-gold);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  .course-request-item .request-actions {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .course-request-item .request-actions .btn-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.7rem;
+    font-weight: 600;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-approve-all {
+    background: rgba(5, 150, 105, 0.08);
+    color: #059669;
+  }
+
+  .btn-approve-all:hover {
+    background: #059669;
+    color: white;
+  }
+
+  .btn-approve-one {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold);
+  }
+
+  .btn-approve-one:hover {
+    background: var(--primary-gold);
+    color: white;
+  }
+
+  .btn-reject-all {
+    background: rgba(239, 68, 68, 0.08);
+    color: #EF4444;
+  }
+
+  .btn-reject-all:hover {
+    background: #EF4444;
+    color: white;
+  }
+
+  /* ============================================
+     SUPER ADMIN PANEL
+     ============================================ */
+  .super-panel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+  }
+
+  .super-stat {
+    text-align: center;
+    padding: 14px 12px;
+    background: rgba(201, 168, 75, 0.02);
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+    border: 1px solid rgba(201, 168, 75, 0.02);
+    text-decoration: none;
+    cursor: pointer;
+    display: block;
+  }
+
+  .super-stat:hover {
+    background: rgba(201, 168, 75, 0.04);
+    transform: translateY(-2px);
+    border-color: rgba(201, 168, 75, 0.06);
+  }
+
+  .super-stat .number {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1.2;
+  }
+
+  .super-stat .number.gold { color: var(--primary-gold); }
+  .super-stat .number.green { color: #059669; }
+  .super-stat .number.orange { color: #F59E0B; }
+  .super-stat .number.purple { color: #7C3AED; }
+
+  .super-stat .label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* ============================================
+     EMPTY STATE
+     ============================================ */
+  .empty-state {
+    text-align: center;
+    padding: 24px 16px;
+  }
+
+  .empty-state i {
+    font-size: 1.8rem;
+    color: var(--primary-gold);
+    opacity: 0.15;
+  }
+
+  .empty-state p {
+    color: var(--text-gray);
+    margin: 6px 0 0;
+    font-size: 0.85rem;
+  }
+
+  .empty-state .empty-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  /* ============================================
+     ANIMATIONS
+     ============================================ */
+  @keyframes fadeSlideUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============================================
+     RESPONSIVE
+     ============================================ */
+  @media (max-width: 1200px) {
+    .stats-row { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  @media (max-width: 992px) {
+    .dashboard-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    .admin-dashboard { padding: 16px 12px 40px; }
+    .welcome-banner { padding: 24px 20px; }
+    .welcome-content { flex-direction: column; align-items: stretch; }
+    .welcome-left { flex-direction: column; text-align: center; }
+    .welcome-text h1 { font-size: 1.3rem; }
+    .welcome-actions { justify-content: center; }
+    .btn-welcome { font-size: 0.8rem; padding: 8px 16px; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stat-card { padding: 14px 10px 12px; }
+    .stat-number { font-size: 1.3rem; }
+    .quick-actions { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .quick-action { padding: 14px 8px 12px; }
+    .quick-action i { font-size: 1.2rem; }
+    .card { padding: 18px 16px 20px; }
+    .pending-header-actions { flex-wrap: wrap; }
+    .notice-card { flex-wrap: wrap; padding: 12px 16px; }
+    .notice-card .notice-cta { width: 100%; text-align: center; justify-content: center; }
+    .deadline-item { flex-wrap: wrap; padding: 10px 12px; }
+    .deadline-item .deadline-status { margin-left: auto; }
+    .quiz-result-item { flex-wrap: wrap; gap: 4px; }
+    .quiz-result-item .quiz-score { margin-left: auto; }
+    .progress-viz-item .viz-stats { gap: 8px; }
+    .progress-viz-item .viz-header { flex-wrap: wrap; gap: 4px; }
+  }
+
+  @media (max-width: 480px) {
+    .stats-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .quick-actions { grid-template-columns: 1fr 1fr; }
+    .super-panel-grid { grid-template-columns: 1fr 1fr; }
+    .welcome-avatar { width: 44px; height: 44px; font-size: 1rem; }
+    .welcome-text h1 { font-size: 1.1rem; }
+    .stat-card .stat-number { font-size: 1.1rem; }
+    .notices-container { gap: 6px; }
+    .notice-card { padding: 10px 12px; }
+    .notice-card .notice-icon { font-size: 1.1rem; }
+    .notice-card .notice-content .notice-title { font-size: 0.85rem; }
+    .notice-card .notice-content .notice-message { font-size: 0.78rem; }
+    .deadline-item .deadline-date { min-width: 36px; }
+    .deadline-item .deadline-date .day { font-size: 0.8rem; }
+    .deadline-item .deadline-info .title { font-size: 0.8rem; }
+    .deadline-item .deadline-status { font-size: 0.55rem; padding: 1px 10px; }
+    .quiz-result-item .quiz-title { font-size: 0.82rem; }
+    .quiz-result-item .quiz-score { font-size: 0.78rem; padding: 1px 10px; }
+    .announcement-preview { padding: 10px 12px; }
+    .announcement-preview-header h4 { font-size: 0.82rem; }
+    .announcement-preview p { font-size: 0.78rem; }
+    .progress-viz-item { padding: 10px 12px; }
+    .progress-viz-item .viz-header .course-name { font-size: 0.82rem; }
+    .progress-viz-item .viz-stats .stat { font-size: 0.7rem; }
+  }
+
+  /* ============================================
+     DARK MODE OVERRIDES
+     ============================================ */
+  [data-theme="dark"] .admin-dashboard { background: var(--primary-bg); }
+  [data-theme="dark"] .stat-card { background: var(--secondary-bg); border-color: rgba(201, 168, 75, 0.04); }
+  [data-theme="dark"] .stat-card .stat-number { color: var(--white); }
+  [data-theme="dark"] .card { background: var(--secondary-bg); border-color: rgba(201, 168, 75, 0.04); }
+  [data-theme="dark"] .card-header h3 { color: var(--white); }
+  [data-theme="dark"] .quick-action { background: rgba(201, 168, 75, 0.02); color: var(--text-gray); }
+  [data-theme="dark"] .quick-action:hover { background: rgba(201, 168, 75, 0.06); border-color: rgba(201, 168, 75, 0.1); }
+  [data-theme="dark"] .quick-action .action-title { color: var(--white); }
+  [data-theme="dark"] .activity-item { background: rgba(201, 168, 75, 0.02); }
+  [data-theme="dark"] .activity-item:hover { background: rgba(201, 168, 75, 0.04); }
+  [data-theme="dark"] .activity-item .activity-info .title { color: var(--text-gray); }
+  [data-theme="dark"] .activity-item .activity-info .title a { color: var(--text-gray); }
+  [data-theme="dark"] .activity-item .activity-info .title a:hover { color: var(--primary-gold); }
+  [data-theme="dark"] .pending-item { background: rgba(201, 168, 75, 0.02); }
+  [data-theme="dark"] .pending-item:hover { background: rgba(201, 168, 75, 0.04); }
+  [data-theme="dark"] .pending-info .name { color: var(--text-gray); }
+  [data-theme="dark"] .course-request-item { background: rgba(201, 168, 75, 0.02); }
+  [data-theme="dark"] .course-request-item:hover { background: rgba(201, 168, 75, 0.04); }
+  [data-theme="dark"] .course-request-item .request-info .student-name { color: var(--text-gray); }
+  [data-theme="dark"] .super-stat { background: rgba(201, 168, 75, 0.02); }
+  [data-theme="dark"] .super-stat:hover { background: rgba(201, 168, 75, 0.04); }
+  [data-theme="dark"] .super-stat .number { color: var(--white); }
+  [data-theme="dark"] .empty-state p { color: var(--text-gray); }
+  [data-theme="dark"] .stat-change.neutral { color: var(--text-muted); background: rgba(201, 168, 75, 0.04); }
+  [data-theme="dark"] .deadline-item { background: rgba(201, 168, 75, 0.02); }
+  [data-theme="dark"] .deadline-item:hover { background: rgba(201, 168, 75, 0.04); }
+  [data-theme="dark"] .deadline-item .deadline-info .title { color: var(--white); }
+  [data-theme="dark"] .quiz-result-item { background: rgba(201, 168, 75, 0.02); }
+  [data-theme="dark"] .quiz-result-item:hover { background: rgba(201, 168, 75, 0.04); }
+  [data-theme="dark"] .quiz-result-item .quiz-title { color: var(--text-gray); }
+  [data-theme="dark"] .announcement-preview { background: rgba(201, 168, 75, 0.02); }
+  [data-theme="dark"] .announcement-preview:hover { background: rgba(201, 168, 75, 0.04); }
+  [data-theme="dark"] .announcement-preview-header h4 { color: var(--white); }
+  [data-theme="dark"] .announcement-preview p { color: var(--text-gray); }
+  [data-theme="dark"] .progress-viz-item { background: rgba(201, 168, 75, 0.02); }
+  [data-theme="dark"] .progress-viz-item:hover { background: rgba(201, 168, 75, 0.04); }
+  [data-theme="dark"] .progress-viz-item .viz-header .course-name { color: var(--white); }
+  [data-theme="dark"] .progress-viz-item .viz-stats .stat { color: var(--text-muted); }
+  [data-theme="dark"] .progress-viz-item .viz-stats .stat strong { color: var(--white); }
+  [data-theme="dark"] .progress-viz-item .viz-stats .stat.gold strong { color: var(--primary-gold); }
+  [data-theme="dark"] .notice-card { background: var(--secondary-bg); border-color: rgba(201, 168, 75, 0.06); }
+  [data-theme="dark"] .notice-card.type-error { background: rgba(239, 68, 68, 0.04); border-color: rgba(239, 68, 68, 0.08); }
+  [data-theme="dark"] .notice-card.type-warning { background: rgba(245, 158, 11, 0.04); border-color: rgba(245, 158, 11, 0.08); }
+  [data-theme="dark"] .notice-card.type-info { background: rgba(59, 130, 246, 0.04); border-color: rgba(59, 130, 246, 0.08); }
+  [data-theme="dark"] .notice-card.type-success { background: rgba(5, 150, 105, 0.04); border-color: rgba(5, 150, 105, 0.08); }
+  [data-theme="dark"] .notice-card .notice-content .notice-title { color: var(--white); }
+  [data-theme="dark"] .notice-card .notice-content .notice-message { color: var(--text-gray); }
+  [data-theme="dark"] .btn-bulk-approve { background: rgba(5, 150, 105, 0.08); color: #34D399; border-color: rgba(5, 150, 105, 0.06); }
+  [data-theme="dark"] .btn-bulk-approve:hover { background: #059669; color: white; }
+  [data-theme="dark"] .stat-card .stat-change.alert { color: #EF4444; background: rgba(239, 68, 68, 0.08); }
+  [data-theme="dark"] .quick-action .badge-count { border-color: var(--secondary-bg); }
+  [data-theme="dark"] .welcome-banner { border-color: rgba(201, 168, 75, 0.06); }
+  [data-theme="dark"] .deadline-item .deadline-status.upcoming { background: rgba(5, 150, 105, 0.08); color: #34D399; border-color: rgba(5, 150, 105, 0.04); }
+  [data-theme="dark"] .deadline-item .deadline-status.overdue { background: rgba(239, 68, 68, 0.08); color: #F87171; border-color: rgba(239, 68, 68, 0.04); }
+  [data-theme="dark"] .deadline-item .deadline-status.today { background: rgba(201, 168, 75, 0.08); color: var(--primary-gold); border-color: rgba(201, 168, 75, 0.04); }
+  [data-theme="dark"] .deadline-item .deadline-status.soon { background: rgba(245, 158, 11, 0.08); color: #FBBF24; border-color: rgba(245, 158, 11, 0.04); }
+  [data-theme="dark"] .quiz-result-item .quiz-score.high { background: rgba(201, 168, 75, 0.08); color: var(--primary-gold); border-color: rgba(201, 168, 75, 0.04); }
+  [data-theme="dark"] .quiz-result-item .quiz-score.medium { background: rgba(245, 158, 11, 0.08); color: #FBBF24; border-color: rgba(245, 158, 11, 0.04); }
+  [data-theme="dark"] .quiz-result-item .quiz-score.low { background: rgba(239, 68, 68, 0.08); color: #F87171; border-color: rgba(239, 68, 68, 0.04); }
+  [data-theme="dark"] .tag-new { background: rgba(5, 150, 105, 0.08); color: #34D399; }
+  [data-theme="dark"] .tag-pending { background: rgba(245, 158, 11, 0.08); color: #FBBF24; }
+  [data-theme="dark"] .tag-gold { background: rgba(201, 168, 75, 0.08); color: var(--primary-gold); }
+  [data-theme="dark"] .tag-orange { background: rgba(245, 158, 11, 0.08); color: #FBBF24; }
+  [data-theme="dark"] .tag-green { background: rgba(5, 150, 105, 0.08); color: #34D399; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+  <!-- ============================== -->
+  <!-- WELCOME BANNER -->
+  <!-- ============================== -->
+  <div class="welcome-banner">
+    <div class="welcome-content">
+      <div class="welcome-left">
+        <div class="welcome-avatar">
+          {{ current_user.username[0]|upper }}
+        </div>
+        <div class="welcome-text">
+          <h1>Welcome back, <span>{{ current_user.username }}</span></h1>
+          <p class="welcome-subtitle">
+            Here's what's happening with your courses today
+            {% if pending_approvals > 0 %}
+            · <strong>{{ pending_approvals }} pending approval{{ 's' if pending_approvals > 1 }}</strong>
+            {% endif %}
+            {% if pending_course_requests_count > 0 %}
+            · <strong>{{ pending_course_requests_count }} pending course request{{ 's' if pending_course_requests_count
+              > 1 }}</strong>
+            {% endif %}
+          </p>
+          <div class="last-updated">
+            <i class="fas fa-sync-alt"></i>
+            Last updated: {{ now.strftime('%I:%M %p') if now else 'Just now' }}
+          </div>
+        </div>
+      </div>
+      <div class="welcome-actions">
+        <a href="{{ url_for('note.post_note') }}" class="btn-welcome btn-welcome-primary">
+          <i class="fas fa-plus"></i> New Note
+        </a>
+        <a href="{{ url_for('quiz.create_quiz_group') }}" class="btn-welcome btn-welcome-outline">
+          <i class="fas fa-plus"></i> New Quiz
+        </a>
+        <a href="{{ url_for('assignment.create_assignment') }}" class="btn-welcome btn-welcome-outline">
+          <i class="fas fa-plus"></i> New Assignment
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== -->
+  <!-- NOTICE/ALERT SYSTEM -->
+  <!-- ============================== -->
+  {% if notices %}
+  <div class="notices-container">
+    {% for notice in notices %}
+    <div class="notice-card type-{{ notice.type }} priority-{{ notice.priority }}" data-notice-id="{{ loop.index }}">
+      <span class="notice-icon" style="color: 
+        {% if notice.icon_color == 'red' %}#EF4444
+        {% elif notice.icon_color == 'orange' %}#F59E0B
+        {% elif notice.icon_color == 'gold' %}#C9A84B
+        {% elif notice.icon_color == 'green' %}#059669
+        {% elif notice.icon_color == 'blue' %}#3B82F6
+        {% elif notice.icon_color == 'purple' %}#8B5CF6
+        {% else %}#C9A84B{% endif %}">
+        <i class="fas {{ notice.icon }}"></i>
+      </span>
+      <div class="notice-content">
+        <div class="notice-title">{{ notice.title }}</div>
+        <div class="notice-message">{{ notice.message }}</div>
+      </div>
+      <a href="{{ notice.cta_url }}" class="notice-cta {% if notice.type == 'error' or notice.type == 'warning' %}gold{% else %}outline{% endif %}">
+        {{ notice.cta_text }} <i class="fas fa-arrow-right"></i>
+      </a>
+      {% if notice.dismissible %}
+      <button class="notice-dismiss" onclick="this.closest('.notice-card').remove()">
+        <i class="fas fa-times"></i>
+      </button>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ============================== -->
+  <!-- STATS ROW - Clickable with View All -->
+  <!-- ============================== -->
+  <div class="stats-row">
+    <a href="{{ url_for('admin.manage_students') }}" class="stat-card">
+      <div class="stat-icon"><i class="fas fa-users"></i></div>
+      <div class="stat-number">{{ total_students }}</div>
+      <div class="stat-label">Total Students</div>
+      <div class="stat-change positive"><i class="fas fa-arrow-up"></i> Active</div>
+      <div class="stat-view-all">View All <i class="fas fa-arrow-right"></i></div>
+    </a>
+    <a href="{{ url_for('admin.manage_students') }}" class="stat-card {% if pending_approvals > 0 %}has-alert{% endif %}">
+      <div class="stat-icon"><i class="fas fa-clock"></i></div>
+      <div class="stat-number">{{ pending_approvals }}</div>
+      <div class="stat-label">Pending Approvals</div>
+      <div class="stat-change {% if pending_approvals > 0 %}alert{% else %}neutral{% endif %}">
+        {% if pending_approvals > 0 %}
+        <i class="fas fa-exclamation-circle"></i> Needs action
+        {% else %}
+        <i class="fas fa-check-circle"></i> All clear
+        {% endif %}
+      </div>
+      <div class="stat-view-all">Review <i class="fas fa-arrow-right"></i></div>
+    </a>
+    <a href="{{ url_for('admin.manage_students') }}" class="stat-card {% if pending_course_requests_count > 0 %}has-alert{% endif %}">
+      <div class="stat-icon"><i class="fas fa-book-open"></i></div>
+      <div class="stat-number">{{ pending_course_requests_count }}</div>
+      <div class="stat-label">Course Requests</div>
+      <div class="stat-change {% if pending_course_requests_count > 0 %}alert{% else %}neutral{% endif %}">
+        {% if pending_course_requests_count > 0 %}
+        <i class="fas fa-exclamation-circle"></i> Needs action
+        {% else %}
+        <i class="fas fa-check-circle"></i> All clear
+        {% endif %}
+      </div>
+      <div class="stat-view-all">Review <i class="fas fa-arrow-right"></i></div>
+    </a>
+    <a href="{{ url_for('admin.course_list') }}" class="stat-card">
+      <div class="stat-icon"><i class="fas fa-book"></i></div>
+      <div class="stat-number">{{ total_courses }}</div>
+      <div class="stat-label">Active Courses</div>
+      <div class="stat-change positive"><i class="fas fa-check"></i> {{ courses|length if courses else 0 }} managed</div>
+      <div class="stat-view-all">View All <i class="fas fa-arrow-right"></i></div>
+    </a>
+    <a href="{{ url_for('note.manage_notes') }}" class="stat-card">
+      <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+      <div class="stat-number">{{ total_notes }}</div>
+      <div class="stat-label">Notes Published</div>
+      <div class="stat-change positive"><i class="fas fa-file"></i> Active</div>
+      <div class="stat-view-all">View All <i class="fas fa-arrow-right"></i></div>
+    </a>
+    <a href="{{ url_for('quiz.manage_quizzes') }}" class="stat-card">
+      <div class="stat-icon"><i class="fas fa-puzzle-piece"></i></div>
+      <div class="stat-number">{{ total_quizzes }}</div>
+      <div class="stat-label">Quizzes</div>
+      <div class="stat-change neutral"><i class="fas fa-check"></i> Active</div>
+      <div class="stat-view-all">View All <i class="fas fa-arrow-right"></i></div>
+    </a>
+  </div>
+
+  <!-- ============================== -->
+  <!-- MAIN GRID -->
+  <!-- ============================== -->
+  <div class="dashboard-grid">
+    <!-- LEFT COLUMN -->
+    <div>
+      <!-- ============================== -->
+      <!-- QUICK ACTIONS - Redesigned with Subtitles -->
+      <!-- ============================== -->
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-header">
+          <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Click to perform</span>
+        </div>
+        <div class="quick-actions">
+          <!-- Create/Post Actions -->
+          <a href="{{ url_for('note.post_note') }}" class="quick-action">
+            <i class="fas fa-plus-circle"></i>
+            <span class="action-title">Post Note</span>
+            <span class="action-subtitle">Share study material</span>
+          </a>
+          <a href="{{ url_for('quiz.create_quiz_group') }}" class="quick-action">
+            <i class="fas fa-plus-circle"></i>
+            <span class="action-title">Create Quiz</span>
+            <span class="action-subtitle">Test student knowledge</span>
+          </a>
+          <a href="{{ url_for('assignment.create_assignment') }}" class="quick-action">
+            <i class="fas fa-plus-circle"></i>
+            <span class="action-title">Create Assignment</span>
+            <span class="action-subtitle">Give homework tasks</span>
+          </a>
+
+          <!-- Manage Actions -->
+          <a href="{{ url_for('admin.course_list') }}" class="quick-action">
+            <i class="fas fa-book"></i>
+            <span class="action-title">Courses</span>
+            <span class="action-subtitle">{{ total_courses }} active</span>
+          </a>
+          <a href="{{ url_for('note.manage_notes') }}" class="quick-action">
+            <i class="fas fa-file-alt"></i>
+            <span class="action-title">Manage Notes</span>
+            <span class="action-subtitle">{{ total_notes }} published</span>
+            {% if total_notes > 0 %}
+            <span class="badge-count">{{ total_notes }}</span>
+            {% endif %}
+          </a>
+          <a href="{{ url_for('quiz.manage_quizzes') }}" class="quick-action">
+            <i class="fas fa-list"></i>
+            <span class="action-title">Manage Quizzes</span>
+            <span class="action-subtitle">{{ total_quizzes }} available</span>
+          </a>
+          <a href="{{ url_for('assignment.manage_assignments') }}" class="quick-action">
+            <i class="fas fa-list-ul"></i>
+            <span class="action-title">Manage Assignments</span>
+            <span class="action-subtitle">{{ total_assignments }} active</span>
+          </a>
+          <a href="{{ url_for('admin.manage_students') }}" class="quick-action">
+            <i class="fas fa-users"></i>
+            <span class="action-title">Manage Students</span>
+            <span class="action-subtitle">{{ total_students }} enrolled</span>
+            {% if pending_approvals > 0 %}
+            <span class="badge-count">{{ pending_approvals }}</span>
+            {% endif %}
+          </a>
+
+          <!-- Announcements & Export -->
+          <a href="{{ url_for('admin.manage_announcements') }}" class="quick-action">
+            <i class="fas fa-bullhorn"></i>
+            <span class="action-title">Announcements</span>
+            <span class="action-subtitle">{{ announcements_count }} posted</span>
+            {% if announcements_count is defined and announcements_count > 0 %}
+            <span class="badge-count">{{ announcements_count }}</span>
+            {% endif %}
+          </a>
+          <a href="{{ url_for('admin.export_page') }}" class="quick-action">
+            <i class="fas fa-file-export"></i>
+            <span class="action-title">Export Reports</span>
+            <span class="action-subtitle">Download data</span>
+          </a>
+
+          <!-- Super Admin Actions -->
+          {% if current_user.is_super_admin() %}
+          <a href="{{ url_for('admin.manage_admins') }}" class="quick-action">
+            <i class="fas fa-users-cog"></i>
+            <span class="action-title">Manage Admins</span>
+            <span class="action-subtitle">{{ admin_count }} admins</span>
+          </a>
+          <a href="{{ url_for('admin.create_course') }}" class="quick-action">
+            <i class="fas fa-plus-circle"></i>
+            <span class="action-title">Create Course</span>
+            <span class="action-subtitle">New learning path</span>
+          </a>
+          {% endif %}
+
+          <!-- Settings Actions -->
+          <a href="{{ url_for('admin.manage_tags') }}" class="quick-action">
+            <i class="fas fa-tags"></i>
+            <span class="action-title">Manage Tags</span>
+            <span class="action-subtitle">{{ tag_count }} tags</span>
+            {% if tag_count is defined and tag_count > 0 %}
+            <span class="badge-count">{{ tag_count }}</span>
+            {% endif %}
+          </a>
+          <a href="{{ url_for('leaderboard.admin') }}" class="quick-action">
+            <i class="fas fa-trophy"></i>
+            <span class="action-title">Leaderboard</span>
+            <span class="action-subtitle">View rankings</span>
+            {% if total_students > 0 %}
+            <span class="badge-count">{{ total_students }}</span>
+            {% endif %}
+          </a>
+          <a href="{{ url_for('auth.change_password') }}" class="quick-action">
+            <i class="fas fa-key"></i>
+            <span class="action-title">Change Password</span>
+            <span class="action-subtitle">Security settings</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- ============================== -->
+      <!-- UPCOMING DEADLINES -->
+      <!-- ============================== -->
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-header">
+          <h3><i class="fas fa-calendar-alt"></i> Upcoming Deadlines</h3>
+          <span class="badge-count">{{ upcoming_deadlines|length }}</span>
+          <a href="{{ url_for('assignment.manage_assignments') }}" class="card-link">
+            View All <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+        <div class="deadline-list">
+          {% if upcoming_deadlines %}
+          {% for deadline in upcoming_deadlines[:5] %}
+          <div class="deadline-item">
+            <div class="deadline-date">
+              <span class="day">{{ deadline.due_date.strftime('%d') }}</span>
+              <span class="month">{{ deadline.due_date.strftime('%b') }}</span>
+            </div>
+            <div class="deadline-info">
+              <div class="title">{{ deadline.title }}</div>
+              <div class="course">{{ deadline.course_name }}</div>
+              <div class="submissions">
+                <i class="fas fa-user-graduate"></i>
+                {{ deadline.submissions_count }}/{{ deadline.total_students }} submitted
+              </div>
+            </div>
+            <span class="deadline-status {{ deadline.status }}">
+              {{ deadline.status_text }}
+            </span>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="empty-state">
+            <i class="fas fa-calendar-check"></i>
+            <p>No upcoming deadlines</p>
+            <p class="empty-sub">Everything is on track! 🎉</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- ============================== -->
+      <!-- RECENT QUIZ RESULTS -->
+      <!-- ============================== -->
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-header">
+          <h3><i class="fas fa-puzzle-piece"></i> Recent Quiz Results</h3>
+          <span class="badge-count">{{ quiz_results|length }}</span>
+          <a href="{{ url_for('quiz.manage_quizzes') }}" class="card-link">
+            View All <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+        <div class="quiz-results-list">
+          {% if quiz_results %}
+          {% for result in quiz_results[:5] %}
+          <div class="quiz-result-item">
+            <div class="quiz-info">
+              <span class="quiz-title">{{ result.title }}</span>
+              <span class="quiz-course">{{ result.course_name }} · {{ result.total_students }} students</span>
+            </div>
+            <span class="quiz-score {{ result.color_class }}">
+              {{ result.avg_score }}%
+            </span>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="empty-state">
+            <i class="fas fa-puzzle-piece"></i>
+            <p>No quiz results yet</p>
+            <p class="empty-sub">Quizzes will appear here once students start taking them</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- ============================== -->
+      <!-- STUDENT PROGRESS VISUALIZATION -->
+      <!-- ============================== -->
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-header">
+          <h3><i class="fas fa-chart-line"></i> Student Progress Overview</h3>
+          <span class="badge-count">{{ progress_visualization|length }} courses</span>
+          <a href="{{ url_for('admin.course_analytics') }}" class="card-link">
+            Analytics <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+        <div class="progress-viz-grid">
+          {% if progress_visualization %}
+          {% for viz in progress_visualization[:4] %}
+          <div class="progress-viz-item">
+            <div class="viz-header">
+              <span class="course-name">{{ viz.course_name }}</span>
+              <span class="course-code">{{ viz.course_code }}</span>
+            </div>
+            <div class="viz-stats">
+              <span class="stat"><i class="fas fa-users"></i> <strong>{{ viz.total_students }}</strong> students</span>
+              <span class="stat gold"><i class="fas fa-star"></i> <strong>{{ viz.avg_progress }}%</strong> avg</span>
+              <span class="stat"><i class="fas fa-trophy"></i> <strong>{{ viz.completed_count }}</strong> completed</span>
+            </div>
+            <div class="viz-bar-container">
+              <div class="viz-bar">
+                <div class="fill" style="width: {{ viz.avg_progress }}%;"></div>
+              </div>
+              <span class="viz-bar-label">{{ viz.avg_progress }}%</span>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="empty-state">
+            <i class="fas fa-chart-line"></i>
+            <p>No progress data available</p>
+            <p class="empty-sub">Students will appear here once they start learning</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+      <!-- ============================== -->
+      <!-- LATEST ANNOUNCEMENTS -->
+      <!-- ============================== -->
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-header">
+          <h3><i class="fas fa-bullhorn"></i> Latest Announcements</h3>
+          <span class="badge-count">{{ announcements_with_pins|length }}</span>
+          <a href="{{ url_for('admin.manage_announcements') }}" class="card-link">
+            View All <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+        <div class="announcement-list">
+          {% if announcements_with_pins %}
+          {% for ann in announcements_with_pins[:4] %}
+          <div class="announcement-preview {% if ann.is_pinned %}pinned{% endif %}">
+            <div class="announcement-preview-header">
+              <h4>{{ ann.title }}</h4>
+              {% if ann.is_pinned %}
+              <span class="pin-badge"><i class="fas fa-thumbtack"></i> Pinned</span>
+              {% endif %}
+              <span class="announcement-course">{{ ann.course_name }}</span>
+            </div>
+            <p>{{ ann.content|truncate(100)|safe }}</p>
+            <span class="announcement-date">{{ ann.created_at | local_date }} · by {{ ann.author }}</span>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="empty-state">
+            <i class="fas fa-bullhorn"></i>
+            <p>No announcements yet</p>
+            <p class="empty-sub">Create your first announcement to engage students</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- ============================== -->
+      <!-- ENHANCED RECENT ACTIVITY - With Icons & Colors -->
+      <!-- ============================== -->
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-header">
+          <h3><i class="fas fa-history"></i> Recent Activity</h3>
+          <span class="badge-count">{{ enhanced_activity|length }}</span>
+          <a href="{{ url_for('admin.recent_activity') }}" class="card-link">
+            View All <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+        <div class="activity-list">
+          {% if enhanced_activity %}
+          {% for activity in enhanced_activity[:8] %}
+          <div class="activity-item">
+            <div class="activity-icon-wrap {{ activity.color }}">
+              <i class="fas {{ activity.icon }}"></i>
+            </div>
+            <div class="activity-info">
+              <div class="title">
+                {% if activity.url %}
+                <a href="{{ activity.url }}">{{ activity.title|safe }}</a>
+                {% else %}
+                {{ activity.title|safe }}
+                {% endif %}
+              </div>
+              <div class="description">{{ activity.description }}</div>
+              <div class="meta">
+                <span>{{ activity.user }}</span>
+                {% if activity.badge %}
+                <span class="tag tag-{{ activity.badge_color }}">{{ activity.badge }}</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="activity-time">{{ activity.time | time_ago }}</div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="empty-state">
+            <i class="fas fa-clock"></i>
+            <p>No recent activity</p>
+            <p class="empty-sub">Activity will appear here as students interact with content</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- ============================== -->
+      <!-- PENDING COURSE REQUESTS -->
+      <!-- ============================== -->
+      {% if pending_course_requests and pending_course_requests|length > 0 %}
+      <div class="card" style="border-color: rgba(201, 168, 75, 0.12); margin-bottom: 20px;">
+        <div class="card-header">
+          <h3><i class="fas fa-book-open" style="color: var(--primary-gold);"></i> Pending Course Requests</h3>
+          <div class="pending-header-actions">
+            <span style="font-size:0.75rem; color:var(--text-muted);">{{ pending_course_requests|length }} student{{ 's' if pending_course_requests|length > 1 }} waiting</span>
+            <a href="{{ url_for('admin.manage_students') }}" class="card-link">
+              View All <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          {% for request in pending_course_requests[:5] %}
+          <div class="course-request-item">
+            <div class="request-avatar">{{ request.student.username[0]|upper }}</div>
+            <div class="request-info">
+              <div class="student-name">{{ request.student.username }}</div>
+              <div class="requested-courses">
+                {% for course in request.courses[:3] %}
+                <span class="course-tag">{{ course.name }}</span>
+                {% endfor %}
+                {% if request.courses|length > 3 %}
+                <span class="course-tag">+{{ request.courses|length - 3 }} more</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="request-actions">
+              <form method="POST" action="{{ url_for('admin.approve_student', student_id=request.student.id) }}" style="display:inline;">
+                <button type="submit" class="btn-icon btn-approve-all" title="Approve All Courses">
+                  <i class="fas fa-check-double"></i>
+                </button>
+              </form>
+              {% for course in request.courses[:2] %}
+              <form method="POST" action="{{ url_for('admin.approve_course', student_id=request.student.id, course_id=course.id) }}" style="display:inline;">
+                <button type="submit" class="btn-icon btn-approve-one" title="Approve {{ course.name }}">
+                  <i class="fas fa-check"></i>
+                </button>
+              </form>
+              {% endfor %}
+              <a href="{{ url_for('admin.reject_student', student_id=request.student.id) }}" class="btn-icon btn-reject-all" title="Reject All">
+                <i class="fas fa-times"></i>
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+          {% if pending_course_requests|length > 5 %}
+          <div style="text-align:center; margin-top:6px;">
+            <a href="{{ url_for('admin.manage_students') }}" style="font-size:0.8rem; color:var(--primary-gold); text-decoration:none;">
+              View all {{ pending_course_requests|length }} pending requests →
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- ============================== -->
+      <!-- PENDING STUDENT APPROVALS -->
+      <!-- ============================== -->
+      {% if pending_approvals > 0 %}
+      <div class="card" style="border-color: rgba(239, 68, 68, 0.12); margin-bottom: 20px;">
+        <div class="card-header">
+          <h3><i class="fas fa-user-clock" style="color: #EF4444;"></i> Pending Student Approvals</h3>
+          <div class="pending-header-actions">
+            {% if current_user.is_super_admin() %}
+            <form method="POST" action="{{ url_for('admin.bulk_approve_students') }}" style="display:inline;">
+              <button type="submit" class="btn-bulk-approve" onclick="return confirm('Approve all pending students?')">
+                <i class="fas fa-check-double"></i> Bulk Approve
+              </button>
+            </form>
+            {% endif %}
+            <a href="{{ url_for('admin.manage_students') }}" class="card-link">
+              View All <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+        <div class="pending-list">
+          {% for student in pending[:5] %}
+          <div class="pending-item">
+            <div class="pending-avatar">{{ student.username[0]|upper }}</div>
+            <div class="pending-info">
+              <div class="name">{{ student.username }}</div>
+              <div class="course">
+                {% set pending_enrollments = student.enrollments|selectattr('status', 'equalto', 'pending')|list %}
+                {% if pending_enrollments %}
+                {% for enrollment in pending_enrollments[:3] %}
+                <span class="course-tag-pending">{{ enrollment.course.name }}</span>
+                {% endfor %}
+                {% if pending_enrollments|length > 3 %}
+                <span class="course-tag-pending">+{{ pending_enrollments|length - 3 }} more</span>
+                {% endif %}
+                {% else %}
+                <span style="color: var(--text-muted); font-size: 0.75rem;">No pending courses</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="pending-actions">
+              <form method="POST" action="{{ url_for('admin.approve_student', student_id=student.id) }}" style="display:inline;">
+                <button type="submit" class="btn-sm btn-approve"><i class="fas fa-check"></i></button>
+              </form>
+              <a href="{{ url_for('admin.reject_student', student_id=student.id) }}" class="btn-sm btn-reject"><i class="fas fa-times"></i></a>
+            </div>
+          </div>
+          {% endfor %}
+          {% if pending|length > 5 %}
+          <div style="text-align:center; margin-top:6px;">
+            <a href="{{ url_for('admin.manage_students') }}" style="font-size:0.8rem; color:var(--primary-gold); text-decoration:none;">
+              View all {{ pending|length }} pending approvals →
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- ============================== -->
+      <!-- SUPER ADMIN PANEL -->
+      <!-- ============================== -->
+      {% if current_user.is_super_admin() %}
+      <div class="card" style="border-color: rgba(201, 168, 75, 0.08);">
+        <div class="card-header">
+          <h3><i class="fas fa-crown" style="color: var(--primary-gold);"></i> Super Admin Panel</h3>
+          <span style="font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--primary-gold); background:rgba(201,168,75,0.08); padding:4px 14px; border-radius:100px; border:1px solid rgba(201,168,75,0.06);">
+            <i class="fas fa-crown"></i> Super Admin
+          </span>
+        </div>
+        <div class="super-panel-grid">
+          <a href="{{ url_for('admin.manage_admins') }}" class="super-stat">
+            <div class="number gold">{{ admin_count if admin_count is defined else 0 }}</div>
+            <div class="label">Admins</div>
+          </a>
+          <a href="{{ url_for('admin.course_list') }}" class="super-stat">
+            <div class="number green">{{ total_courses }}</div>
+            <div class="label">Total Courses</div>
+          </a>
+          <a href="{{ url_for('note.manage_notes') }}" class="super-stat">
+            <div class="number orange">{{ total_notes }}</div>
+            <div class="label">Total Notes</div>
+          </a>
+          <a href="{{ url_for('admin.manage_tags') }}" class="super-stat">
+            <div class="number purple">{{ tag_count if tag_count is defined else 0 }}</div>
+            <div class="label">Tags</div>
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // ==========================================
+    // ANIMATE PROGRESS BARS
+    // ==========================================
+    const fills = document.querySelectorAll('.progress-track .fill, .viz-bar .fill');
+    fills.forEach(bar => {
+      const target = bar.style.width;
+      bar.style.width = '0%';
+      setTimeout(() => {
+        bar.style.width = target;
+      }, 300);
+    });
+
+    // ==========================================
+    // STATS COUNTER ANIMATION
+    // ==========================================
+    const statNumbers = document.querySelectorAll('.stat-number');
+    statNumbers.forEach(stat => {
+      const text = stat.textContent;
+      const number = parseInt(text);
+      if (!isNaN(number) && number > 0) {
+        let current = 0;
+        const increment = Math.ceil(number / 30);
+        const counter = setInterval(() => {
+          current += increment;
+          if (current >= number) {
+            stat.textContent = text;
+            clearInterval(counter);
+          } else {
+            stat.textContent = current;
+          }
+        }, 30);
+      }
+    });
+
+    // ==========================================
+    // NOTICE DISMISS
+    // ==========================================
+    document.querySelectorAll('.notice-dismiss').forEach(btn => {
+      btn.addEventListener('click', function (e) {
+        const card = this.closest('.notice-card');
+        card.style.transition = 'all 0.3s ease';
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(20px)';
+        setTimeout(() => {
+          card.remove();
+        }, 300);
+      });
+    });
+
+    // ==========================================
+    // CARD ENTRY ANIMATION
+    // ==========================================
+    const cards = document.querySelectorAll('.card, .stat-card, .notice-card, .deadline-item, .quiz-result-item, .announcement-preview, .activity-item, .progress-viz-item');
+    cards.forEach((card, index) => {
+      if (!card.style.animation) {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(10px)';
+        setTimeout(() => {
+          card.style.transition = 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }, 100 + index * 30);
+      }
+    });
+
+    // ==========================================
+    // LIVE CLOCK UPDATE
+    // ==========================================
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+      const hour12 = now.getHours() % 12 || 12;
+      const timeStr = `${String(hour12).padStart(2, '0')}:${minutes} ${ampm}`;
+
+      const updatedEl = document.querySelector('.last-updated');
+      if (updatedEl) {
+        updatedEl.innerHTML = `<i class="fas fa-sync-alt"></i> Last updated: ${timeStr}`;
+      }
+    }
+
+    setInterval(updateClock, 30000);
+
+    // ==========================================
+    // CONFIRM BULK APPROVE
+    // ==========================================
+    document.querySelectorAll('.btn-bulk-approve').forEach(btn => {
+      btn.addEventListener('click', function (e) {
+        if (!confirm('Are you sure you want to approve all pending students?')) {
+          e.preventDefault();
+        }
+      });
+    });
+
+    // ==========================================
+    // CONFIRM INDIVIDUAL REJECT
+    // ==========================================
+    document.querySelectorAll('.btn-reject, .btn-reject-all').forEach(btn => {
+      btn.addEventListener('click', function (e) {
+        if (!confirm('Are you sure you want to reject this student?')) {
+          e.preventDefault();
+        }
+      });
+    });
+
+    // ==========================================
+    // CONFIRM DELETE ACTIONS
+    // ==========================================
+    document.querySelectorAll('.confirm-delete').forEach(btn => {
+      btn.addEventListener('click', function (e) {
+        if (!confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+          e.preventDefault();
+        }
+      });
+    });
+
+    // ==========================================
+    // QUICK ACTION CLICK FEEDBACK
+    // ==========================================
+    document.querySelectorAll('.quick-action').forEach(action => {
+      action.addEventListener('click', function (e) {
+        this.style.transform = 'scale(0.96)';
+        setTimeout(() => {
+          this.style.transform = '';
+        }, 200);
+      });
+    });
+
+    // ==========================================
+    // STAT CARD CLICK FEEDBACK
+    // ==========================================
+    document.querySelectorAll('.stat-card').forEach(card => {
+      card.addEventListener('click', function (e) {
+        this.style.transform = 'scale(0.97)';
+        setTimeout(() => {
+          this.style.transform = '';
+        }, 150);
+      });
+    });
+
+    console.log('✨ A-Portal Admin Dashboard - Enhanced with All Features!');
+    console.log('📊 Features Loaded:');
+    console.log('  ✅ Upcoming Deadlines');
+    console.log('  ✅ Recent Quiz Results (color coded)');
+    console.log('  ✅ Latest Announcements (pinned badges)');
+    console.log('  ✅ Clickable Stats Cards (View All)');
+    console.log('  ✅ Notice/Alerts System (CTAs)');
+    console.log('  ✅ Enhanced Activity Feed (icons & colors)');
+    console.log('  ✅ Redesigned Quick Actions (subtitles)');
+    console.log('  ✅ Student Progress Visualization');
+  });
+</script>
+{% endblock %}

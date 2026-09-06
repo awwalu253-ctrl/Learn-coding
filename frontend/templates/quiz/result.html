@@ -1,0 +1,582 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz Results - {{ site_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ============================================
+   QUIZ RESULTS - Premium Navy + Gold Theme
+   ============================================ */
+.quiz-results-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+/* ============================================
+   RESULT CARD - Gold Theme
+   ============================================ */
+.result-card {
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 16px);
+    border: 1px solid rgba(201, 168, 75, 0.06);
+    box-shadow: var(--shadow-md, 0 4px 20px rgba(10, 21, 39, 0.12));
+    padding: 40px 36px 36px;
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.result-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+}
+
+/* ============================================
+   RESULT ICON - Dynamic
+   ============================================ */
+.result-icon {
+    font-size: 4.5rem;
+    margin-bottom: 12px;
+    display: inline-block;
+}
+
+.result-icon.pass {
+    color: #059669;
+}
+
+.result-icon.fail {
+    color: #EF4444;
+}
+
+.result-icon.perfect {
+    color: var(--primary-gold, #C9A84B);
+}
+
+/* ============================================
+   SCORE DISPLAY - Gold Theme
+   ============================================ */
+.score-display {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 8px;
+    margin: 12px 0 8px;
+}
+
+.score-number {
+    font-size: 4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+}
+
+.score-label {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-muted, #8A94A6);
+}
+
+.score-percent {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-gray, #C8CED8);
+}
+
+/* ============================================
+   STATUS BADGE - Dynamic
+   ============================================ */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 20px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin: 8px 0 20px;
+}
+
+.status-badge.pass {
+    background: rgba(5, 150, 105, 0.08);
+    color: #059669;
+    border: 1px solid rgba(5, 150, 105, 0.04);
+}
+
+.status-badge.fail {
+    background: rgba(239, 68, 68, 0.08);
+    color: #EF4444;
+    border: 1px solid rgba(239, 68, 68, 0.04);
+}
+
+.status-badge.perfect {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+/* ============================================
+   STATS ROW
+   ============================================ */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin: 20px 0 28px;
+}
+
+.stat-item {
+    background: var(--primary-bg, #0A1527);
+    border-radius: var(--radius-sm, 10px);
+    padding: 14px 12px;
+    border: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.stat-item .stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    line-height: 1.2;
+}
+
+.stat-item .stat-number.correct {
+    color: #059669;
+}
+
+.stat-item .stat-number.wrong {
+    color: #EF4444;
+}
+
+.stat-item .stat-number.total {
+    color: var(--primary-gold, #C9A84B);
+}
+
+.stat-item .stat-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted, #8A94A6);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* ============================================
+   MESSAGE
+   ============================================ */
+.result-message {
+    font-size: 1rem;
+    color: var(--text-gray, #C8CED8);
+    line-height: 1.7;
+    margin-bottom: 24px;
+}
+
+/* ============================================
+   ACTION BUTTONS
+   ============================================ */
+.result-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    color: var(--white, #FFFFFF);
+    box-shadow: 0 2px 16px rgba(201, 168, 75, 0.15);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 24px rgba(201, 168, 75, 0.25);
+    color: var(--white, #FFFFFF);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--text-gray, #C8CED8);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.btn-outline:hover {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #059669, #047857);
+    color: var(--white, #FFFFFF);
+    box-shadow: 0 2px 16px rgba(5, 150, 105, 0.15);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 24px rgba(5, 150, 105, 0.25);
+    color: var(--white, #FFFFFF);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scorePop {
+    0% { transform: scale(0.5); opacity: 0; }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.score-number {
+    animation: scorePop 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+
+.result-icon {
+    animation: scorePop 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .result-card {
+        padding: 28px 20px 24px;
+    }
+
+    .score-number {
+        font-size: 3rem;
+    }
+
+    .score-percent {
+        font-size: 1.4rem;
+    }
+
+    .result-icon {
+        font-size: 3.5rem;
+    }
+
+    .stats-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .stat-item .stat-number {
+        font-size: 1.2rem;
+    }
+
+    .btn {
+        font-size: 0.82rem;
+        padding: 8px 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .result-card {
+        padding: 20px 14px 18px;
+        border-radius: var(--radius-sm, 10px);
+    }
+
+    .score-number {
+        font-size: 2.4rem;
+    }
+
+    .score-percent {
+        font-size: 1.2rem;
+    }
+
+    .result-icon {
+        font-size: 2.8rem;
+    }
+
+    .stats-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .result-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .result-actions .btn {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 4px 14px;
+    }
+
+    .result-message {
+        font-size: 0.9rem;
+    }
+}
+
+/* ============================================
+   DARK MODE SUPPORT
+   ============================================ */
+[data-theme="dark"] .result-card {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.06);
+}
+
+[data-theme="dark"] .stat-item {
+    background: var(--primary-bg, #0A1527);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .stat-item .stat-number {
+    color: var(--white, #FFFFFF);
+}
+
+[data-theme="dark"] .result-message {
+    color: var(--text-gray, #C8CED8);
+}
+
+[data-theme="dark"] .btn-outline {
+    color: var(--text-gray, #C8CED8);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .btn-outline:hover {
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+}
+
+[data-theme="dark"] .status-badge.pass {
+    background: rgba(5, 150, 105, 0.08);
+    color: #34D399;
+    border-color: rgba(5, 150, 105, 0.04);
+}
+
+[data-theme="dark"] .status-badge.fail {
+    background: rgba(239, 68, 68, 0.08);
+    color: #F87171;
+    border-color: rgba(239, 68, 68, 0.04);
+}
+
+[data-theme="dark"] .status-badge.perfect {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .stat-item .stat-number.correct {
+    color: #34D399;
+}
+
+[data-theme="dark"] .stat-item .stat-number.wrong {
+    color: #F87171;
+}
+
+[data-theme="dark"] .stat-item .stat-number.total {
+    color: var(--primary-gold, #C9A84B);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="quiz-results-page">
+    <div class="result-card">
+        <!-- Result Icon -->
+        <div class="result-icon 
+            {% if score >= 80 %}perfect
+            {% elif score >= 50 %}pass
+            {% else %}fail{% endif %}">
+            {% if score >= 80 %}
+                <i class="fas fa-crown"></i>
+            {% elif score >= 50 %}
+                <i class="fas fa-check-circle"></i>
+            {% else %}
+                <i class="fas fa-times-circle"></i>
+            {% endif %}
+        </div>
+
+        <!-- Quiz Title -->
+        <h1 style="font-size: 1.3rem; font-weight: 700; color: var(--white, #FFFFFF); margin: 0 0 4px;">
+            {{ quiz.title }}
+        </h1>
+        <p style="font-size: 0.85rem; color: var(--text-muted, #8A94A6); margin: 0 0 12px;">
+            {{ quiz.course.name }}
+        </p>
+
+        <!-- Score -->
+        <div class="score-display">
+            <span class="score-number">{{ score }}</span>
+            <span class="score-percent">%</span>
+        </div>
+
+        <!-- Status Badge -->
+        <div class="status-badge 
+            {% if score >= 80 %}perfect
+            {% elif score >= 50 %}pass
+            {% else %}fail{% endif %}">
+            <i class="fas 
+                {% if score >= 80 %}fa-crown
+                {% elif score >= 50 %}fa-check-circle
+                {% else %}fa-times-circle{% endif %}"></i>
+            {% if score >= 80 %}
+                Perfect Score! 🏆
+            {% elif score >= 50 %}
+                Passed! ✅
+            {% else %}
+                Needs Improvement 📚
+            {% endif %}
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="stat-number correct">{{ correct }}</div>
+                <div class="stat-label">Correct</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number wrong">{{ total - correct }}</div>
+                <div class="stat-label">Wrong</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number total">{{ total }}</div>
+                <div class="stat-label">Total Questions</div>
+            </div>
+        </div>
+
+        <!-- Message -->
+        <p class="result-message">
+            {% if score >= 80 %}
+                Outstanding performance! You've mastered this quiz. Keep up the great work! 🌟
+            {% elif score >= 50 %}
+                Good job! You've passed the quiz. Review the questions you missed to improve further. 💪
+            {% else %}
+                Don't give up! Review the material and try again. Every attempt brings you closer to mastery. 📖
+            {% endif %}
+        </p>
+
+        <!-- Actions -->
+        <div class="result-actions">
+            <a href="{{ url_for('quiz.quiz_review', quiz_id=quiz.id) }}" class="btn btn-primary">
+                <i class="fas fa-eye"></i> Review Answers
+            </a>
+            <a href="{{ url_for('quiz.student_quizzes') }}" class="btn btn-outline">
+                <i class="fas fa-list"></i> All Quizzes
+            </a>
+            <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+        </div>
+
+        <!-- Confetti Animation for High Scores -->
+        {% if score >= 80 %}
+        <div style="position: relative; height: 0;">
+            <canvas id="confettiCanvas" style="position: absolute; top: -40px; left: 0; width: 100%; height: 200px; pointer-events: none; z-index: 1;"></canvas>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ==========================================
+    // CONFETTI ANIMATION (for scores >= 80%)
+    // ==========================================
+    {% if score >= 80 %}
+    (function() {
+        const canvas = document.getElementById('confettiCanvas');
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width || 800;
+        canvas.height = 200;
+        
+        const colors = ['#C9A84B', '#8F7E48', '#EF4444', '#3B82F6', '#059669', '#F59E0B', '#8B5CF6'];
+        const particles = [];
+        
+        for (let i = 0; i < 120; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height - 50,
+                w: 6 + Math.random() * 6,
+                h: 4 + Math.random() * 4,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                speed: 1 + Math.random() * 2,
+                angle: Math.random() * Math.PI * 2,
+                rotation: Math.random() * Math.PI * 2,
+                rotationSpeed: (Math.random() - 0.5) * 0.05,
+                wobble: Math.random() * 0.05,
+                wobbleSpeed: 0.01 + Math.random() * 0.02
+            });
+        }
+        
+        function drawParticle(p) {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation);
+            ctx.globalAlpha = 0.8;
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+            ctx.restore();
+        }
+        
+        function updateParticle(p) {
+            p.y += p.speed;
+            p.x += Math.sin(p.y * p.wobble) * 0.5;
+            p.rotation += p.rotationSpeed;
+            
+            if (p.y > canvas.height) {
+                p.y = -20;
+                p.x = Math.random() * canvas.width;
+                p.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+        }
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw confetti pieces
+            particles.forEach(p => {
+                drawParticle(p);
+                updateParticle(p);
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+        
+        // Update canvas on resize
+        window.addEventListener('resize', function() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width || 800;
+        });
+    })();
+    {% endif %}
+});
+</script>
+{% endblock %}

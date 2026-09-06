@@ -1,0 +1,895 @@
+{% extends "base.html" %}
+
+{% block title %}My Assignments - {{ site_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ============================================
+   STUDENT ASSIGNMENTS - Premium Navy + Gold Theme
+   ============================================ */
+.student-assignments {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* ============================================
+   HEADER - Gold Theme
+   ============================================ */
+.page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.page-header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm, 10px);
+    background: linear-gradient(135deg, rgba(201, 168, 75, 0.08), rgba(143, 126, 72, 0.06));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-gold, #C9A84B);
+    font-size: 1.3rem;
+    border: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.page-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.page-header h1 span {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-header .subtitle {
+    font-size: 0.85rem;
+    color: var(--text-gray, #C8CED8);
+    margin: 2px 0 0;
+}
+
+/* ============================================
+   STATS ROW - Gold Theme
+   ============================================ */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
+}
+
+.stat-card {
+    background: var(--secondary-bg, #253449);
+    padding: 18px 16px 16px;
+    border-radius: var(--radius, 14px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(10, 21, 39, 0.08));
+    text-align: center;
+    transition: var(--transition, 0.3s ease);
+}
+
+.stat-card .stat-icon {
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+    display: inline-block;
+}
+
+.stat-card:nth-child(1) .stat-icon { color: var(--primary-gold, #C9A84B); }
+.stat-card:nth-child(2) .stat-icon { color: #EF4444; }
+.stat-card:nth-child(3) .stat-icon { color: #059669; }
+.stat-card:nth-child(4) .stat-icon { color: #F59E0B; }
+
+.stat-card .stat-number {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--white, #FFFFFF);
+    line-height: 1.2;
+}
+
+.stat-card .stat-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted, #8A94A6);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+}
+
+/* ============================================
+   ASSIGNMENT GRID - Gold Theme
+   ============================================ */
+.assignment-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 20px;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+}
+
+.assignment-card {
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 14px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(10, 21, 39, 0.08));
+    padding: 24px 24px 20px;
+    transition: var(--transition, 0.3s ease);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.assignment-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md, 0 4px 20px rgba(10, 21, 39, 0.12));
+    border-color: rgba(201, 168, 75, 0.08);
+}
+
+.assignment-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    opacity: 0;
+    transition: var(--transition, 0.3s ease);
+}
+
+.assignment-card:hover::before {
+    opacity: 1;
+}
+
+.assignment-card .card-status {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 12px;
+    border-radius: 100px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.status-badge.submitted {
+    background: rgba(5, 150, 105, 0.08);
+    color: #059669;
+    border: 1px solid rgba(5, 150, 105, 0.04);
+}
+
+.status-badge.graded {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.status-badge.pending {
+    background: rgba(245, 158, 11, 0.08);
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.04);
+}
+
+.status-badge.overdue {
+    background: rgba(239, 68, 68, 0.08);
+    color: #EF4444;
+    border: 1px solid rgba(239, 68, 68, 0.04);
+}
+
+/* ============================================
+   FILE DOWNLOAD - Gold Theme
+   ============================================ */
+.assignment-file {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(201, 168, 75, 0.04);
+    border-radius: var(--radius-sm, 8px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    margin-bottom: 12px;
+}
+
+.assignment-file i {
+    color: var(--primary-gold, #C9A84B);
+    font-size: 0.85rem;
+}
+
+.file-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--primary-gold, #C9A84B);
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+}
+
+.file-link:hover {
+    color: var(--dark-gold, #8F7E48);
+    text-decoration: underline;
+}
+
+.file-link i {
+    font-size: 0.75rem;
+}
+
+.file-size {
+    font-size: 0.65rem;
+    color: var(--text-muted, #8A94A6);
+    margin-left: auto;
+}
+
+.assignment-card .assignment-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    margin: 0 0 4px;
+    padding-right: 80px;
+}
+
+.assignment-card .assignment-course {
+    font-size: 0.8rem;
+    color: var(--text-muted, #8A94A6);
+    margin-bottom: 10px;
+}
+
+.assignment-card .assignment-course i {
+    color: var(--primary-gold, #C9A84B);
+}
+
+.assignment-card .assignment-description {
+    font-size: 0.88rem;
+    color: var(--text-gray, #C8CED8);
+    line-height: 1.6;
+    margin: 0 0 14px;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.assignment-card .assignment-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-top: 12px;
+    border-top: 1px solid rgba(201, 168, 75, 0.04);
+    margin-bottom: 14px;
+}
+
+.assignment-card .assignment-meta .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--text-muted, #8A94A6);
+}
+
+.assignment-card .assignment-meta .meta-item i {
+    color: var(--primary-gold, #C9A84B);
+    font-size: 0.7rem;
+}
+
+.assignment-card .assignment-meta .meta-item .score-value {
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+}
+
+.assignment-card .assignment-meta .meta-item .score-value.gold {
+    color: var(--primary-gold, #C9A84B);
+}
+
+.assignment-card .assignment-meta .meta-item .score-value.green {
+    color: #059669;
+}
+
+.assignment-card .assignment-meta .meta-item .score-value.red {
+    color: #EF4444;
+}
+
+.assignment-card .assignment-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: skewX(-20deg);
+    transition: var(--transition, 0.6s ease);
+}
+
+.btn:hover::after {
+    left: 100%;
+}
+
+.btn-block {
+    flex: 1;
+    justify-content: center;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    color: var(--white, #FFFFFF);
+    box-shadow: 0 2px 12px rgba(201, 168, 75, 0.12);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(201, 168, 75, 0.2);
+    color: var(--white, #FFFFFF);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--text-gray, #C8CED8);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.btn-outline:hover {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+    transform: translateY(-2px);
+}
+
+.btn-outline i {
+    color: var(--primary-gold, #C9A84B);
+}
+
+.btn-success {
+    background: rgba(5, 150, 105, 0.08);
+    color: #059669;
+    border: 1px solid rgba(5, 150, 105, 0.04);
+}
+
+.btn-success:hover {
+    background: #059669;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ============================================
+   EMPTY STATE - Gold Theme
+   ============================================ */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 14px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    grid-column: 1 / -1;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: var(--primary-gold, #C9A84B);
+    opacity: 0.15;
+    margin-bottom: 16px;
+}
+
+.empty-state h3 {
+    color: var(--white, #FFFFFF);
+    font-size: 1.2rem;
+    margin: 0 0 8px;
+}
+
+.empty-state p {
+    color: var(--text-gray, #C8CED8);
+    font-size: 0.95rem;
+    margin: 0 0 20px;
+}
+
+.empty-state .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    color: var(--white, #FFFFFF);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 16px rgba(201, 168, 75, 0.15);
+}
+
+.empty-state .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 24px rgba(201, 168, 75, 0.25);
+    color: var(--white, #FFFFFF);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(16px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .page-header-left {
+        width: 100%;
+    }
+
+    .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .stat-card {
+        padding: 14px 12px;
+    }
+
+    .stat-number {
+        font-size: 1.3rem;
+    }
+
+    .assignment-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .assignment-card {
+        padding: 18px 16px 16px;
+    }
+
+    .assignment-card .assignment-title {
+        font-size: 0.95rem;
+        padding-right: 70px;
+    }
+
+    .btn {
+        font-size: 0.78rem;
+        padding: 7px 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header h1 {
+        font-size: 1.2rem;
+    }
+
+    .page-header-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .stats-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .stat-card {
+        padding: 12px 10px;
+    }
+
+    .stat-number {
+        font-size: 1.1rem;
+    }
+
+    .stat-label {
+        font-size: 0.6rem;
+    }
+
+    .stat-card .stat-icon {
+        font-size: 1.1rem;
+    }
+
+    .assignment-card {
+        padding: 14px 12px 14px;
+        border-radius: var(--radius-sm, 10px);
+    }
+
+    .assignment-card .assignment-title {
+        font-size: 0.88rem;
+        padding-right: 0;
+    }
+
+    .assignment-card .assignment-description {
+        font-size: 0.82rem;
+    }
+
+    .assignment-card .assignment-meta .meta-item {
+        font-size: 0.7rem;
+    }
+
+    .btn {
+        font-size: 0.72rem;
+        padding: 6px 12px;
+    }
+
+    .assignment-file {
+        flex-wrap: wrap;
+        padding: 6px 10px;
+    }
+
+    .file-link {
+        font-size: 0.75rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1rem;
+    }
+
+    .empty-state p {
+        font-size: 0.85rem;
+    }
+}
+
+/* ============================================
+   DARK MODE SUPPORT
+   ============================================ */
+[data-theme="dark"] .stat-card {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .stat-card .stat-number {
+    color: var(--white, #FFFFFF);
+}
+
+[data-theme="dark"] .assignment-card {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .assignment-card:hover {
+    border-color: rgba(201, 168, 75, 0.08);
+}
+
+[data-theme="dark"] .assignment-card .assignment-title {
+    color: var(--white, #FFFFFF);
+}
+
+[data-theme="dark"] .assignment-card .assignment-description {
+    color: var(--text-gray, #C8CED8);
+}
+
+[data-theme="dark"] .assignment-card .assignment-meta .meta-item {
+    color: var(--text-muted, #8A94A6);
+}
+
+[data-theme="dark"] .status-badge.submitted {
+    background: rgba(5, 150, 105, 0.08);
+    color: #34D399;
+    border-color: rgba(5, 150, 105, 0.04);
+}
+
+[data-theme="dark"] .status-badge.graded {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .status-badge.pending {
+    background: rgba(245, 158, 11, 0.08);
+    color: #FBBF24;
+    border-color: rgba(245, 158, 11, 0.04);
+}
+
+[data-theme="dark"] .status-badge.overdue {
+    background: rgba(239, 68, 68, 0.08);
+    color: #F87171;
+    border-color: rgba(239, 68, 68, 0.04);
+}
+
+[data-theme="dark"] .btn-outline {
+    color: var(--text-gray, #C8CED8);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .btn-outline:hover {
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+}
+
+[data-theme="dark"] .btn-outline i {
+    color: var(--primary-gold, #C9A84B);
+}
+
+[data-theme="dark"] .btn-success {
+    background: rgba(5, 150, 105, 0.08);
+    color: #34D399;
+    border-color: rgba(5, 150, 105, 0.04);
+}
+
+[data-theme="dark"] .btn-success:hover {
+    background: #059669;
+    color: white;
+}
+
+[data-theme="dark"] .assignment-file {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .file-link {
+    color: var(--primary-gold, #C9A84B);
+}
+
+[data-theme="dark"] .file-link:hover {
+    color: var(--dark-gold, #8F7E48);
+}
+
+[data-theme="dark"] .empty-state {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .empty-state h3 {
+    color: var(--white, #FFFFFF);
+}
+
+[data-theme="dark"] .empty-state p {
+    color: var(--text-gray, #C8CED8);
+}
+
+[data-theme="dark"] .assignment-card .assignment-meta .meta-item .score-value {
+    color: var(--white, #FFFFFF);
+}
+
+[data-theme="dark"] .assignment-card .assignment-meta .meta-item .score-value.gold {
+    color: var(--primary-gold, #C9A84B);
+}
+
+[data-theme="dark"] .assignment-card .assignment-meta .meta-item .score-value.green {
+    color: #34D399;
+}
+
+[data-theme="dark"] .assignment-card .assignment-meta .meta-item .score-value.red {
+    color: #F87171;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="student-assignments">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <div class="page-header-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div>
+                <h1>My <span>Assignments</span></h1>
+                <p class="subtitle">View and submit your course assignments</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-list"></i></div>
+            <div class="stat-number">{{ assignment_data|length }}</div>
+            <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-number">{{ assignment_data|selectattr('is_past_due', 'eq', True)|list|length }}</div>
+            <div class="stat-label">Overdue</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-number">{{ assignment_data|selectattr('is_submitted', 'eq', True)|list|length }}</div>
+            <div class="stat-label">Submitted</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-number">{{ assignment_data|selectattr('is_submitted', 'eq', False)|selectattr('is_past_due', 'eq', False)|list|length }}</div>
+            <div class="stat-label">Pending</div>
+        </div>
+    </div>
+
+    <!-- Assignments Grid -->
+    <div class="assignment-grid">
+        {% if assignment_data %}
+            {% for data in assignment_data %}
+            <div class="assignment-card">
+                <div class="card-status">
+                    {% if data.is_graded %}
+                        <span class="status-badge graded"><i class="fas fa-check-circle"></i> Graded</span>
+                    {% elif data.is_submitted %}
+                        <span class="status-badge submitted"><i class="fas fa-check"></i> Submitted</span>
+                    {% elif data.is_past_due %}
+                        <span class="status-badge overdue"><i class="fas fa-exclamation-circle"></i> Overdue</span>
+                    {% else %}
+                        <span class="status-badge pending"><i class="fas fa-clock"></i> Pending</span>
+                    {% endif %}
+                </div>
+
+                <h3 class="assignment-title">{{ data.assignment.title }}</h3>
+                <div class="assignment-course">
+                    <i class="fas fa-book"></i> {{ data.assignment.course.name }}
+                </div>
+
+                <p class="assignment-description">{{ data.assignment.description|truncate(120) }}</p>
+
+                <!-- File Download for Students -->
+                {% if data.assignment.file_path %}
+                <div class="assignment-file">
+                    <i class="fas fa-paperclip"></i>
+                    <a href="{{ url_for('assignment.download_assignment_file', assignment_id=data.assignment.id) }}" class="file-link">
+                        <i class="fas fa-download"></i> Download Assignment File
+                        {% if data.assignment.file_name %}
+                        ({{ data.assignment.file_name }})
+                        {% endif %}
+                    </a>
+                    {% if data.assignment.file_size %}
+                    <span class="file-size">{{ data.assignment.file_size }}</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="assignment-meta">
+                    <span class="meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        Due: {{ data.assignment.due_date.strftime('%b %d, %Y at %I:%M %p') }}
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-star"></i>
+                        Max Score: {{ data.assignment.max_score }}
+                    </span>
+                    {% if data.is_graded and data.submission %}
+                    <span class="meta-item">
+                        <i class="fas fa-check-circle"></i>
+                        Score: 
+                        <span class="score-value 
+                            {% if data.submission.score >= data.assignment.max_score * 0.8 %}gold
+                            {% elif data.submission.score >= data.assignment.max_score * 0.5 %}green
+                            {% else %}red{% endif %}">
+                            {{ data.submission.score }}
+                        </span>
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div class="assignment-actions">
+                    {% if data.is_graded %}
+                        <a href="{{ url_for('assignment.view_submission', assignment_id=data.assignment.id) }}" class="btn btn-outline btn-block">
+                            <i class="fas fa-eye"></i> View Submission
+                        </a>
+                    {% elif data.is_submitted %}
+                        <a href="{{ url_for('assignment.view_submission', assignment_id=data.assignment.id) }}" class="btn btn-outline btn-block">
+                            <i class="fas fa-eye"></i> View Submission
+                        </a>
+                    {% elif data.is_past_due %}
+                        <span class="btn btn-disabled btn-block" style="justify-content: center;">
+                            <i class="fas fa-times"></i> Past Due
+                        </span>
+                    {% else %}
+                        <a href="{{ url_for('assignment.submit_assignment', assignment_id=data.assignment.id) }}" class="btn btn-primary btn-block">
+                            <i class="fas fa-upload"></i> Submit Assignment
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-tasks"></i>
+                <h3>No Assignments</h3>
+                <p>You don't have any assignments yet. Check back later for new assignments from your courses.</p>
+                <a href="{{ url_for('student.courses') }}" class="btn">
+                    <i class="fas fa-book"></i> View Your Courses
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ==========================================
+    // STATS COUNTER ANIMATION
+    // ==========================================
+    const statNumbers = document.querySelectorAll('.stat-number');
+    statNumbers.forEach(stat => {
+        const text = stat.textContent;
+        const number = parseInt(text);
+        if (!isNaN(number)) {
+            let current = 0;
+            const increment = Math.ceil(number / 25);
+            const counter = setInterval(() => {
+                current += increment;
+                if (current >= number) {
+                    stat.textContent = text;
+                    clearInterval(counter);
+                } else {
+                    stat.textContent = current;
+                }
+            }, 40);
+        }
+    });
+
+    // ==========================================
+    // CARD ENTRY ANIMATION
+    // ==========================================
+    const cards = document.querySelectorAll('.assignment-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(15px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100 + index * 60);
+    });
+
+    console.log('✨ Student Assignments - Premium Gold Theme Loaded!');
+});
+</script>
+{% endblock %}

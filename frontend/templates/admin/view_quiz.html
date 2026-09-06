@@ -1,0 +1,566 @@
+{% extends "base.html" %}
+
+{% block title %}View Quiz - {{ quiz.title }} - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ============================================
+   VIEW QUIZ - Premium Navy + Gold Theme
+   ============================================ */
+.view-quiz-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* ============================================
+   QUIZ HEADER - Gold Theme
+   ============================================ */
+.quiz-header {
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 16px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    box-shadow: var(--shadow-md, 0 4px 20px rgba(10, 21, 39, 0.12));
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.quiz-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    opacity: 0.8;
+}
+
+.quiz-header .quiz-info {
+    flex: 1;
+}
+
+.quiz-header .quiz-info h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    margin: 0 0 4px;
+}
+
+.quiz-header .quiz-info .quiz-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 0.85rem;
+    color: var(--text-muted, #8A94A6);
+}
+
+.quiz-header .quiz-info .quiz-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.quiz-header .quiz-info .quiz-meta i {
+    color: var(--primary-gold, #C9A84B);
+}
+
+.quiz-header .quiz-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: skewX(-20deg);
+    transition: var(--transition, 0.6s ease);
+}
+
+.btn:hover::after {
+    left: 100%;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    color: var(--white, #FFFFFF);
+    box-shadow: 0 2px 12px rgba(201, 168, 75, 0.12);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(201, 168, 75, 0.2);
+    color: var(--white, #FFFFFF);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--text-gray, #C8CED8);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.btn-outline:hover {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+    transform: translateY(-2px);
+}
+
+.btn-outline i {
+    color: var(--primary-gold, #C9A84B);
+}
+
+/* ============================================
+   QUESTION LIST - Gold Theme
+   ============================================ */
+.question-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+}
+
+.question-item {
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 14px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(10, 21, 39, 0.08));
+    padding: 24px 28px;
+    transition: var(--transition, 0.3s ease);
+}
+
+.question-item:hover {
+    box-shadow: var(--shadow-md, 0 4px 20px rgba(10, 21, 39, 0.12));
+    border-color: rgba(201, 168, 75, 0.08);
+}
+
+.question-item .question-number {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted, #8A94A6);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+}
+
+.question-item .question-text {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--white, #FFFFFF);
+    margin: 0 0 14px;
+    line-height: 1.6;
+}
+
+.question-item .options {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.question-item .option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm, 8px);
+    background: var(--primary-bg, #0A1527);
+    border: 1px solid rgba(201, 168, 75, 0.02);
+    transition: var(--transition, 0.3s ease);
+}
+
+.question-item .option .option-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(201, 168, 75, 0.04);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted, #8A94A6);
+    flex-shrink: 0;
+    transition: var(--transition, 0.3s ease);
+}
+
+.question-item .option .option-text {
+    font-size: 0.9rem;
+    color: var(--text-gray, #C8CED8);
+}
+
+.question-item .option .correct-badge {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 10px;
+    border-radius: 100px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    background: rgba(5, 150, 105, 0.08);
+    color: #059669;
+    border: 1px solid rgba(5, 150, 105, 0.04);
+}
+
+.question-item .option.correct-answer {
+    border-color: rgba(5, 150, 105, 0.12);
+    background: rgba(5, 150, 105, 0.02);
+}
+
+.question-item .option.correct-answer .option-letter {
+    background: #059669;
+    color: var(--white, #FFFFFF);
+}
+
+.question-item .option.correct-answer .option-text {
+    color: #059669;
+}
+
+/* ============================================
+   EMPTY STATE - Gold Theme
+   ============================================ */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 14px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: var(--primary-gold, #C9A84B);
+    opacity: 0.15;
+    margin-bottom: 16px;
+}
+
+.empty-state h3 {
+    color: var(--white, #FFFFFF);
+    font-size: 1.2rem;
+    margin: 0 0 8px;
+}
+
+.empty-state p {
+    color: var(--text-gray, #C8CED8);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(16px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .quiz-header {
+        padding: 20px 20px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .quiz-header .quiz-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .quiz-header .quiz-actions .btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .question-item {
+        padding: 18px 16px;
+    }
+
+    .question-item .question-text {
+        font-size: 0.95rem;
+    }
+
+    .question-item .option {
+        padding: 6px 10px;
+    }
+
+    .question-item .option .option-text {
+        font-size: 0.82rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .quiz-header {
+        padding: 16px 14px;
+        border-radius: var(--radius-sm, 10px);
+    }
+
+    .quiz-header .quiz-info h1 {
+        font-size: 1.1rem;
+    }
+
+    .quiz-header .quiz-info .quiz-meta {
+        font-size: 0.75rem;
+        gap: 10px;
+    }
+
+    .question-item {
+        padding: 14px 12px;
+        border-radius: var(--radius-sm, 10px);
+    }
+
+    .question-item .question-text {
+        font-size: 0.88rem;
+    }
+
+    .question-item .option {
+        padding: 5px 8px;
+        gap: 8px;
+    }
+
+    .question-item .option .option-letter {
+        width: 22px;
+        height: 22px;
+        font-size: 0.6rem;
+    }
+
+    .question-item .option .option-text {
+        font-size: 0.78rem;
+    }
+
+    .question-item .option .correct-badge {
+        font-size: 0.5rem;
+        padding: 0px 6px;
+    }
+
+    .btn {
+        font-size: 0.78rem;
+        padding: 6px 14px;
+    }
+
+    .empty-state h3 {
+        font-size: 1rem;
+    }
+
+    .empty-state p {
+        font-size: 0.85rem;
+    }
+}
+
+/* ============================================
+   DARK MODE SUPPORT
+   ============================================ */
+[data-theme="dark"] .quiz-header {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .quiz-header .quiz-info h1 {
+    color: var(--white, #FFFFFF);
+}
+
+[data-theme="dark"] .question-item {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .question-item:hover {
+    border-color: rgba(201, 168, 75, 0.08);
+}
+
+[data-theme="dark"] .question-item .question-text {
+    color: var(--white, #FFFFFF);
+}
+
+[data-theme="dark"] .question-item .option {
+    background: var(--primary-bg, #0A1527);
+    border-color: rgba(201, 168, 75, 0.02);
+}
+
+[data-theme="dark"] .question-item .option .option-text {
+    color: var(--text-gray, #C8CED8);
+}
+
+[data-theme="dark"] .question-item .option .option-letter {
+    background: rgba(201, 168, 75, 0.04);
+    color: var(--text-muted, #8A94A6);
+}
+
+[data-theme="dark"] .question-item .option.correct-answer {
+    border-color: rgba(5, 150, 105, 0.12);
+    background: rgba(5, 150, 105, 0.02);
+}
+
+[data-theme="dark"] .question-item .option.correct-answer .option-letter {
+    background: #34D399;
+    color: var(--white, #FFFFFF);
+}
+
+[data-theme="dark"] .question-item .option.correct-answer .option-text {
+    color: #34D399;
+}
+
+[data-theme="dark"] .question-item .option .correct-badge {
+    background: rgba(5, 150, 105, 0.08);
+    color: #34D399;
+    border-color: rgba(5, 150, 105, 0.04);
+}
+
+[data-theme="dark"] .btn-outline {
+    color: var(--text-gray, #C8CED8);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .btn-outline:hover {
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+}
+
+[data-theme="dark"] .empty-state {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .empty-state h3 {
+    color: var(--white, #FFFFFF);
+}
+
+[data-theme="dark"] .empty-state p {
+    color: var(--text-gray, #C8CED8);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="view-quiz-page">
+    <!-- Quiz Header -->
+    <div class="quiz-header">
+        <div class="quiz-info">
+            <h1>{{ quiz.title }}</h1>
+            <div class="quiz-meta">
+                <span><i class="fas fa-book"></i> {{ quiz.course.name }}</span>
+                <span><i class="fas fa-question-circle"></i> {{ total_questions }} Questions</span>
+                {% if quiz.time_limit > 0 %}
+                <span><i class="fas fa-clock"></i> {{ quiz.time_limit }} minutes</span>
+                {% endif %}
+                <span><i class="fas fa-calendar-alt"></i> Created: {{ quiz.created_at.strftime('%b %d, %Y') }}</span>
+            </div>
+            {% if quiz.description %}
+            <p style="margin-top: 8px; font-size: 0.9rem; color: var(--text-gray, #C8CED8);">{{ quiz.description }}</p>
+            {% endif %}
+        </div>
+        <div class="quiz-actions">
+            <a href="{{ url_for('quiz.edit_quiz_group', quiz_id=quiz.id) }}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit Quiz
+            </a>
+            <a href="{{ url_for('quiz.manage_quizzes') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Questions -->
+    {% if questions %}
+    <div class="question-list">
+        {% for question in questions %}
+        <div class="question-item">
+            <div class="question-number">Question {{ loop.index }} of {{ total_questions }}</div>
+            <div class="question-text">{{ question.question_text }}</div>
+            <div class="options">
+                <div class="option {% if question.correct_option == 'A' %}correct-answer{% endif %}">
+                    <span class="option-letter">A</span>
+                    <span class="option-text">{{ question.option_a }}</span>
+                    {% if question.correct_option == 'A' %}
+                    <span class="correct-badge"><i class="fas fa-check-circle"></i> Correct</span>
+                    {% endif %}
+                </div>
+                <div class="option {% if question.correct_option == 'B' %}correct-answer{% endif %}">
+                    <span class="option-letter">B</span>
+                    <span class="option-text">{{ question.option_b }}</span>
+                    {% if question.correct_option == 'B' %}
+                    <span class="correct-badge"><i class="fas fa-check-circle"></i> Correct</span>
+                    {% endif %}
+                </div>
+                <div class="option {% if question.correct_option == 'C' %}correct-answer{% endif %}">
+                    <span class="option-letter">C</span>
+                    <span class="option-text">{{ question.option_c }}</span>
+                    {% if question.correct_option == 'C' %}
+                    <span class="correct-badge"><i class="fas fa-check-circle"></i> Correct</span>
+                    {% endif %}
+                </div>
+                <div class="option {% if question.correct_option == 'D' %}correct-answer{% endif %}">
+                    <span class="option-letter">D</span>
+                    <span class="option-text">{{ question.option_d }}</span>
+                    {% if question.correct_option == 'D' %}
+                    <span class="correct-badge"><i class="fas fa-check-circle"></i> Correct</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-puzzle-piece"></i>
+        <h3>No Questions</h3>
+        <p>This quiz doesn't have any questions yet.</p>
+        <a href="{{ url_for('quiz.edit_quiz_group', quiz_id=quiz.id) }}" class="btn btn-primary" style="margin-top: 16px;">
+            <i class="fas fa-plus"></i> Add Questions
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ==========================================
+    // CARD ENTRY ANIMATION
+    // ==========================================
+    const questions = document.querySelectorAll('.question-item');
+    questions.forEach((q, index) => {
+        q.style.opacity = '0';
+        q.style.transform = 'translateY(15px)';
+        setTimeout(() => {
+            q.style.transition = 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
+            q.style.opacity = '1';
+            q.style.transform = 'translateY(0)';
+        }, 100 + index * 50);
+    });
+
+    console.log('✨ View Quiz - Admin Preview Mode Loaded!');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,500 @@
+{% extends "base.html" %}
+
+{% block title %}Pending Approval - {{ site_name }}{% endblock %}
+
+{% block content %}
+<style>
+  /* ============================================
+     PENDING APPROVAL - Premium Navy + Gold Theme
+     ============================================ */
+  .pending-approval {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px 60px;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pending-card {
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 16px);
+    border: 1px solid rgba(201, 168, 75, 0.08);
+    box-shadow: var(--shadow-lg, 0 12px 48px rgba(10, 21, 39, 0.16));
+    padding: 48px 40px 40px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .pending-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    opacity: 0.8;
+  }
+
+  .pending-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 70% 30%, rgba(201, 168, 75, 0.03), transparent 70%);
+    pointer-events: none;
+  }
+
+  .pending-icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    display: inline-block;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.08); opacity: 1; }
+  }
+
+  .pending-card h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--white, #FFFFFF);
+    margin: 0 0 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .pending-card h1 span {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .pending-card .subtitle {
+    color: var(--text-gray, #C8CED8);
+    font-size: 1.05rem;
+    margin: 0 0 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .pending-card .message {
+    color: var(--text-muted, #8A94A6);
+    font-size: 0.95rem;
+    margin: 0 0 24px;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+  }
+
+  .pending-card .message strong {
+    color: var(--primary-gold, #C9A84B);
+  }
+
+  /* ============================================
+     STATUS BADGES
+     ============================================ */
+  .status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 24px 0 28px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .status-item {
+    background: var(--primary-bg, #0A1527);
+    border-radius: var(--radius-sm, 10px);
+    padding: 16px 12px;
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    transition: var(--transition, 0.3s ease);
+  }
+
+  .status-item:hover {
+    border-color: rgba(201, 168, 75, 0.08);
+    transform: translateY(-2px);
+  }
+
+  .status-item .number {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--white, #FFFFFF);
+    display: block;
+    line-height: 1.2;
+  }
+
+  .status-item .label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted, #8A94A6);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .status-item .label.pending-label { color: #F59E0B; }
+  .status-item .label.approved-label { color: var(--primary-gold, #C9A84B); }
+  .status-item .label.rejected-label { color: #EF4444; }
+
+  .status-item .number.pending-number { color: #F59E0B; }
+  .status-item .number.approved-number { color: var(--primary-gold, #C9A84B); }
+  .status-item .number.rejected-number { color: #EF4444; }
+
+  /* ============================================
+     PENDING COURSES LIST
+     ============================================ */
+  .pending-courses-list {
+    text-align: left;
+    margin: 0 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .pending-courses-list h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-gray, #C8CED8);
+    margin: 0 0 10px;
+  }
+
+  .pending-course-tag {
+    display: inline-block;
+    padding: 4px 16px;
+    border-radius: 100px;
+    background: rgba(245, 158, 11, 0.08);
+    color: #F59E0B;
+    font-size: 0.82rem;
+    font-weight: 500;
+    border: 1px solid rgba(245, 158, 11, 0.06);
+    margin: 3px 6px 3px 0;
+  }
+
+  .rejected-course-tag {
+    display: inline-block;
+    padding: 4px 16px;
+    border-radius: 100px;
+    background: rgba(239, 68, 68, 0.08);
+    color: #EF4444;
+    font-size: 0.82rem;
+    font-weight: 500;
+    border: 1px solid rgba(239, 68, 68, 0.06);
+    margin: 3px 6px 3px 0;
+  }
+
+  /* ============================================
+     BUTTONS
+     ============================================ */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: skewX(-20deg);
+    transition: var(--transition, 0.6s ease);
+  }
+
+  .btn:hover::after {
+    left: 100%;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    color: var(--white, #FFFFFF);
+    box-shadow: 0 2px 16px rgba(201, 168, 75, 0.15);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 24px rgba(201, 168, 75, 0.25);
+    color: var(--white, #FFFFFF);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text-gray, #C8CED8);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+  }
+
+  .btn-outline:hover {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+    transform: translateY(-2px);
+  }
+
+  .btn-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ============================================
+     ANIMATIONS
+     ============================================ */
+  @keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============================================
+     RESPONSIVE
+     ============================================ */
+  @media (max-width: 768px) {
+    .pending-card {
+      padding: 32px 24px 28px;
+    }
+
+    .pending-card h1 {
+      font-size: 1.4rem;
+    }
+
+    .pending-card .subtitle {
+      font-size: 0.95rem;
+    }
+
+    .status-grid {
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .status-item .number {
+      font-size: 1.2rem;
+    }
+
+    .status-item .label {
+      font-size: 0.6rem;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      font-size: 0.82rem;
+    }
+
+    .btn-actions {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .btn-actions .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .pending-card {
+      padding: 24px 16px 20px;
+      border-radius: var(--radius-sm, 10px);
+    }
+
+    .pending-card h1 {
+      font-size: 1.2rem;
+    }
+
+    .pending-icon {
+      font-size: 3rem;
+    }
+
+    .status-grid {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+
+    .status-item {
+      padding: 12px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .status-item .number {
+      font-size: 1rem;
+    }
+
+    .pending-courses-list h4 {
+      font-size: 0.82rem;
+    }
+
+    .pending-course-tag {
+      font-size: 0.75rem;
+      padding: 3px 12px;
+    }
+
+    .rejected-course-tag {
+      font-size: 0.75rem;
+      padding: 3px 12px;
+    }
+  }
+
+  /* ============================================
+     DARK MODE SUPPORT
+     ============================================ */
+  [data-theme="dark"] .pending-card {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.06);
+  }
+
+  [data-theme="dark"] .pending-card h1 {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .pending-card .subtitle {
+    color: var(--text-gray, #C8CED8);
+  }
+
+  [data-theme="dark"] .pending-card .message {
+    color: var(--text-muted, #8A94A6);
+  }
+
+  [data-theme="dark"] .status-item {
+    background: var(--primary-bg, #0A1527);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .status-item .number {
+    color: var(--white, #FFFFFF);
+  }
+
+  [data-theme="dark"] .pending-course-tag {
+    background: rgba(245, 158, 11, 0.08);
+    color: #FBBF24;
+    border-color: rgba(245, 158, 11, 0.04);
+  }
+
+  [data-theme="dark"] .rejected-course-tag {
+    background: rgba(239, 68, 68, 0.08);
+    color: #F87171;
+    border-color: rgba(239, 68, 68, 0.04);
+  }
+
+  [data-theme="dark"] .btn-outline {
+    color: var(--text-gray, #C8CED8);
+    border-color: rgba(201, 168, 75, 0.04);
+  }
+
+  [data-theme="dark"] .btn-outline:hover {
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+  }
+</style>
+
+<div class="pending-approval">
+  <div class="pending-card">
+    <!-- Icon -->
+    <div class="pending-icon">⏳</div>
+
+    <!-- Title -->
+    <h1>Account <span>Pending Approval</span></h1>
+    <p class="subtitle">Welcome, <strong>{{ username }}</strong>!</p>
+    <p class="message">
+      Your account is currently <strong>awaiting approval</strong> from an administrator.
+      You will be notified via email once your account is approved.
+    </p>
+
+    <!-- Status Grid -->
+    <div class="status-grid">
+      <div class="status-item">
+        <span class="number pending-number">{{ pending_count }}</span>
+        <span class="label pending-label">Pending</span>
+      </div>
+      <div class="status-item">
+        <span class="number approved-number">{{ approved_courses|length }}</span>
+        <span class="label approved-label">Approved</span>
+      </div>
+      <div class="status-item">
+        <span class="number rejected-number">{{ rejected_courses|length }}</span>
+        <span class="label rejected-label">Rejected</span>
+      </div>
+    </div>
+
+    <!-- Pending Courses -->
+    {% if pending_courses %}
+    <div class="pending-courses-list">
+      <h4><i class="fas fa-clock" style="color: #F59E0B;"></i> Courses awaiting approval:</h4>
+      <div>
+        {% for course in pending_courses %}
+        <span class="pending-course-tag">{{ course.name }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Rejected Courses -->
+    {% if rejected_courses %}
+    <div class="pending-courses-list">
+      <h4><i class="fas fa-times-circle" style="color: #EF4444;"></i> Rejected courses:</h4>
+      <div>
+        {% for course in rejected_courses %}
+        <span class="rejected-course-tag">{{ course.name }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Actions -->
+    <div class="btn-actions">
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-outline">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </a>
+      <!-- ✅ FIXED: Changed student_courses to student.courses -->
+      <a href="{{ url_for('student.courses') }}" class="btn btn-primary">
+        <i class="fas fa-book"></i> Browse Courses
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // ==========================================
+    // CARD ENTRY ANIMATION
+    // ==========================================
+    const card = document.querySelector('.pending-card');
+    if (card) {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      setTimeout(() => {
+        card.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, 200);
+    }
+
+    console.log('✨ Pending Approval Page - Gold Theme Loaded!');
+  });
+</script>
+{% endblock %}

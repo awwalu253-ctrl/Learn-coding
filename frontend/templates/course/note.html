@@ -1,0 +1,649 @@
+{% extends "base.html" %}
+
+{% block title %}{{ note.title }} - A-Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ============================================
+       VIEW NOTE - Premium Navy + Gold Theme
+       ============================================ */
+    .note-view-page {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0;
+    }
+
+    /* ============================================
+       NOTE CARD - Gold Theme
+       ============================================ */
+    .note-card {
+        background: var(--secondary-bg, #253449);
+        border-radius: var(--radius, 16px);
+        border: 1px solid rgba(201, 168, 75, 0.06);
+        box-shadow: var(--shadow-lg, 0 12px 48px rgba(10, 21, 39, 0.12));
+        padding: 40px 40px 36px;
+        transition: var(--transition, 0.3s ease);
+        opacity: 0;
+        animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .note-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+        opacity: 0.8;
+    }
+
+    .note-card::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(201, 168, 75, 0.02), transparent);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .note-card:hover {
+        box-shadow: var(--shadow-xl, 0 20px 60px rgba(10, 21, 39, 0.16));
+        border-color: rgba(201, 168, 75, 0.08);
+    }
+
+    /* ============================================
+     NOTE HEADER - Gold Theme
+     ============================================ */
+    .note-header {
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(201, 168, 75, 0.06);
+    }
+
+    .note-header .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.78rem;
+        color: var(--text-muted, #8A94A6);
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+    }
+
+    .note-header .breadcrumb a {
+        color: var(--primary-gold, #C9A84B);
+        text-decoration: none;
+        transition: var(--transition, 0.3s ease);
+    }
+
+    .note-header .breadcrumb a:hover {
+        color: var(--dark-gold, #8F7E48);
+    }
+
+    .note-header .breadcrumb .separator {
+        color: var(--text-muted, #8A94A6);
+        opacity: 0.4;
+    }
+
+    .note-header .breadcrumb .current {
+        color: var(--text-gray, #C8CED8);
+    }
+
+    .note-header .top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .note-header .title-section {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .note-header .title-section h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--white, #FFFFFF);
+        margin: 0 0 8px;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+    }
+
+    .note-header .title-section h1 span {
+        background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .note-header .title-section .meta {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        font-size: 0.82rem;
+        color: var(--text-muted, #8A94A6);
+    }
+
+    .note-header .title-section .meta .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .note-header .title-section .meta .meta-item i {
+        color: var(--primary-gold, #C9A84B);
+        font-size: 0.75rem;
+    }
+
+    .note-header .title-section .meta .tag-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 12px;
+        border-radius: 100px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        background: rgba(201, 168, 75, 0.08);
+        color: var(--primary-gold, #C9A84B);
+        border: 1px solid rgba(201, 168, 75, 0.04);
+    }
+
+    .note-header .title-section .meta .tag-badge i {
+        font-size: 0.6rem;
+    }
+
+    .note-header .title-section .meta .new-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 12px;
+        border-radius: 100px;
+        font-size: 0.6rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+        color: var(--white, #FFFFFF);
+        animation: goldPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes goldPulse {
+        0%, 100% { box-shadow: 0 0 20px rgba(201, 168, 75, 0); }
+        50% { box-shadow: 0 0 40px rgba(201, 168, 75, 0.15); }
+    }
+
+    .note-header .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .btn-sm {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: 60px;
+        font-weight: 600;
+        font-size: 0.78rem;
+        text-decoration: none;
+        transition: var(--transition, 0.3s ease);
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-outline-sm {
+        background: transparent;
+        color: var(--text-gray, #C8CED8);
+        border: 1px solid rgba(201, 168, 75, 0.06);
+    }
+
+    .btn-outline-sm:hover {
+        background: rgba(201, 168, 75, 0.04);
+        border-color: var(--primary-gold, #C9A84B);
+        color: var(--primary-gold, #C9A84B);
+        transform: translateY(-2px);
+    }
+
+    .btn-primary-sm {
+        background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+        color: var(--white, #FFFFFF);
+        box-shadow: 0 2px 12px rgba(201, 168, 75, 0.15);
+    }
+
+    .btn-primary-sm:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(201, 168, 75, 0.25);
+        color: var(--white, #FFFFFF);
+    }
+
+    /* ============================================
+     NOTE CONTENT - Gold Theme
+     ============================================ */
+    .note-content {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: var(--text-gray, #C8CED8);
+        padding: 4px 0;
+    }
+
+    .note-content p {
+        margin-bottom: 1.2em;
+    }
+
+    .note-content p:last-child {
+        margin-bottom: 0;
+    }
+
+    .note-content h1, .note-content h2, .note-content h3 {
+        color: var(--white, #FFFFFF);
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+    }
+
+    .note-content h1 { font-size: 1.8rem; }
+    .note-content h2 { font-size: 1.5rem; }
+    .note-content h3 { font-size: 1.2rem; }
+
+    .note-content ul, .note-content ol {
+        padding-left: 1.5em;
+        margin-bottom: 1.2em;
+    }
+
+    .note-content li {
+        margin-bottom: 0.4em;
+    }
+
+    .note-content blockquote {
+        border-left: 3px solid var(--primary-gold, #C9A84B);
+        padding: 12px 20px;
+        margin: 1.2em 0;
+        background: rgba(201, 168, 75, 0.04);
+        border-radius: 0 var(--radius-sm, 8px) var(--radius-sm, 8px) 0;
+        color: var(--text-gray, #C8CED8);
+    }
+
+    .note-content pre, .note-content code {
+        background: rgba(201, 168, 75, 0.04);
+        border-radius: var(--radius-sm, 6px);
+        padding: 2px 6px;
+        font-size: 0.9rem;
+        font-family: 'Inter', monospace;
+        color: var(--primary-gold, #C9A84B);
+    }
+
+    .note-content pre {
+        padding: 16px 20px;
+        overflow-x: auto;
+        margin: 1.2em 0;
+        background: var(--primary-bg, #0A1527);
+        border: 1px solid rgba(201, 168, 75, 0.04);
+    }
+
+    .note-content pre code {
+        background: transparent;
+        padding: 0;
+        color: var(--text-gray, #C8CED8);
+    }
+
+    .note-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: var(--radius-sm, 8px);
+        margin: 1em 0;
+    }
+
+    .note-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.2em 0;
+    }
+
+    .note-content table th,
+    .note-content table td {
+        padding: 10px 14px;
+        border: 1px solid rgba(201, 168, 75, 0.06);
+    }
+
+    .note-content table th {
+        background: rgba(201, 168, 75, 0.04);
+        color: var(--white, #FFFFFF);
+        font-weight: 600;
+    }
+
+    /* ============================================
+     NOTE FOOTER - Gold Theme
+     ============================================ */
+    .note-footer {
+        margin-top: 28px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(201, 168, 75, 0.06);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .note-footer .footer-info {
+        font-size: 0.78rem;
+        color: var(--text-muted, #8A94A6);
+    }
+
+    .note-footer .footer-info .author {
+        color: var(--primary-gold, #C9A84B);
+        font-weight: 500;
+    }
+
+    .note-footer .footer-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .note-footer .footer-actions .btn-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 1px solid rgba(201, 168, 75, 0.06);
+        color: var(--text-muted, #8A94A6);
+        background: transparent;
+        cursor: pointer;
+        transition: var(--transition, 0.3s ease);
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .note-footer .footer-actions .btn-icon:hover {
+        border-color: var(--primary-gold, #C9A84B);
+        color: var(--primary-gold, #C9A84B);
+        transform: translateY(-2px);
+        background: rgba(201, 168, 75, 0.04);
+    }
+
+    /* ============================================
+     ANIMATIONS
+     ============================================ */
+    @keyframes fadeUp {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ============================================
+     RESPONSIVE
+     ============================================ */
+    @media (max-width: 768px) {
+        .note-card {
+            padding: 24px 20px 20px;
+        }
+
+        .note-header .top-row {
+            flex-direction: column;
+        }
+
+        .note-header .title-section h1 {
+            font-size: 1.4rem;
+        }
+
+        .note-content {
+            font-size: 0.95rem;
+        }
+
+        .note-footer {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.72rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .note-card {
+            padding: 16px 14px 16px;
+            border-radius: var(--radius-sm, 10px);
+        }
+
+        .note-header .title-section h1 {
+            font-size: 1.2rem;
+        }
+
+        .note-header .title-section .meta {
+            font-size: 0.72rem;
+            gap: 10px;
+        }
+
+        .note-content {
+            font-size: 0.88rem;
+        }
+
+        .note-footer .footer-info {
+            font-size: 0.7rem;
+        }
+
+        .note-footer .footer-actions .btn-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 0.8rem;
+        }
+    }
+
+    /* ============================================
+     DARK MODE SUPPORT
+     ============================================ */
+    [data-theme="dark"] .note-card {
+        background: var(--secondary-bg, #253449);
+        border-color: rgba(201, 168, 75, 0.04);
+    }
+
+    [data-theme="dark"] .note-card::before {
+        background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    }
+
+    [data-theme="dark"] .note-header .title-section h1 {
+        color: var(--white, #FFFFFF);
+    }
+
+    [data-theme="dark"] .note-content {
+        color: var(--text-gray, #C8CED8);
+    }
+
+    [data-theme="dark"] .note-content h1,
+    [data-theme="dark"] .note-content h2,
+    [data-theme="dark"] .note-content h3 {
+        color: var(--white, #FFFFFF);
+    }
+
+    [data-theme="dark"] .note-content blockquote {
+        background: rgba(201, 168, 75, 0.04);
+    }
+
+    [data-theme="dark"] .note-content pre {
+        background: var(--primary-bg, #0A1527);
+        border-color: rgba(201, 168, 75, 0.04);
+    }
+
+    [data-theme="dark"] .note-content pre code {
+        color: var(--text-gray, #C8CED8);
+    }
+
+    [data-theme="dark"] .note-content table th {
+        background: rgba(201, 168, 75, 0.04);
+        color: var(--white, #FFFFFF);
+    }
+
+    [data-theme="dark"] .note-content table th,
+    [data-theme="dark"] .note-content table td {
+        border-color: rgba(201, 168, 75, 0.06);
+    }
+
+    [data-theme="dark"] .note-footer {
+        border-top-color: rgba(201, 168, 75, 0.04);
+    }
+
+    [data-theme="dark"] .note-footer .footer-info .author {
+        color: var(--primary-gold, #C9A84B);
+    }
+
+    [data-theme="dark"] .btn-outline-sm {
+        color: var(--text-gray, #C8CED8);
+        border-color: rgba(201, 168, 75, 0.04);
+    }
+
+    [data-theme="dark"] .btn-outline-sm:hover {
+        border-color: var(--primary-gold, #C9A84B);
+        color: var(--primary-gold, #C9A84B);
+    }
+
+    [data-theme="dark"] .note-header .title-section .meta .tag-badge {
+        background: rgba(201, 168, 75, 0.06);
+        color: var(--primary-gold, #C9A84B);
+        border-color: rgba(201, 168, 75, 0.04);
+    }
+
+    [data-theme="dark"] .note-header .title-section .meta .new-badge {
+        background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+        color: var(--white, #FFFFFF);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="note-view-page">
+    <div class="note-card">
+        <!-- Header -->
+        <div class="note-header">
+            <div class="breadcrumb">
+                <a href="{{ url_for('auth.index') }}"><i class="fas fa-home"></i> Home</a>
+                <span class="separator"><i class="fas fa-chevron-right" style="font-size: 0.6rem;"></i></span>
+                <a href="{{ url_for('student.courses') }}">Courses</a>
+                <span class="separator"><i class="fas fa-chevron-right" style="font-size: 0.6rem;"></i></span>
+                <a href="{{ url_for('course.view', course_id=note.course.id) }}">{{ note.course.name }}</a>
+                <span class="separator"><i class="fas fa-chevron-right" style="font-size: 0.6rem;"></i></span>
+                <span class="current">{{ note.title }}</span>
+            </div>
+
+            <div class="top-row">
+                <div class="title-section">
+                    <h1>{{ note.title }}</h1>
+                    <div class="meta">
+                        <span class="meta-item">
+                            <i class="fas fa-book"></i>
+                            {{ note.course.name }}
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-user"></i>
+                            {{ note.author.username if note.author else 'Unknown' }}
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            {{ note.created_at.strftime('%b %d, %Y') }}
+                        </span>
+                        {% if note.tag %}
+                            <span class="tag-badge">
+                                <i class="fas fa-tag"></i> {{ note.tag.name }}
+                            </span>
+                        {% endif %}
+                        {% if note.is_new() %}
+                            <span class="new-badge"><i class="fas fa-star"></i> New</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="actions">
+                    {% if current_user.is_authenticated and current_user.is_admin() %}
+                        <a href="{{ url_for('note.edit_note', note_id=note.id) }}" class="btn-sm btn-primary-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('student.courses') }}" class="btn-sm btn-outline-sm">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="note-content">
+            {{ note.content|safe }}
+        </div>
+
+        <!-- Footer -->
+        <div class="note-footer">
+            <div class="footer-info">
+                <span class="author"><i class="fas fa-user-edit"></i> {{ note.author.username if note.author else 'Unknown' }}</span>
+                <span style="margin-left: 12px;">
+                    <i class="fas fa-clock"></i> 
+                    {% if note.updated_at and note.updated_at != note.created_at %}
+                        Updated: {{ note.updated_at.strftime('%b %d, %Y at %I:%M %p') }}
+                    {% else %}
+                        Created: {{ note.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+                    {% endif %}
+                </span>
+                {% if note.file_path %}
+                    <span style="margin-left: 12px;">
+                        <i class="fas fa-paperclip"></i> 
+                        <a href="{{ url_for('note.download_file', filename=note.file_path) }}" style="color: var(--primary-gold);">
+                            {{ note.file_name or 'Attachment' }}
+                        </a>
+                    </span>
+                {% endif %}
+            </div>
+            <div class="footer-actions">
+                <button class="btn-icon" onclick="window.print()" title="Print">
+                    <i class="fas fa-print"></i>
+                </button>
+                <button class="btn-icon" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to Top">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ============================================
+        // ANIMATE NOTE CARD ON LOAD
+        // ============================================
+        const card = document.querySelector('.note-card');
+        if (card) {
+            card.style.opacity = '0';
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                card.style.transform = 'translateY(0)';
+            }, 100);
+        }
+
+        // ============================================
+        // KEYBOARD SHORTCUTS
+        // ============================================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                window.history.back();
+            }
+        });
+
+        console.log('✨ Note View - Premium Theme Loaded!');
+    });
+</script>
+{% endblock %}

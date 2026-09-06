@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.name }} - A-Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .course-view-page {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .course-header {
+        background: var(--secondary-bg, #253449);
+        border-radius: var(--radius, 16px);
+        padding: 32px 36px;
+        margin-bottom: 24px;
+        border: 1px solid rgba(201, 168, 75, 0.06);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .course-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+        opacity: 0.8;
+    }
+
+    .course-header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--white, #FFFFFF);
+        margin: 0 0 4px;
+    }
+
+    .course-header .course-code {
+        font-size: 0.85rem;
+        color: var(--text-muted, #8A94A6);
+        background: rgba(201, 168, 75, 0.04);
+        padding: 2px 14px;
+        border-radius: 100px;
+        display: inline-block;
+    }
+
+    .course-header .description {
+        color: var(--text-gray, #C8CED8);
+        margin: 12px 0 0;
+        font-size: 1rem;
+    }
+
+    .course-header .progress-bar {
+        margin-top: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .course-header .progress-track {
+        flex: 1;
+        height: 6px;
+        background: rgba(201, 168, 75, 0.06);
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .course-header .progress-track .fill {
+        height: 100%;
+        border-radius: 6px;
+        background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+        transition: width 1s ease;
+    }
+
+    .course-header .progress-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--primary-gold, #C9A84B);
+        min-width: 48px;
+        text-align: right;
+    }
+
+    .notes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+    }
+
+    .note-item {
+        background: var(--secondary-bg, #253449);
+        border-radius: var(--radius, 14px);
+        border: 1px solid rgba(201, 168, 75, 0.04);
+        padding: 20px 22px;
+        transition: var(--transition, 0.3s ease);
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .note-item:hover {
+        transform: translateY(-4px);
+        border-color: rgba(201, 168, 75, 0.08);
+        box-shadow: var(--shadow-md);
+    }
+
+    .note-item .note-title {
+        font-weight: 600;
+        font-size: 1rem;
+        color: var(--white, #FFFFFF);
+        margin-bottom: 4px;
+    }
+
+    .note-item .note-title i {
+        color: var(--primary-gold, #C9A84B);
+        margin-right: 6px;
+        font-size: 0.85rem;
+    }
+
+    .note-item .note-meta {
+        font-size: 0.78rem;
+        color: var(--text-muted, #8A94A6);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .note-item .note-meta i {
+        color: var(--primary-gold, #C9A84B);
+        font-size: 0.7rem;
+    }
+
+    .note-item .note-meta .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 1px 10px;
+        border-radius: 100px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        background: rgba(201, 168, 75, 0.06);
+        color: var(--primary-gold, #C9A84B);
+        border: 1px solid rgba(201, 168, 75, 0.04);
+    }
+
+    .note-item .new-badge {
+        font-size: 0.55rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 1px 8px;
+        border-radius: 100px;
+        background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+        color: var(--white, #FFFFFF);
+        animation: goldPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes goldPulse {
+        0%, 100% { box-shadow: 0 0 20px rgba(201, 168, 75, 0); }
+        50% { box-shadow: 0 0 40px rgba(201, 168, 75, 0.15); }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        grid-column: 1 / -1;
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        color: var(--primary-gold, #C9A84B);
+        opacity: 0.15;
+        margin-bottom: 12px;
+    }
+
+    .empty-state p {
+        color: var(--text-gray, #C8CED8);
+        font-size: 0.95rem;
+    }
+
+    @media (max-width: 768px) {
+        .course-header { padding: 20px 18px; }
+        .course-header h1 { font-size: 1.4rem; }
+        .notes-grid { grid-template-columns: 1fr; }
+    }
+
+    [data-theme="dark"] .course-header {
+        background: var(--secondary-bg, #253449);
+        border-color: rgba(201, 168, 75, 0.04);
+    }
+
+    [data-theme="dark"] .note-item {
+        background: var(--secondary-bg, #253449);
+        border-color: rgba(201, 168, 75, 0.04);
+    }
+
+    [data-theme="dark"] .note-item .note-title {
+        color: var(--white, #FFFFFF);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="course-view-page">
+    <div class="course-header">
+        <h1>{{ course.name }}</h1>
+        <span class="course-code">{{ course.code }}</span>
+        <p class="description">{{ course.description or 'No description available.' }}</p>
+        <div class="progress-bar">
+            <div class="progress-track">
+                <div class="fill" style="width: {{ progress }}%;"></div>
+            </div>
+            <span class="progress-label">{{ progress }}%</span>
+        </div>
+    </div>
+
+    <div class="notes-grid">
+        {% for note in notes %}
+            <a href="{{ url_for('note.view', note_id=note.id) }}" class="note-item">
+                <div class="note-title">
+                    <i class="fas fa-file-alt"></i> {{ note.title }}
+                    {% if note.is_new() %}
+                        <span class="new-badge">New</span>
+                    {% endif %}
+                </div>
+                <div class="note-meta">
+                    <span><i class="fas fa-user"></i> {{ note.author.username if note.author else 'Unknown' }}</span>
+                    <span><i class="fas fa-calendar-alt"></i> {{ note.created_at.strftime('%b %d, %Y') }}</span>
+                    {% if note.tag %}
+                        <span class="tag"><i class="fas fa-tag"></i> {{ note.tag.name }}</span>
+                    {% endif %}
+                    {% if note.file_path %}
+                        <span><i class="fas fa-paperclip"></i></span>
+                    {% endif %}
+                </div>
+            </a>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-file-alt"></i>
+                <p>No notes available for this course yet.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
