@@ -2,6 +2,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from datetime import datetime
+from sqlalchemy import or_
 from ..extensions import db
 from ..models.user import User, CourseEnrollment
 from ..models.course import Course
@@ -127,6 +128,7 @@ def dashboard():
                          has_pending_courses=bool(pending_courses),
                          avg_progress=avg_progress)
 
+
 # ============================================================================
 # COURSES
 # ============================================================================
@@ -164,6 +166,7 @@ def courses():
                          available_courses=available_courses,
                          rejections=rejections)
 
+
 # ============================================================================
 # PENDING APPROVAL
 # ============================================================================
@@ -190,6 +193,7 @@ def pending_approval():
                          rejected_courses=rejected_courses,
                          username=current_user.username)
 
+
 # ============================================================================
 # ANNOUNCEMENTS
 # ============================================================================
@@ -203,7 +207,7 @@ def announcements():
     enrolled_course_ids = [c.id for c in current_user.get_enrolled_courses()]
     
     announcements = Announcement.query.filter(
-        db.or_(
+        or_(
             Announcement.course_id.is_(None),
             Announcement.course_id.in_(enrolled_course_ids)
         )
@@ -214,6 +218,7 @@ def announcements():
     
     return render_template('student/announcements.html', announcements=announcements)
 
+
 # ============================================================================
 # NOTIFICATIONS
 # ============================================================================
@@ -221,6 +226,7 @@ def announcements():
 @student_bp.route('/notifications')
 @login_required
 def notifications_page():
+    """Student notifications page"""
     if current_user.is_admin():
         return redirect(url_for('admin.dashboard'))
     
@@ -229,6 +235,7 @@ def notifications_page():
     ).order_by(Notification.created_at.desc()).all()
     
     return render_template('student/notifications.html', notifications=notifications)
+
 
 # ============================================================================
 # MESSAGES
@@ -242,6 +249,7 @@ def messages_page():
     
     return render_template('student/messages.html')
 
+
 # ============================================================================
 # CALENDAR
 # ============================================================================
@@ -249,6 +257,7 @@ def messages_page():
 @student_bp.route('/calendar')
 @login_required
 def calendar_page():
+    """Student calendar page"""
     if current_user.is_admin():
         return redirect(url_for('admin.dashboard'))
     
@@ -266,6 +275,7 @@ def calendar_page():
     return render_template('student/calendar.html',
                          assignments=assignments,
                          quizzes=quizzes)
+
 
 # ============================================================================
 # PROGRESS
@@ -299,6 +309,7 @@ def progress_page():
                          course_progress=course_progress,
                          avg_progress=avg_progress)
 
+
 # ============================================================================
 # ACHIEVEMENTS
 # ============================================================================
@@ -313,8 +324,9 @@ def achievements_page():
         return redirect(url_for('student.pending_approval'))
     
     achievements = []
-    quiz_count = QuizAnswer.query.filter_by(student_id=current_user.id).count()
     
+    # First Quiz Achievement
+    quiz_count = QuizAnswer.query.filter_by(student_id=current_user.id).count()
     if quiz_count > 0:
         achievements.append({
             'name': 'First Quiz',
@@ -332,6 +344,7 @@ def achievements_page():
             'date': None
         })
     
+    # Perfect Score Achievement
     answers = QuizAnswer.query.filter_by(student_id=current_user.id).all()
     if answers:
         correct = sum(1 for a in answers if a.is_correct)
@@ -353,6 +366,7 @@ def achievements_page():
                 'date': None
             })
     
+    # Course Master Achievement
     enrolled_courses = current_user.get_enrolled_courses()
     completed_courses = 0
     for course in enrolled_courses:
@@ -375,137 +389,7 @@ def achievements_page():
             'date': None
         })
     
-    submissions = AssignmentSubmission.query.filter_by(student_id=current_user.id).count()
-    if submissions > 0:
-        achievements.append({
-            'name': 'Assignment Submitted',
-            'icon': 'fa-tasks',
-            'description': f'Submitted {submissions} assignment(s)',
-            'earned': True,
-            'date': AssignmentSubmission.query.filter_by(student_id=current_user.id).first().submitted_at
-        })
-    else:
-        achievements.append({
-            'name': 'Assignment Submitted',
-            'icon': 'fa-tasks',
-            'description': 'Submit your first assignment',
-            'earned': False,
-            'date': None
-        })
-    
-    earned_count = sum(1 for a in achievements if a['earned'])
-    
-    return render_template('student/achievements.html',
-                         achievements=achievements,
-                         earned_count=earned_count,
-                         total_achievements=len(achievements))
-
-# backend/routes/student.py - Use these route names
-
-@student_bp.route('/progress')
-@login_required
-def my_progress():
-    """Student progress page"""
-    if current_user.is_admin():
-        return redirect(url_for('admin.dashboard'))
-    
-    if not current_user.is_approved:
-        return redirect(url_for('student.pending_approval'))
-    
-    enrolled_courses = current_user.get_enrolled_courses()
-    course_progress = []
-    total_progress = 0
-    
-    for course in enrolled_courses:
-        progress = course.get_progress_for_student(current_user.id)
-        course_progress.append({
-            'course': course,
-            'progress': progress
-        })
-        total_progress += progress
-    
-    avg_progress = (total_progress // len(enrolled_courses)) if enrolled_courses else 0
-    
-    return render_template('student/progress.html',
-                         enrolled_courses=enrolled_courses,
-                         course_progress=course_progress,
-                         avg_progress=avg_progress)
-
-
-@student_bp.route('/achievements')
-@login_required
-def my_achievements():
-    """Student achievements page"""
-    if current_user.is_admin():
-        return redirect(url_for('admin.dashboard'))
-    
-    if not current_user.is_approved:
-        return redirect(url_for('student.pending_approval'))
-    
-    # Calculate achievements
-    achievements = []
-    quiz_count = QuizAnswer.query.filter_by(student_id=current_user.id).count()
-    
-    if quiz_count > 0:
-        achievements.append({
-            'name': 'First Quiz',
-            'icon': 'fa-puzzle-piece',
-            'description': 'Completed your first quiz',
-            'earned': True,
-            'date': QuizAnswer.query.filter_by(student_id=current_user.id).first().answered_at if quiz_count > 0 else None
-        })
-    else:
-        achievements.append({
-            'name': 'First Quiz',
-            'icon': 'fa-puzzle-piece',
-            'description': 'Complete your first quiz',
-            'earned': False,
-            'date': None
-        })
-    
-    answers = QuizAnswer.query.filter_by(student_id=current_user.id).all()
-    if answers:
-        correct = sum(1 for a in answers if a.is_correct)
-        total = len(answers)
-        if total > 0 and (correct / total) * 100 >= 100:
-            achievements.append({
-                'name': 'Perfect Score',
-                'icon': 'fa-star',
-                'description': 'Got 100% on a quiz',
-                'earned': True,
-                'date': answers[-1].answered_at
-            })
-        else:
-            achievements.append({
-                'name': 'Perfect Score',
-                'icon': 'fa-star',
-                'description': 'Get 100% on a quiz',
-                'earned': False,
-                'date': None
-            })
-    
-    enrolled_courses = current_user.get_enrolled_courses()
-    completed_courses = 0
-    for course in enrolled_courses:
-        if course.get_progress_for_student(current_user.id) >= 100:
-            completed_courses += 1
-    if completed_courses >= 1:
-        achievements.append({
-            'name': 'Course Master',
-            'icon': 'fa-graduation-cap',
-            'description': 'Completed a course',
-            'earned': True,
-            'date': None
-        })
-    else:
-        achievements.append({
-            'name': 'Course Master',
-            'icon': 'fa-graduation-cap',
-            'description': 'Complete all modules in a course',
-            'earned': False,
-            'date': None
-        })
-    
+    # Assignment Submitted Achievement
     submissions = AssignmentSubmission.query.filter_by(student_id=current_user.id).count()
     if submissions > 0:
         achievements.append({
@@ -532,48 +416,79 @@ def my_achievements():
                          total_achievements=len(achievements))
 
 
-@student_bp.route('/notifications')
+# ============================================================================
+# EDIT PROFILE
+# ============================================================================
+
+@student_bp.route('/edit-profile', methods=['GET', 'POST'])
 @login_required
-def my_notifications():
-    """Student notifications page"""
+def edit_profile():
     if current_user.is_admin():
+        flash('Admins cannot edit student profiles here. Please use the admin panel.', 'warning')
         return redirect(url_for('admin.dashboard'))
     
-    notifications = Notification.query.filter_by(
-        user_id=current_user.id
-    ).order_by(Notification.created_at.desc()).all()
+    if not current_user.is_approved:
+        flash('Your account is pending approval. You cannot edit your profile until approved.', 'warning')
+        return redirect(url_for('student.pending_approval'))
     
-    return render_template('student/notifications.html', notifications=notifications)
-
-
-@student_bp.route('/messages')
-@login_required
-def my_messages():
-    """Student messages page"""
-    if current_user.is_admin():
-        return redirect(url_for('admin.dashboard'))
+    if current_user.is_suspended:
+        flash('Your account is suspended. Please contact an admin.', 'error')
+        logout_user()
+        return redirect(url_for('auth.login'))
     
-    return render_template('student/messages.html')
-
-
-@student_bp.route('/calendar')
-@login_required
-def my_calendar():
-    """Student calendar page"""
-    if current_user.is_admin():
-        return redirect(url_for('admin.dashboard'))
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        dob = request.form.get('dob')
+        
+        if not username or not email:
+            flash('Username and email are required.', 'error')
+            return render_template('student/edit_profile.html')
+        
+        # Check if username exists
+        existing_user = User.query.filter(User.username == username, User.id != current_user.id).first()
+        if existing_user:
+            flash('Username already taken.', 'error')
+            return render_template('student/edit_profile.html')
+        
+        # Check if email exists
+        existing_email = User.query.filter(User.email == email, User.id != current_user.id).first()
+        if existing_email:
+            flash('Email already registered.', 'error')
+            return render_template('student/edit_profile.html')
+        
+        current_user.username = username
+        current_user.email = email
+        current_user.phone = phone if phone else None
+        
+        if dob:
+            try:
+                current_user.dob = datetime.strptime(dob, '%Y-%m-%d')
+            except ValueError:
+                flash('Invalid date format.', 'error')
+                return render_template('student/edit_profile.html')
+        
+        # Handle profile picture upload
+        if 'profile_picture' in request.files:
+            file = request.files['profile_picture']
+            if file and file.filename:
+                if allowed_file(file.filename):
+                    # Delete old picture
+                    if current_user.profile_picture:
+                        old_path = os.path.join(current_app.config['UPLOAD_FOLDER'], current_user.profile_picture)
+                        if os.path.exists(old_path):
+                            os.remove(old_path)
+                    
+                    # Save new picture
+                    file_path, file_name = save_uploaded_file(file, 'profile_pictures')
+                    current_user.profile_picture = file_path
+                    flash('Profile picture updated!', 'success')
+                else:
+                    flash('Invalid file format. Please upload JPG, PNG, or GIF.', 'error')
+        
+        db.session.commit()
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('auth.profile'))
     
-    enrolled_courses = current_user.get_enrolled_courses()
-    course_ids = [c.id for c in enrolled_courses]
-    
-    assignments = Assignment.query.filter(
-        Assignment.course_id.in_(course_ids)
-    ).order_by(Assignment.due_date.asc()).all()
-    
-    quizzes = QuizGroup.query.filter(
-        QuizGroup.course_id.in_(course_ids)
-    ).all()
-    
-    return render_template('student/calendar.html',
-                         assignments=assignments,
-                         quizzes=quizzes)                         
+    return render_template('student/edit_profile.html')

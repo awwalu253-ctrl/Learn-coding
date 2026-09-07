@@ -8,7 +8,11 @@ from flask_cors import CORS
 db = SQLAlchemy()
 login_manager = LoginManager()
 migrate = Migrate()
-cache = Cache(config={'CACHE_TYPE': 'simple'})  # Add this config
+# Fix: Use a valid cache type
+cache = Cache(config={
+    'CACHE_TYPE': 'SimpleCache',  # Changed from 'simple' to 'SimpleCache'
+    'CACHE_DEFAULT_TIMEOUT': 300
+})
 cors = CORS()
 
 login_manager.login_view = 'auth.login'
