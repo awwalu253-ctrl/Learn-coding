@@ -1,5 +1,5 @@
 # backend/routes/student.py
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, current_app
 from flask_login import login_required, current_user
 from datetime import datetime
 from sqlalchemy import or_
@@ -11,6 +11,7 @@ from ..models.quiz import QuizGroup, QuizAnswer, QuizQuestion
 from ..models.assignment import Assignment, AssignmentSubmission
 from ..models.notification import Notification, RejectionMessage
 from ..models.announcement import Announcement
+from ..models.message import Message
 from ..utils.decorators import student_required
 from ..utils.helpers import allowed_file, save_uploaded_file
 from ..services.notification_service import create_notification
@@ -28,11 +29,11 @@ def dashboard():
         return redirect(url_for('admin.dashboard'))
     
     if current_user.is_suspended:
-        flash(f'Your account has been suspended. Reason: {current_user.suspension_reason or "No reason provided."}', 'error')
+        flash(f'Your account has been suspended.', 'error')
         return redirect(url_for('auth.logout'))
     
     if not current_user.is_approved:
-        flash('Your account is pending approval. Please wait for an admin to approve your account.', 'warning')
+        flash('Your account is pending approval.', 'warning')
         return redirect(url_for('student.pending_approval'))
     
     approved_courses = current_user.get_enrolled_courses()
@@ -74,12 +75,14 @@ def dashboard():
     ).limit(5).all()
     
     # Get upcoming deadlines
+    from datetime import datetime, timedelta
+    now = datetime.utcnow()
     upcoming_deadlines = []
     if approved_courses:
         course_ids = [c.id for c in approved_courses]
         upcoming_deadlines = Assignment.query.filter(
             Assignment.course_id.in_(course_ids),
-            Assignment.due_date >= datetime.utcnow()
+            Assignment.due_date >= now
         ).order_by(Assignment.due_date.asc()).limit(5).all()
     
     # Get recent activities
@@ -115,6 +118,9 @@ def dashboard():
         total_progress = sum(data['progress'] for data in progress_data)
         avg_progress = total_progress // len(progress_data)
     
+    # Get quiz timer from session
+    quiz_timer = session.get('quiz_timer', None)
+    
     return render_template('student/dashboard.html', 
                          approved_courses=approved_courses,
                          pending_courses=pending_courses,
@@ -126,7 +132,8 @@ def dashboard():
                          recent_activities=recent_activities[:10],
                          has_approved_courses=bool(approved_courses),
                          has_pending_courses=bool(pending_courses),
-                         avg_progress=avg_progress)
+                         avg_progress=avg_progress,
+                         quiz_timer=quiz_timer)
 
 
 # ============================================================================
@@ -238,16 +245,155 @@ def notifications_page():
 
 
 # ============================================================================
-# MESSAGES
+# MESSAGES - COMPLETE IMPLEMENTATION
 # ============================================================================
 
 @student_bp.route('/messages')
 @login_required
 def messages_page():
+    """Student messages page"""
     if current_user.is_admin():
         return redirect(url_for('admin.dashboard'))
     
-    return render_template('student/messages.html')
+    # Get all messages for the student
+    received = Message.query.filter_by(receiver_id=current_user.id).order_by(Message.created_at.desc()).all()
+    sent = Message.query.filter_by(sender_id=current_user.id).order_by(Message.created_at.desc()).all()
+    
+    # Get unread count
+    unread_count = Message.query.filter_by(receiver_id=current_user.id, is_read=False).count()
+    
+    return render_template('student/messages.html', 
+                         received=received, 
+                         sent=sent,
+                         unread_count=unread_count)
+
+
+@student_bp.route('/messages/send', methods=['POST'])
+@login_required
+def send_message():
+    """Send a message to another user"""
+    receiver_id = request.form.get('receiver_id')
+    subject = request.form.get('subject')
+    body = request.form.get('body')
+    
+    if not receiver_id or not subject or not body:
+        flash('All fields are required.', 'error')
+        return redirect(url_for('student.messages_page'))
+    
+    receiver = User.query.get(receiver_id)
+    if not receiver:
+        flash('User not found.', 'error')
+        return redirect(url_for('student.messages_page'))
+    
+    # Create message
+    message = Message(
+        sender_id=current_user.id,
+        receiver_id=receiver_id,
+        subject=subject,
+        body=body
+    )
+    db.session.add(message)
+    db.session.commit()
+    
+    # Send notification to receiver
+    create_notification(
+        user_id=receiver.id,
+        title=f'📩 New Message from {current_user.username}',
+        message=f'Subject: {subject}',
+        type='info',
+        link=url_for('student.messages_page'),
+        icon='fa-envelope',
+        icon_color='gold'
+    )
+    
+    flash('Message sent successfully!', 'success')
+    return redirect(url_for('student.messages_page'))
+
+
+@student_bp.route('/messages/<int:message_id>/read')
+@login_required
+def read_message(message_id):
+    """View a message"""
+    message = Message.query.get_or_404(message_id)
+    
+    # Check if user is the receiver or sender
+    if message.receiver_id != current_user.id and message.sender_id != current_user.id:
+        flash('You do not have permission to view this message.', 'error')
+        return redirect(url_for('student.messages_page'))
+    
+    # Mark as read if user is the receiver
+    if message.receiver_id == current_user.id:
+        message.mark_as_read()
+    
+    # Get replies
+    replies = message.get_replies()
+    
+    return render_template('student/message_detail.html', 
+                         message=message, 
+                         replies=replies)
+
+
+@student_bp.route('/messages/<int:message_id>/reply', methods=['POST'])
+@login_required
+def reply_message(message_id):
+    """Reply to a message"""
+    parent = Message.query.get_or_404(message_id)
+    
+    # Check if user is the receiver or sender of the parent message
+    if parent.receiver_id != current_user.id and parent.sender_id != current_user.id:
+        flash('You do not have permission to reply to this message.', 'error')
+        return redirect(url_for('student.messages_page'))
+    
+    body = request.form.get('body')
+    if not body:
+        flash('Message body is required.', 'error')
+        return redirect(url_for('student.read_message', message_id=message_id))
+    
+    # Determine receiver (reply to the sender of the parent message)
+    receiver_id = parent.sender_id if parent.receiver_id == current_user.id else parent.receiver_id
+    
+    # Create reply
+    reply = Message(
+        sender_id=current_user.id,
+        receiver_id=receiver_id,
+        subject=f'Re: {parent.subject}',
+        body=body,
+        parent_message_id=parent.id
+    )
+    db.session.add(reply)
+    db.session.commit()
+    
+    # Send notification
+    create_notification(
+        user_id=receiver_id,
+        title=f'📩 New Reply from {current_user.username}',
+        message=f'Re: {parent.subject}',
+        type='info',
+        link=url_for('student.messages_page'),
+        icon='fa-reply',
+        icon_color='gold'
+    )
+    
+    flash('Reply sent successfully!', 'success')
+    return redirect(url_for('student.read_message', message_id=message_id))
+
+
+@student_bp.route('/messages/<int:message_id>/delete', methods=['POST'])
+@login_required
+def delete_message(message_id):
+    """Delete a message"""
+    message = Message.query.get_or_404(message_id)
+    
+    # Check if user is the sender or receiver
+    if message.sender_id != current_user.id and message.receiver_id != current_user.id:
+        flash('You do not have permission to delete this message.', 'error')
+        return redirect(url_for('student.messages_page'))
+    
+    db.session.delete(message)
+    db.session.commit()
+    
+    flash('Message deleted.', 'success')
+    return redirect(url_for('student.messages_page'))
 
 
 # ============================================================================

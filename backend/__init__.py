@@ -93,6 +93,7 @@ def create_app(config_class=Config):
     from .routes.settings import settings_bp
     from .routes.api import api_bp
     
+    # Register all blueprints - ✅ FIX: Make sure api_bp is registered
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
     app.register_blueprint(student_bp, url_prefix='/student')
@@ -103,10 +104,10 @@ def create_app(config_class=Config):
     app.register_blueprint(assignment_bp, url_prefix='/assignment')
     app.register_blueprint(leaderboard_bp, url_prefix='/leaderboard')
     app.register_blueprint(settings_bp, url_prefix='/settings')
-    app.register_blueprint(api_bp, url_prefix='/api')
+    app.register_blueprint(api_bp, url_prefix='/api')  # ✅ FIX: Register api blueprint
     
     # ============================================
-    # ROOT ROUTE - FIXES THE "NOT FOUND" ERROR
+    # ROOT ROUTE
     # ============================================
     @app.route('/')
     def home():

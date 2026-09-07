@@ -6,6 +6,7 @@ from .quiz import QuizGroup, QuizQuestion, QuizAnswer
 from .assignment import Assignment, AssignmentSubmission
 from .notification import Notification, RejectionMessage
 from .system import SystemSetting, Backup, EmailTemplate
+from .message import Message
 
 # Try to import Announcement, if it exists
 try:

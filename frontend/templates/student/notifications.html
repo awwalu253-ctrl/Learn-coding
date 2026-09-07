@@ -71,11 +71,20 @@
         font-weight: 600;
         transition: var(--transition);
         font-family: 'Inter', sans-serif;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
 
     .btn-mark-read:hover {
         background: rgba(201, 168, 75, 0.12);
         transform: translateY(-2px);
+    }
+
+    .btn-mark-read:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
     }
 
     .notification-list {
@@ -153,17 +162,8 @@
     }
 
     @keyframes pulse-dot {
-
-        0%,
-        100% {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        50% {
-            opacity: 0.5;
-            transform: scale(0.8);
-        }
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(0.8); }
     }
 
     .notification-item.read .unread-dot {
@@ -205,62 +205,46 @@
         background: rgba(5, 150, 105, 0.08);
         color: #059669;
     }
-
     .notification-item .icon.error {
         background: rgba(239, 68, 68, 0.08);
         color: #EF4444;
     }
-
     .notification-item .icon.warning {
         background: rgba(245, 158, 11, 0.08);
         color: #F59E0B;
     }
-
     .notification-item .icon.info {
         background: rgba(59, 130, 246, 0.08);
         color: #3B82F6;
     }
-
     .notification-item .icon.gold {
         background: rgba(201, 168, 75, 0.08);
         color: var(--primary-gold);
     }
-
     .notification-item .icon.purple {
         background: rgba(139, 92, 246, 0.08);
         color: #8B5CF6;
     }
-
     .notification-item .icon.green {
         background: rgba(5, 150, 105, 0.08);
         color: #059669;
     }
-
     .notification-item .icon.red {
         background: rgba(239, 68, 68, 0.08);
         color: #EF4444;
     }
-
     .notification-item .icon.orange {
         background: rgba(245, 158, 11, 0.08);
         color: #F59E0B;
     }
-
     .notification-item .icon.blue {
         background: rgba(59, 130, 246, 0.08);
         color: #3B82F6;
     }
 
     @keyframes fadeUp {
-        0% {
-            opacity: 0;
-            transform: translateY(16px);
-        }
-
-        100% {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        0% { opacity: 0; transform: translateY(16px); }
+        100% { opacity: 1; transform: translateY(0); }
     }
 
     /* Responsive */
@@ -269,31 +253,25 @@
             flex-direction: column;
             align-items: flex-start;
         }
-
         .page-header-left {
             width: 100%;
         }
-
         .btn-mark-read {
             width: 100%;
             text-align: center;
             justify-content: center;
         }
-
         .notification-item {
             padding: 14px 16px;
         }
-
         .notification-item .icon {
             width: 36px;
             height: 36px;
             font-size: 0.85rem;
         }
-
         .notification-item .content .title {
             font-size: 0.9rem;
         }
-
         .notification-item .content .message {
             font-size: 0.82rem;
         }
@@ -303,36 +281,29 @@
         .page-header h1 {
             font-size: 1.2rem;
         }
-
         .page-header-icon {
             width: 40px;
             height: 40px;
             font-size: 1rem;
         }
-
         .notification-item {
             padding: 12px 14px;
             gap: 10px;
         }
-
         .notification-item .icon {
             width: 32px;
             height: 32px;
             font-size: 0.75rem;
         }
-
         .notification-item .content .title {
             font-size: 0.85rem;
         }
-
         .notification-item .content .message {
             font-size: 0.78rem;
         }
-
         .notification-item .content .time {
             font-size: 0.65rem;
         }
-
         .notification-item .unread-dot {
             width: 6px;
             height: 6px;
@@ -345,49 +316,38 @@
         background: var(--secondary-bg, #253449);
         border-color: rgba(201, 168, 75, 0.04);
     }
-
     [data-theme="dark"] .notification-item {
         border-bottom-color: rgba(201, 168, 75, 0.02);
     }
-
     [data-theme="dark"] .notification-item:hover {
         background: rgba(201, 168, 75, 0.02);
     }
-
     [data-theme="dark"] .notification-item .content .title {
         color: var(--white);
     }
-
     [data-theme="dark"] .notification-item .content .message {
         color: var(--text-gray);
     }
-
     [data-theme="dark"] .notification-item .content .time {
         color: var(--text-muted);
     }
-
     [data-theme="dark"] .notification-item.read .content .title {
         color: var(--text-gray);
     }
-
     [data-theme="dark"] .empty-state i {
         color: var(--primary-gold);
     }
-
     [data-theme="dark"] .empty-state p {
         color: var(--text-gray);
     }
-
     [data-theme="dark"] .empty-state .empty-sub {
         color: var(--text-muted);
     }
-
     [data-theme="dark"] .btn-mark-read {
         background: rgba(201, 168, 75, 0.06);
         border-color: rgba(201, 168, 75, 0.04);
         color: var(--primary-gold);
     }
-
     [data-theme="dark"] .btn-mark-read:hover {
         background: rgba(201, 168, 75, 0.12);
     }
@@ -402,7 +362,7 @@
                 <p class="subtitle">Stay updated with your latest activity</p>
             </div>
         </div>
-        <button class="btn-mark-read" onclick="markAllRead()">
+        <button class="btn-mark-read" id="markAllReadBtn">
             <i class="fas fa-check-double"></i> Mark All Read
         </button>
     </div>
@@ -420,7 +380,6 @@
                 <div class="message">{{ notif.message }}</div>
                 <div class="time">
                     <i class="fas fa-clock" style="font-size: 0.6rem; margin-right: 4px;"></i>
-                    <!-- ✅ FIX: Add fallback -->
                     {{ notif.created_at | time_ago if notif.created_at else 'Just now' }}
                 </div>
             </div>
@@ -446,89 +405,163 @@
         // ==========================================
         document.querySelectorAll('.notification-item.unread').forEach(item => {
             item.addEventListener('click', function (e) {
-                // Don't trigger if clicking on a link inside
                 if (e.target.closest('a')) return;
+                if (e.target.closest('.btn-mark-read')) return;
 
                 const id = this.dataset.id;
                 if (id) {
-                    // Mark as read immediately (optimistic UI)
+                    // Optimistic UI update
                     this.classList.remove('unread');
                     this.classList.add('read');
                     const dot = this.querySelector('.unread-dot');
                     if (dot) dot.remove();
-
-                    // Update badge count
                     updateBadgeCount();
 
-                    // Send request to server
                     fetch(`/api/notifications/${id}/mark-read`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
                     })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (!data.success) {
-                                // Revert if failed
-                                this.classList.remove('read');
-                                this.classList.add('unread');
-                                if (!this.querySelector('.unread-dot')) {
-                                    const newDot = document.createElement('span');
-                                    newDot.className = 'unread-dot';
-                                    this.appendChild(newDot);
-                                }
-                            }
-                        })
-                        .catch(() => {
-                            // Revert on error
-                            this.classList.remove('read');
-                            this.classList.add('unread');
-                            if (!this.querySelector('.unread-dot')) {
-                                const newDot = document.createElement('span');
-                                newDot.className = 'unread-dot';
-                                this.appendChild(newDot);
-                            }
-                        });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            revertMarkRead(this);
+                        }
+                    })
+                    .catch(() => revertMarkRead(this));
                 }
             });
         });
 
+        function revertMarkRead(item) {
+            item.classList.remove('read');
+            item.classList.add('unread');
+            if (!item.querySelector('.unread-dot')) {
+                const dot = document.createElement('span');
+                dot.className = 'unread-dot';
+                item.appendChild(dot);
+            }
+            updateBadgeCount();
+        }
+
         // ==========================================
         // MARK ALL NOTIFICATIONS AS READ
         // ==========================================
-        function markAllRead() {
-            fetch('/api/notifications/mark-read', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.querySelectorAll('.notification-item.unread').forEach(item => {
-                            item.classList.remove('unread');
-                            item.classList.add('read');
-                            const dot = item.querySelector('.unread-dot');
-                            if (dot) dot.remove();
-                        });
-                        updateBadgeCount();
-                    }
-                });
+        const markAllBtn = document.getElementById('markAllReadBtn');
+
+        if (markAllBtn) {
+            markAllBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                markAllRead();
+            });
         }
 
-        // Make function global
-        window.markAllRead = markAllRead;
+        function markAllRead() {
+            const btn = document.getElementById('markAllReadBtn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            }
+
+            console.log('Marking all notifications as read...');
+
+            fetch('/api/notifications/mark-read', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    // Update all notifications
+                    document.querySelectorAll('.notification-item.unread').forEach(item => {
+                        item.classList.remove('unread');
+                        item.classList.add('read');
+                        const dot = item.querySelector('.unread-dot');
+                        if (dot) dot.remove();
+                    });
+                    
+                    updateBadgeCount();
+                    showMessage(`✅ ${data.count || 'All'} notifications marked as read!`, 'success');
+                } else {
+                    showMessage('Failed: ' + (data.error || 'Unknown error'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Error: ' + error.message, 'error');
+            })
+            .finally(() => {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check-double"></i> Mark All Read';
+                }
+            });
+        }
+
+        // ==========================================
+        // SHOW MESSAGE HELPER
+        // ==========================================
+        function showMessage(text, type) {
+            const colors = {
+                success: '#059669',
+                error: '#EF4444',
+                warning: '#F59E0B',
+                info: '#3B82F6'
+            };
+            
+            const message = document.createElement('div');
+            message.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: ${colors[type] || '#059669'};
+                color: white;
+                padding: 14px 28px;
+                border-radius: 12px;
+                font-weight: 600;
+                z-index: 99999;
+                animation: slideIn 0.4s ease;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                max-width: 90%;
+            `;
+            message.textContent = text;
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.style.opacity = '0';
+                message.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => {
+                    if (message.parentNode) message.remove();
+                }, 300);
+            }, 4000);
+        }
 
         // ==========================================
         // UPDATE BADGE COUNT
         // ==========================================
         function updateBadgeCount() {
             const unreadCount = document.querySelectorAll('.notification-item.unread').length;
-            const badge = document.querySelector('.notification-badge');
-            if (badge) {
+            
+            const bellBadge = document.getElementById('notificationBadge');
+            if (bellBadge) {
                 if (unreadCount > 0) {
-                    badge.textContent = unreadCount;
-                    badge.style.display = 'flex';
+                    bellBadge.textContent = unreadCount;
+                    bellBadge.classList.add('has-notifications');
                 } else {
-                    badge.style.display = 'none';
+                    bellBadge.classList.remove('has-notifications');
                 }
             }
         }
@@ -547,31 +580,28 @@
             }, 80 + index * 40);
         });
 
-        // ==========================================
-        // REAL-TIME UPDATES (Optional)
-        // ==========================================
-        // Check for new notifications every 30 seconds
-        let lastCheck = new Date();
+        // Add CSS animation
+        if (!document.getElementById('notificationStyles')) {
+            const style = document.createElement('style');
+            style.id = 'notificationStyles';
+            style.textContent = `
+                @keyframes slideIn {
+                    0% { transform: translateX(50px); opacity: 0; }
+                    100% { transform: translateX(0); opacity: 1; }
+                }
+                .btn-mark-read:disabled {
+                    opacity: 0.6 !important;
+                    cursor: not-allowed !important;
+                    transform: none !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
 
-        setInterval(() => {
-            fetch('/api/notifications')
-                .then(response => response.json())
-                .then(data => {
-                    const unread = data.filter(n => !n.is_read).length;
-                    const badge = document.querySelector('.notification-badge');
-                    if (badge) {
-                        if (unread > 0) {
-                            badge.textContent = unread;
-                            badge.style.display = 'flex';
-                        } else {
-                            badge.style.display = 'none';
-                        }
-                    }
-                })
-                .catch(() => { });
-        }, 30000);
+        // Initial badge count update
+        updateBadgeCount();
 
-        console.log('✨ Notifications - Gold Theme with Timezone Fix Loaded!');
+        console.log('✨ Notifications - Gold Theme with Mark All Read Fixed!');
     });
 </script>
 {% endblock %}

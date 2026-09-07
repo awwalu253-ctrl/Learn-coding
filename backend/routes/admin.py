@@ -12,6 +12,7 @@ from ..models.assignment import Assignment, AssignmentSubmission
 from ..models.notification import Notification, RejectionMessage
 from ..models.announcement import Announcement
 from ..models.system import SystemSetting
+from ..models.message import Message
 from ..utils.decorators import admin_required, super_admin_required
 from ..services.notification_service import create_notification, notify_course_approved, notify_student_approved, notify_student_rejected, notify_student_suspended, notify_student_unsuspended
 
@@ -1331,15 +1332,148 @@ def bulk_actions():
 
 
 # ============================================================================
-# ADMIN MESSAGES
+# ADMIN MESSAGES - COMPLETE IMPLEMENTATION
 # ============================================================================
 
 @admin_bp.route('/messages')
 @login_required
 @admin_required
 def admin_messages():
+    """Admin messages page with sent and received messages"""
+    from ..models.message import Message
+    
+    # Get all students for sending messages
     students = User.query.filter_by(role='student').all()
-    return render_template('admin/admin_messages.html', students=students)
+    
+    # Get messages sent by admin to students
+    sent = Message.query.filter_by(sender_id=current_user.id).order_by(Message.created_at.desc()).all()
+    
+    # Get messages received by admin from students
+    received = Message.query.filter_by(receiver_id=current_user.id).order_by(Message.created_at.desc()).all()
+    
+    # Get unread count
+    unread_count = Message.query.filter_by(receiver_id=current_user.id, is_read=False).count()
+    
+    return render_template('admin/admin_messages.html', 
+                         students=students,
+                         sent=sent,
+                         received=received,
+                         unread_count=unread_count)
+
+
+@admin_bp.route('/messages/send', methods=['POST'])
+@login_required
+@admin_required
+def send_admin_message():
+    """Admin sends a message to a student"""
+    from ..models.message import Message
+    
+    receiver_id = request.form.get('receiver_id')
+    subject = request.form.get('subject')
+    body = request.form.get('body')
+    
+    if not receiver_id or not subject or not body:
+        flash('All fields are required.', 'error')
+        return redirect(url_for('admin.admin_messages'))
+    
+    receiver = User.query.get(receiver_id)
+    if not receiver:
+        flash('Student not found.', 'error')
+        return redirect(url_for('admin.admin_messages'))
+    
+    # Create message
+    message = Message(
+        sender_id=current_user.id,
+        receiver_id=receiver_id,
+        subject=subject,
+        body=body
+    )
+    db.session.add(message)
+    db.session.commit()
+    
+    # Send notification to student
+    create_notification(
+        user_id=receiver.id,
+        title=f'📩 New Message from Admin',
+        message=f'Subject: {subject}',
+        type='info',
+        link=url_for('student.messages_page'),
+        icon='fa-envelope',
+        icon_color='gold'
+    )
+    
+    flash(f'Message sent to {receiver.username} successfully!', 'success')
+    return redirect(url_for('admin.admin_messages'))
+
+
+@admin_bp.route('/messages/reply/<int:message_id>', methods=['POST'])
+@login_required
+@admin_required
+def reply_admin_message(message_id):
+    """Admin replies to a message from a student"""
+    from ..models.message import Message
+    
+    parent = Message.query.get_or_404(message_id)
+    body = request.form.get('body')
+    
+    if not body:
+        flash('Message body is required.', 'error')
+        return redirect(url_for('admin.admin_messages'))
+    
+    # Create reply
+    reply = Message(
+        sender_id=current_user.id,
+        receiver_id=parent.sender_id,
+        subject=f'Re: {parent.subject}',
+        body=body,
+        parent_message_id=parent.id
+    )
+    db.session.add(reply)
+    db.session.commit()
+    
+    # Send notification to student
+    create_notification(
+        user_id=parent.sender_id,
+        title=f'📩 New Reply from Admin',
+        message=f'Re: {parent.subject}',
+        type='info',
+        link=url_for('student.messages_page'),
+        icon='fa-reply',
+        icon_color='gold'
+    )
+    
+    flash('Reply sent successfully!', 'success')
+    return redirect(url_for('admin.admin_messages'))
+
+
+@admin_bp.route('/messages/student/<int:student_id>')
+@login_required
+@admin_required
+def student_conversation(student_id):
+    """View conversation with a specific student"""
+    from ..models.message import Message
+    
+    student = User.query.get_or_404(student_id)
+    
+    # Get all messages between admin and this student
+    messages = Message.query.filter(
+        db.or_(
+            db.and_(Message.sender_id == current_user.id, Message.receiver_id == student_id),
+            db.and_(Message.sender_id == student_id, Message.receiver_id == current_user.id)
+        )
+    ).order_by(Message.created_at.asc()).all()
+    
+    # Mark messages from student as read
+    for msg in messages:
+        if msg.sender_id == student_id and msg.receiver_id == current_user.id and not msg.is_read:
+            msg.mark_as_read()
+    
+    students = User.query.filter_by(role='student').all()
+    
+    return render_template('admin/student_conversation.html', 
+                         student=student, 
+                         messages=messages,
+                         students=students)
 
 
 # ============================================================================

@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}Messages - A-Portal{% endblock %}
+{% block title %}Admin Messages - A-Portal{% endblock %}
 
 {% block content %}
 <style>
-    .messages-page { max-width: 1000px; margin: 0 auto; padding: 0; }
+    .admin-messages-page { max-width: 1000px; margin: 0 auto; padding: 0; }
     .page-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px; opacity: 0; animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
     .page-header-left { display: flex; align-items: center; gap: 14px; }
     .page-header-icon { width: 48px; height: 48px; border-radius: var(--radius-sm, 10px); background: linear-gradient(135deg, rgba(201, 168, 75, 0.08), rgba(143, 126, 72, 0.06)); display: flex; align-items: center; justify-content: center; color: var(--primary-gold, #C9A84B); font-size: 1.3rem; border: 1px solid rgba(201, 168, 75, 0.04); }
@@ -12,115 +12,240 @@
     .page-header h1 span { background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .page-header .subtitle { font-size: 0.85rem; color: var(--text-gray, #C8CED8); margin: 2px 0 0; }
 
-    .message-container { display: grid; grid-template-columns: 300px 1fr; gap: 20px; background: var(--secondary-bg, #253449); border-radius: var(--radius, 14px); border: 1px solid rgba(201, 168, 75, 0.04); overflow: hidden; min-height: 500px; opacity: 0; animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards; }
-    .message-sidebar { border-right: 1px solid rgba(201,168,75,0.04); padding: 16px; }
-    .message-sidebar h3 { color: var(--white); font-size: 0.9rem; margin-bottom: 12px; }
-    .message-sidebar .recipient-list { list-style: none; padding: 0; }
-    .message-sidebar .recipient-list li { padding: 10px 14px; border-radius: var(--radius-sm); color: var(--text-gray); cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(201,168,75,0.02); }
-    .message-sidebar .recipient-list li:hover { background: rgba(201,168,75,0.04); color: var(--primary-gold); }
-    .message-sidebar .recipient-list li .avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.7rem; flex-shrink: 0; }
-    .message-sidebar .recipient-list li .name { flex: 1; }
-    .message-sidebar .recipient-list li .badge { font-size: 0.55rem; padding: 1px 8px; border-radius: 100px; background: rgba(201,168,75,0.08); color: var(--primary-gold); }
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+    .stat-card { background: var(--secondary-bg, #253449); padding: 16px; border-radius: var(--radius, 14px); border: 1px solid rgba(201, 168, 75, 0.04); text-align: center; }
+    .stat-card .stat-number { font-size: 1.6rem; font-weight: 800; color: var(--white, #FFFFFF); line-height: 1.2; }
+    .stat-card .stat-label { font-size: 0.72rem; font-weight: 600; color: var(--text-muted, #8A94A6); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+    .stat-card .stat-icon { font-size: 1.4rem; margin-bottom: 4px; display: inline-block; }
+    .stat-card:nth-child(1) .stat-icon { color: var(--primary-gold, #C9A84B); }
+    .stat-card:nth-child(2) .stat-icon { color: #3B82F6; }
+    .stat-card:nth-child(3) .stat-icon { color: #059669; }
 
-    .message-content { padding: 20px; }
-    .message-content .compose-area { display: flex; flex-direction: column; gap: 12px; height: 100%; }
-    .message-content .compose-area select, .message-content .compose-area textarea { background: var(--primary-bg, #0A1527); color: var(--text-gray, #C8CED8); border: 1px solid rgba(201,168,75,0.06); border-radius: var(--radius-sm, 8px); padding: 10px 14px; font-family: 'Inter', sans-serif; font-size: 0.85rem; width: 100%; }
-    .message-content .compose-area select:focus, .message-content .compose-area textarea:focus { outline: none; border-color: var(--primary-gold, #C9A84B); box-shadow: 0 0 0 3px rgba(201,168,75,0.06); }
-    .message-content .compose-area textarea { min-height: 180px; resize: vertical; }
-    .message-content .compose-area .btn-send { padding: 10px 24px; border-radius: 60px; background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48)); color: var(--white, #FFFFFF); font-weight: 600; border: none; cursor: pointer; transition: var(--transition, 0.3s ease); align-self: flex-start; }
-    .message-content .compose-area .btn-send:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(201,168,75,0.2); }
+    /* Send Message Card */
+    .send-message-card { background: var(--secondary-bg, #253449); border-radius: var(--radius, 14px); border: 1px solid rgba(201, 168, 75, 0.04); padding: 24px 28px; margin-bottom: 28px; }
+    .send-message-card h2 { font-size: 1.05rem; font-weight: 700; color: var(--white, #FFFFFF); margin: 0 0 16px; }
+    .send-message-card .form-group { margin-bottom: 14px; }
+    .send-message-card label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-gray, #C8CED8); margin-bottom: 4px; }
+    .send-message-card select, .send-message-card input, .send-message-card textarea { width: 100%; padding: 10px 14px; border-radius: var(--radius-sm, 8px); border: 1px solid rgba(201, 168, 75, 0.04); background: var(--primary-bg, #0A1527); color: var(--text-gray, #C8CED8); font-size: 0.9rem; font-family: 'Inter', sans-serif; }
+    .send-message-card select:focus, .send-message-card input:focus, .send-message-card textarea:focus { border-color: var(--primary-gold, #C9A84B); outline: none; }
+    .send-message-card textarea { min-height: 80px; resize: vertical; }
+    .btn-send { padding: 10px 28px; border-radius: 60px; font-weight: 600; font-size: 0.85rem; background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48)); color: var(--white, #FFFFFF); border: none; cursor: pointer; transition: var(--transition, 0.3s ease); }
+    .btn-send:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(201, 168, 75, 0.2); }
 
-    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
-    .empty-state i { font-size: 2.5rem; opacity: 0.2; margin-bottom: 12px; }
-    .empty-state p { color: var(--text-gray); }
+    /* Tab Navigation */
+    .tab-nav { display: flex; gap: 4px; background: var(--secondary-bg, #253449); padding: 4px; border-radius: var(--radius, 14px); border: 1px solid rgba(201, 168, 75, 0.04); margin-bottom: 24px; }
+    .tab-btn { flex: 1; padding: 10px 20px; border: none; border-radius: var(--radius-sm, 10px); font-size: 0.85rem; font-weight: 600; color: var(--text-gray, #C8CED8); background: transparent; cursor: pointer; transition: var(--transition, 0.3s ease); font-family: 'Inter', sans-serif; }
+    .tab-btn:hover { color: var(--white, #FFFFFF); background: rgba(201, 168, 75, 0.02); }
+    .tab-btn.active { background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48)); color: var(--white, #FFFFFF); box-shadow: 0 2px 12px rgba(201, 168, 75, 0.15); }
+    .tab-btn .tab-badge { display: inline-block; padding: 0 8px; border-radius: 100px; font-size: 0.65rem; font-weight: 700; background: rgba(255,255,255,0.2); color: inherit; margin-left: 6px; }
+
+    .tab-content { display: none; opacity: 0; animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+    .tab-content.active { display: block; }
+
+    .message-list { display: flex; flex-direction: column; gap: 10px; }
+    .message-item { background: var(--secondary-bg, #253449); border-radius: var(--radius-sm, 10px); padding: 16px 20px; border: 1px solid rgba(201, 168, 75, 0.04); transition: var(--transition, 0.3s ease); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; text-decoration: none; }
+    .message-item:hover { border-color: rgba(201, 168, 75, 0.08); background: rgba(201, 168, 75, 0.02); }
+    .message-item.unread { border-left: 3px solid var(--primary-gold, #C9A84B); }
+    .message-item .message-info { flex: 1; min-width: 150px; }
+    .message-item .message-info .subject { font-weight: 600; color: var(--white, #FFFFFF); font-size: 0.95rem; }
+    .message-item .message-info .sender { font-size: 0.8rem; color: var(--text-muted, #8A94A6); }
+    .message-item .message-info .preview { font-size: 0.85rem; color: var(--text-gray, #C8CED8); margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .message-item .message-meta { font-size: 0.75rem; color: var(--text-muted, #8A94A6); text-align: right; white-space: nowrap; }
+    .message-item .message-meta .status { display: block; margin-top: 4px; }
+    .message-item .message-meta .status.read { color: #059669; }
+    .message-item .message-meta .status.unread { color: var(--primary-gold, #C9A84B); }
+
+    .empty-state { text-align: center; padding: 40px 20px; background: var(--secondary-bg, #253449); border-radius: var(--radius, 14px); border: 1px solid rgba(201, 168, 75, 0.04); }
+    .empty-state i { font-size: 2.5rem; color: var(--primary-gold, #C9A84B); opacity: 0.15; margin-bottom: 12px; }
+    .empty-state h3 { color: var(--white, #FFFFFF); font-size: 1.1rem; margin: 0 0 4px; }
+    .empty-state p { color: var(--text-gray, #C8CED8); font-size: 0.9rem; }
 
     @keyframes fadeUp { 0% { opacity: 0; transform: translateY(16px); } 100% { opacity: 1; transform: translateY(0); } }
-    @media (max-width: 768px) { .message-container { grid-template-columns: 1fr; } .message-sidebar { border-right: none; border-bottom: 1px solid rgba(201,168,75,0.04); } }
+
+    @media (max-width: 768px) {
+        .stats-row { grid-template-columns: repeat(2, 1fr); }
+        .message-item { flex-direction: column; align-items: flex-start; }
+        .message-item .message-meta { text-align: left; width: 100%; }
+        .send-message-card { padding: 18px 16px; }
+    }
+    @media (max-width: 480px) {
+        .stats-row { grid-template-columns: 1fr; }
+        .page-header h1 { font-size: 1.2rem; }
+        .tab-btn { font-size: 0.75rem; padding: 6px 12px; }
+    }
 </style>
 
-<div class="messages-page">
+<div class="admin-messages-page">
+    <!-- Header -->
     <div class="page-header">
         <div class="page-header-left">
             <div class="page-header-icon"><i class="fas fa-envelope"></i></div>
             <div>
-                <h1><span>Messages</span></h1>
-                <p class="subtitle">Send messages to students</p>
+                <h1>Admin <span>Messages</span></h1>
+                <p class="subtitle">Send and manage messages to students</p>
             </div>
+        </div>
+        <span style="padding: 6px 16px; border-radius: 60px; background: rgba(201,168,75,0.06); color: var(--primary-gold); font-size: 0.8rem; font-weight: 600;">
+            <i class="fas fa-envelope"></i> {{ unread_count }} unread
+        </span>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-number">{{ students|length }}</div>
+            <div class="stat-label">Total Students</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-paper-plane"></i></div>
+            <div class="stat-number">{{ sent|length }}</div>
+            <div class="stat-label">Sent</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-inbox"></i></div>
+            <div class="stat-number">{{ received|length }}</div>
+            <div class="stat-label">Received</div>
         </div>
     </div>
 
-    <div class="message-container">
-        <div class="message-sidebar">
-            <h3><i class="fas fa-users"></i> Students</h3>
-            <ul class="recipient-list">
-                {% for student in students %}
-                    <li onclick="selectRecipient('{{ student.id }}', '{{ student.username }}')">
-                        <div class="avatar">{{ student.username[0]|upper }}</div>
-                        <span class="name">{{ student.username }}</span>
-                        {% if student.is_approved %}
-                            <span class="badge">Active</span>
-                        {% else %}
-                            <span class="badge" style="background: rgba(245,158,11,0.08); color: #F59E0B;">Pending</span>
-                        {% endif %}
-                    </li>
-                {% else %}
-                    <li style="color: var(--text-muted); text-align: center; padding: 20px;">No students found</li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <div class="message-content">
-            <div class="compose-area">
-                <h3 style="color: var(--white); margin: 0 0 8px;">Send Message</h3>
-                <select id="recipientSelect">
-                    <option value="">Select a student...</option>
+    <!-- Send Message -->
+    <div class="send-message-card">
+        <h2><i class="fas fa-paper-plane" style="color: var(--primary-gold);"></i> Send Message to Student</h2>
+        <form method="POST" action="{{ url_for('admin.send_admin_message') }}">
+            <div class="form-group">
+                <label for="receiver_id">Select Student</label>
+                <select name="receiver_id" id="receiver_id" required>
+                    <option value="">-- Select Student --</option>
                     {% for student in students %}
-                        <option value="{{ student.id }}">{{ student.username }} ({{ student.email }})</option>
+                    <option value="{{ student.id }}">{{ student.username }} ({{ student.email }})</option>
                     {% endfor %}
                 </select>
-                <input type="text" id="messageSubject" placeholder="Subject..." style="background: var(--primary-bg, #0A1527); color: var(--text-gray, #C8CED8); border: 1px solid rgba(201,168,75,0.06); border-radius: var(--radius-sm, 8px); padding: 10px 14px; font-family: 'Inter', sans-serif; font-size: 0.85rem; width: 100%;">
-                <textarea id="messageBody" placeholder="Write your message here..."></textarea>
-                <button class="btn-send" onclick="sendMessage()">
-                    <i class="fas fa-paper-plane"></i> Send Message
-                </button>
-                <div id="messageStatus" style="margin-top: 8px; font-size: 0.85rem;"></div>
             </div>
+            <div class="form-group">
+                <label for="subject">Subject</label>
+                <input type="text" name="subject" id="subject" placeholder="Enter message subject" required>
+            </div>
+            <div class="form-group">
+                <label for="body">Message</label>
+                <textarea name="body" id="body" placeholder="Type your message here..." required></textarea>
+            </div>
+            <button type="submit" class="btn-send"><i class="fas fa-paper-plane"></i> Send Message</button>
+        </form>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-nav">
+        <button class="tab-btn active" data-target="sent">
+            Sent <span class="tab-badge">{{ sent|length }}</span>
+        </button>
+        <button class="tab-btn" data-target="received">
+            Received <span class="tab-badge">{{ received|length }}</span>
+        </button>
+    </div>
+
+    <!-- Sent Tab -->
+    <div id="sent" class="tab-content active">
+        <div class="message-list">
+            {% if sent %}
+                {% for msg in sent %}
+                <div class="message-item">
+                    <div class="message-info">
+                        <div class="subject">{{ msg.subject }}</div>
+                        <div class="sender">To: {{ msg.receiver.username }}</div>
+                        <div class="preview">{{ msg.body|truncate(80) }}</div>
+                    </div>
+                    <div class="message-meta">
+                        {{ msg.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+                        <span class="status" style="color: var(--text-muted, #8A94A6);">
+                            <i class="fas fa-paper-plane"></i> Sent
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-paper-plane"></i>
+                    <h3>No Sent Messages</h3>
+                    <p>You haven't sent any messages yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Received Tab -->
+    <div id="received" class="tab-content">
+        <div class="message-list">
+            {% if received %}
+                {% for msg in received %}
+                <div class="message-item {% if not msg.is_read %}unread{% endif %}">
+                    <div class="message-info">
+                        <div class="subject">
+                            {% if not msg.is_read %}
+                            <span style="color: var(--primary-gold, #C9A84B);">●</span>
+                            {% endif %}
+                            {{ msg.subject }}
+                        </div>
+                        <div class="sender">From: {{ msg.sender.username }}</div>
+                        <div class="preview">{{ msg.body|truncate(80) }}</div>
+                    </div>
+                    <div class="message-meta">
+                        {{ msg.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+                        <span class="status {% if msg.is_read %}read{% else %}unread{% endif %}">
+                            {% if msg.is_read %}
+                            <i class="fas fa-check-circle"></i> Read
+                            {% else %}
+                            <i class="fas fa-envelope"></i> Unread
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h3>No Received Messages</h3>
+                    <p>No messages from students yet.</p>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
 
 <script>
-    function selectRecipient(id, name) {
-        document.getElementById('recipientSelect').value = id;
-        document.getElementById('messageSubject').focus();
-    }
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = {
+        sent: document.getElementById('sent'),
+        received: document.getElementById('received')
+    };
 
-    function sendMessage() {
-        const recipientId = document.getElementById('recipientSelect').value;
-        const subject = document.getElementById('messageSubject').value;
-        const body = document.getElementById('messageBody').value;
-        const status = document.getElementById('messageStatus');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const target = this.dataset.target;
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            Object.keys(contents).forEach(key => {
+                if (contents[key]) {
+                    contents[key].classList.remove('active');
+                }
+            });
+            if (contents[target]) {
+                contents[target].classList.add('active');
+            }
+        });
+    });
 
-        if (!recipientId) {
-            status.innerHTML = '<span style="color: #EF4444;">Please select a recipient.</span>';
-            return;
-        }
-        if (!subject || !body) {
-            status.innerHTML = '<span style="color: #EF4444;">Please fill in both subject and message.</span>';
-            return;
-        }
-
-        // In a real implementation, this would send to the backend
-        status.innerHTML = '<span style="color: var(--primary-gold);">Message sent successfully! 🎉</span>';
-        
-        // Clear fields
-        document.getElementById('messageSubject').value = '';
-        document.getElementById('messageBody').value = '';
-        document.getElementById('recipientSelect').value = '';
-
-        setTimeout(() => {
-            status.innerHTML = '';
-        }, 5000);
-    }
+    // Check if there are flash messages and display them
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                console.log('{{ category }}: {{ message }}');
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+});
 </script>
 {% endblock %}

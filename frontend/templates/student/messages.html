@@ -5,54 +5,201 @@
 {% block content %}
 <style>
     .messages-page { max-width: 800px; margin: 0 auto; padding: 0; }
-    .page-header { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-bottom: 28px; opacity: 0; animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+    .page-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px; opacity: 0; animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
     .page-header-left { display: flex; align-items: center; gap: 14px; }
     .page-header-icon { width: 48px; height: 48px; border-radius: var(--radius-sm, 10px); background: linear-gradient(135deg, rgba(201, 168, 75, 0.08), rgba(143, 126, 72, 0.06)); display: flex; align-items: center; justify-content: center; color: var(--primary-gold, #C9A84B); font-size: 1.3rem; border: 1px solid rgba(201, 168, 75, 0.04); }
     .page-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--white, #FFFFFF); letter-spacing: -0.02em; margin: 0; }
     .page-header h1 span { background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .page-header .subtitle { font-size: 0.85rem; color: var(--text-gray, #C8CED8); margin: 2px 0 0; }
 
-    .message-list { background: var(--secondary-bg, #253449); border-radius: var(--radius, 14px); border: 1px solid rgba(201, 168, 75, 0.04); overflow: hidden; opacity: 0; animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards; }
-    .message-item { padding: 16px 20px; border-bottom: 1px solid rgba(201,168,75,0.02); transition: var(--transition); display: flex; align-items: flex-start; gap: 12px; }
-    .message-item:last-child { border-bottom: none; }
-    .message-item:hover { background: rgba(201,168,75,0.02); }
-    .message-item .avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
-    .message-item .content { flex: 1; }
-    .message-item .content .sender { font-weight: 600; color: var(--white); }
-    .message-item .content .subject { font-weight: 500; color: var(--text-gray); }
-    .message-item .content .preview { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
-    .message-item .content .time { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; }
-    .message-item .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 14px; }
-    .message-item .status-dot.unread { background: var(--primary-gold); }
-    .message-item .status-dot.read { background: var(--text-muted); }
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+    .stat-card { background: var(--secondary-bg, #253449); padding: 16px; border-radius: var(--radius, 14px); border: 1px solid rgba(201, 168, 75, 0.04); text-align: center; }
+    .stat-card .stat-number { font-size: 1.6rem; font-weight: 800; color: var(--white, #FFFFFF); line-height: 1.2; }
+    .stat-card .stat-label { font-size: 0.72rem; font-weight: 600; color: var(--text-muted, #8A94A6); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+    .stat-card .stat-icon { font-size: 1.4rem; margin-bottom: 4px; display: inline-block; }
+    .stat-card:nth-child(1) .stat-icon { color: var(--primary-gold, #C9A84B); }
+    .stat-card:nth-child(2) .stat-icon { color: #3B82F6; }
+    .stat-card:nth-child(3) .stat-icon { color: #059669; }
 
-    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
-    .empty-state i { font-size: 2.5rem; opacity: 0.2; margin-bottom: 12px; }
-    .empty-state p { color: var(--text-gray); }
+    .tab-nav { display: flex; gap: 4px; background: var(--secondary-bg, #253449); padding: 4px; border-radius: var(--radius, 14px); border: 1px solid rgba(201, 168, 75, 0.04); margin-bottom: 24px; }
+    .tab-btn { flex: 1; padding: 10px 20px; border: none; border-radius: var(--radius-sm, 10px); font-size: 0.85rem; font-weight: 600; color: var(--text-gray, #C8CED8); background: transparent; cursor: pointer; transition: var(--transition, 0.3s ease); font-family: 'Inter', sans-serif; }
+    .tab-btn:hover { color: var(--white, #FFFFFF); background: rgba(201, 168, 75, 0.02); }
+    .tab-btn.active { background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48)); color: var(--white, #FFFFFF); box-shadow: 0 2px 12px rgba(201, 168, 75, 0.15); }
+    .tab-btn .tab-badge { display: inline-block; padding: 0 8px; border-radius: 100px; font-size: 0.65rem; font-weight: 700; background: rgba(255,255,255,0.2); color: inherit; margin-left: 6px; }
+    .tab-btn.active .tab-badge { background: rgba(255,255,255,0.2); }
+
+    .tab-content { display: none; opacity: 0; animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+    .tab-content.active { display: block; }
+
+    .message-list { display: flex; flex-direction: column; gap: 10px; }
+    .message-item { background: var(--secondary-bg, #253449); border-radius: var(--radius-sm, 10px); padding: 16px 20px; border: 1px solid rgba(201, 168, 75, 0.04); transition: var(--transition, 0.3s ease); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; cursor: pointer; text-decoration: none; }
+    .message-item:hover { border-color: rgba(201, 168, 75, 0.08); background: rgba(201, 168, 75, 0.02); }
+    .message-item.unread { border-left: 3px solid var(--primary-gold, #C9A84B); }
+    .message-item .message-info { flex: 1; min-width: 150px; }
+    .message-item .message-info .subject { font-weight: 600; color: var(--white, #FFFFFF); font-size: 0.95rem; }
+    .message-item .message-info .sender { font-size: 0.8rem; color: var(--text-muted, #8A94A6); }
+    .message-item .message-info .preview { font-size: 0.85rem; color: var(--text-gray, #C8CED8); margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    .message-item .message-meta { font-size: 0.75rem; color: var(--text-muted, #8A94A6); text-align: right; white-space: nowrap; }
+    .message-item .message-meta .status { display: block; margin-top: 4px; }
+    .message-item .message-meta .status.read { color: #059669; }
+    .message-item .message-meta .status.unread { color: var(--primary-gold, #C9A84B); }
+
+    .empty-state { text-align: center; padding: 60px 20px; background: var(--secondary-bg, #253449); border-radius: var(--radius, 14px); border: 1px solid rgba(201, 168, 75, 0.04); }
+    .empty-state i { font-size: 2.5rem; color: var(--primary-gold, #C9A84B); opacity: 0.15; margin-bottom: 12px; }
+    .empty-state h3 { color: var(--white, #FFFFFF); font-size: 1.1rem; margin: 0 0 4px; }
+    .empty-state p { color: var(--text-gray, #C8CED8); font-size: 0.9rem; }
 
     @keyframes fadeUp { 0% { opacity: 0; transform: translateY(16px); } 100% { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 768px) {
+        .stats-row { grid-template-columns: repeat(2, 1fr); }
+        .message-item { flex-direction: column; align-items: flex-start; }
+        .message-item .message-meta { text-align: left; width: 100%; }
+    }
+    @media (max-width: 480px) {
+        .stats-row { grid-template-columns: 1fr; }
+        .page-header h1 { font-size: 1.2rem; }
+        .tab-btn { font-size: 0.75rem; padding: 6px 12px; }
+    }
 </style>
 
 <div class="messages-page">
+    <!-- Header -->
     <div class="page-header">
         <div class="page-header-left">
-            <div class="page-header-icon"><i class="fas fa-inbox"></i></div>
+            <div class="page-header-icon"><i class="fas fa-envelope"></i></div>
             <div>
-                <h1><span>Messages</span></h1>
-                <p class="subtitle">Your inbox</p>
+                <h1>My <span>Messages</span></h1>
+                <p class="subtitle">View and manage your messages</p>
             </div>
         </div>
         <span style="padding: 6px 16px; border-radius: 60px; background: rgba(201,168,75,0.06); color: var(--primary-gold); font-size: 0.8rem; font-weight: 600;">
-            <i class="fas fa-envelope"></i> 0 unread
+            <i class="fas fa-envelope"></i> {{ unread_count }} unread
         </span>
     </div>
 
-    <div class="message-list">
-        <div class="empty-state">
-            <i class="fas fa-inbox"></i>
-            <p>No messages yet</p>
-            <p style="font-size: 0.85rem; color: var(--text-muted);">Messages from instructors will appear here</p>
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-inbox"></i></div>
+            <div class="stat-number">{{ received|length }}</div>
+            <div class="stat-label">Received</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-envelope-open"></i></div>
+            <div class="stat-number">{{ unread_count }}</div>
+            <div class="stat-label">Unread</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-paper-plane"></i></div>
+            <div class="stat-number">{{ sent|length }}</div>
+            <div class="stat-label">Sent</div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-nav">
+        <button class="tab-btn active" data-target="received">
+            Received <span class="tab-badge">{{ received|length }}</span>
+        </button>
+        <button class="tab-btn" data-target="sent">
+            Sent <span class="tab-badge">{{ sent|length }}</span>
+        </button>
+    </div>
+
+    <!-- Received Tab -->
+    <div id="received" class="tab-content active">
+        <div class="message-list">
+            {% if received %}
+                {% for msg in received %}
+                <a href="{{ url_for('student.read_message', message_id=msg.id) }}" class="message-item {% if not msg.is_read %}unread{% endif %}">
+                    <div class="message-info">
+                        <div class="subject">
+                            {% if not msg.is_read %}
+                            <span style="color: var(--primary-gold, #C9A84B);">●</span>
+                            {% endif %}
+                            {{ msg.subject }}
+                        </div>
+                        <div class="sender">From: {{ msg.sender.username }}</div>
+                        <div class="preview">{{ msg.body|truncate(80) }}</div>
+                    </div>
+                    <div class="message-meta">
+                        {{ msg.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+                        <span class="status {% if msg.is_read %}read{% else %}unread{% endif %}">
+                            {% if msg.is_read %}
+                            <i class="fas fa-check-circle"></i> Read
+                            {% else %}
+                            <i class="fas fa-envelope"></i> Unread
+                            {% endif %}
+                        </span>
+                    </div>
+                </a>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h3>No Messages</h3>
+                    <p>You don't have any messages yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sent Tab -->
+    <div id="sent" class="tab-content">
+        <div class="message-list">
+            {% if sent %}
+                {% for msg in sent %}
+                <a href="{{ url_for('student.read_message', message_id=msg.id) }}" class="message-item">
+                    <div class="message-info">
+                        <div class="subject">{{ msg.subject }}</div>
+                        <div class="sender">To: {{ msg.receiver.username }}</div>
+                        <div class="preview">{{ msg.body|truncate(80) }}</div>
+                    </div>
+                    <div class="message-meta">
+                        {{ msg.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+                        <span class="status" style="color: var(--text-muted, #8A94A6);">
+                            <i class="fas fa-paper-plane"></i> Sent
+                        </span>
+                    </div>
+                </a>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-paper-plane"></i>
+                    <h3>No Sent Messages</h3>
+                    <p>You haven't sent any messages yet.</p>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = {
+        received: document.getElementById('received'),
+        sent: document.getElementById('sent')
+    };
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const target = this.dataset.target;
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            Object.keys(contents).forEach(key => {
+                if (contents[key]) {
+                    contents[key].classList.remove('active');
+                }
+            });
+            if (contents[target]) {
+                contents[target].classList.add('active');
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

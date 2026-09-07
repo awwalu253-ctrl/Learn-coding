@@ -1702,7 +1702,7 @@
           <i class="fas fa-history"></i>
           <h2>Recent Activity</h2>
           <span class="section-count">{{ recent_activities|length if recent_activities else 0 }}</span>
-          <a href="{{ url_for('student.my_notifications') }}" class="section-link">View All →</a>
+          <a href="{{ url_for('student.notifications_page') }}" class="section-link">View All →</a>
         </div>
         <div class="activity-list">
           {% if recent_activities %}

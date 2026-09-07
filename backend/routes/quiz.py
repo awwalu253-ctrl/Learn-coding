@@ -1,5 +1,5 @@
 # backend/routes/quiz.py
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, session
 from flask_login import login_required, current_user
 from datetime import datetime
 from ..extensions import db
@@ -49,7 +49,7 @@ def take_quiz(quiz_id):
     
     if not current_user.is_enrolled_in_course(quiz.course_id):
         flash('You are not enrolled in this course.', 'error')
-        return redirect(url_for('student_quizzes'))
+        return redirect(url_for('quiz.student_quizzes'))
     
     # Check if already taken
     existing_answers = QuizAnswer.query.filter_by(
@@ -59,11 +59,23 @@ def take_quiz(quiz_id):
     
     if existing_answers:
         flash('You have already taken this quiz.', 'info')
-        return redirect(url_for('student_quizzes'))
+        return redirect(url_for('quiz.student_quizzes'))
     
     questions = quiz.questions
     
+    # Store timer in session for dashboard display
+    if 'quiz_timer' not in session or session.get('quiz_timer', {}).get('quiz_id') != quiz.id:
+        session['quiz_timer'] = {
+            'quiz_id': quiz.id,
+            'quiz_title': quiz.title,
+            'time_left': quiz.time_limit * 60 if quiz.time_limit > 0 else 0,
+            'start_time': datetime.utcnow().isoformat()
+        }
+    
     if request.method == 'POST':
+        # Clear timer on submission
+        session.pop('quiz_timer', None)
+        
         correct_count = 0
         total = len(questions)
         
@@ -129,7 +141,7 @@ def quiz_result(quiz_id):
     
     if not current_user.is_enrolled_in_course(quiz.course_id):
         flash('You are not enrolled in this course.', 'error')
-        return redirect(url_for('student_quizzes'))
+        return redirect(url_for('quiz.student_quizzes'))
     
     answers = QuizAnswer.query.filter_by(
         student_id=current_user.id,
@@ -138,7 +150,7 @@ def quiz_result(quiz_id):
     
     if not answers:
         flash('You have not taken this quiz yet.', 'info')
-        return redirect(url_for('student_quizzes'))
+        return redirect(url_for('quiz.student_quizzes'))
     
     correct = sum(1 for a in answers if a.is_correct)
     total = len(answers)
@@ -163,7 +175,7 @@ def quiz_review(quiz_id):
     
     if not current_user.is_enrolled_in_course(quiz.course_id):
         flash('You are not enrolled in this course.', 'error')
-        return redirect(url_for('student_quizzes'))
+        return redirect(url_for('quiz.student_quizzes'))
     
     answers = QuizAnswer.query.filter_by(
         student_id=current_user.id,
@@ -172,7 +184,7 @@ def quiz_review(quiz_id):
     
     if not answers:
         flash('You have not taken this quiz yet.', 'info')
-        return redirect(url_for('student_quizzes'))
+        return redirect(url_for('quiz.student_quizzes'))
     
     questions = QuizQuestion.query.filter_by(quiz_group_id=quiz.id).order_by(QuizQuestion.order.asc()).all()
     
@@ -460,7 +472,7 @@ def delete_quiz_group(quiz_id):
             title=f'🗑️ Quiz Removed: {quiz.title}',
             message=f'The quiz "{quiz.title}" has been removed from {quiz.course.name}.',
             type='warning',
-            link=url_for('student_quizzes'),
+            link=url_for('quiz.student_quizzes'),
             icon='fa-trash',
             icon_color='red'
         )
@@ -474,6 +486,29 @@ def delete_quiz_group(quiz_id):
     
     flash('Quiz deleted successfully.', 'success')
     return redirect(url_for('quiz.manage_quizzes'))
+
+
+# ============================================================================
+# VIEW QUIZ (Admin Read-Only)
+# ============================================================================
+
+@quiz_bp.route('/admin/quizzes/<int:quiz_id>/view')
+@login_required
+@admin_required
+def view_quiz(quiz_id):
+    """View a quiz (read-only mode for admins)"""
+    quiz = QuizGroup.query.get_or_404(quiz_id)
+    
+    if not current_user.is_super_admin() and quiz.course not in current_user.managed_courses:
+        flash('You do not have permission to view this quiz.', 'error')
+        return redirect(url_for('quiz.manage_quizzes'))
+    
+    questions = QuizQuestion.query.filter_by(quiz_group_id=quiz.id).order_by(QuizQuestion.order.asc()).all()
+    
+    return render_template('admin/view_quiz.html', 
+                         quiz=quiz, 
+                         questions=questions,
+                         total_questions=len(questions))
 
 
 # ============================================================================
@@ -520,21 +555,3 @@ def get_quiz_results(quiz_id):
         'total_students': len(results),
         'results': results
     })
-
-@quiz_bp.route('/admin/quizzes/<int:quiz_id>/view')
-@login_required
-@admin_required
-def view_quiz(quiz_id):
-    """View a quiz (read-only mode for admins)"""
-    quiz = QuizGroup.query.get_or_404(quiz_id)
-    
-    if not current_user.is_super_admin() and quiz.course not in current_user.managed_courses:
-        flash('You do not have permission to view this quiz.', 'error')
-        return redirect(url_for('quiz.manage_quizzes'))
-    
-    questions = QuizQuestion.query.filter_by(quiz_group_id=quiz.id).order_by(QuizQuestion.order.asc()).all()
-    
-    return render_template('admin/view_quiz.html', 
-                         quiz=quiz, 
-                         questions=questions,
-                         total_questions=len(questions))
