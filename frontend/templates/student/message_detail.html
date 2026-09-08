@@ -1,0 +1,492 @@
+{% extends "base.html" %}
+
+{% block title %}Message Detail - {{ site_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ============================================
+   MESSAGE DETAIL - Premium Navy + Gold Theme
+   ============================================ */
+.message-detail-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* ============================================
+   MESSAGE CARD - Gold Theme
+   ============================================ */
+.message-card {
+    background: var(--secondary-bg, #253449);
+    border-radius: var(--radius, 16px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    box-shadow: var(--shadow-md, 0 4px 20px rgba(10, 21, 39, 0.12));
+    padding: 32px 32px 28px;
+    opacity: 0;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.message-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    opacity: 0.8;
+}
+
+/* ============================================
+   MESSAGE HEADER - Gold Theme
+   ============================================ */
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(201, 168, 75, 0.04);
+    margin-bottom: 16px;
+}
+
+.message-header .subject {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--white, #FFFFFF);
+    margin: 0;
+}
+
+.message-header .meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    font-size: 0.85rem;
+    color: var(--text-muted, #8A94A6);
+}
+
+.message-header .meta .sender {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.message-header .meta .sender .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 0.7rem;
+}
+
+.message-header .meta .time {
+    font-size: 0.75rem;
+}
+
+.message-header .meta .status {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 12px;
+    border-radius: 100px;
+}
+
+.message-header .meta .status.read {
+    background: rgba(5, 150, 105, 0.08);
+    color: #059669;
+}
+
+.message-header .meta .status.unread {
+    background: rgba(201, 168, 75, 0.08);
+    color: var(--primary-gold, #C9A84B);
+}
+
+/* ============================================
+   MESSAGE BODY - Gold Theme
+   ============================================ */
+.message-body {
+    font-size: 1rem;
+    color: var(--text-gray, #C8CED8);
+    line-height: 1.8;
+    padding: 16px 0;
+    min-height: 100px;
+    white-space: pre-wrap;
+}
+
+/* ============================================
+   MESSAGE REPLIES - Gold Theme
+   ============================================ */
+.replies-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.replies-section h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--white, #FFFFFF);
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.replies-section h3 i {
+    color: var(--primary-gold, #C9A84B);
+}
+
+.reply-item {
+    background: var(--primary-bg, #0A1527);
+    border-radius: var(--radius-sm, 10px);
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(201, 168, 75, 0.02);
+}
+
+.reply-item .reply-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.reply-item .reply-header .reply-sender {
+    font-weight: 600;
+    color: var(--white, #FFFFFF);
+    font-size: 0.85rem;
+}
+
+.reply-item .reply-header .reply-time {
+    font-size: 0.7rem;
+    color: var(--text-muted, #8A94A6);
+}
+
+.reply-item .reply-body {
+    font-size: 0.9rem;
+    color: var(--text-gray, #C8CED8);
+    line-height: 1.6;
+}
+
+/* ============================================
+   REPLY FORM - Gold Theme
+   ============================================ */
+.reply-form {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.reply-form textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm, 10px);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+    background: var(--primary-bg, #0A1527);
+    color: var(--text-gray, #C8CED8);
+    font-size: 0.95rem;
+    font-family: 'Inter', sans-serif;
+    resize: vertical;
+    min-height: 80px;
+    transition: var(--transition, 0.3s ease);
+}
+
+.reply-form textarea:focus {
+    border-color: var(--primary-gold, #C9A84B);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(201, 168, 75, 0.04);
+}
+
+.reply-form .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+/* ============================================
+   BUTTONS - Gold Theme
+   ============================================ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: var(--transition, 0.3s ease);
+    border: none;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-gold, #C9A84B), var(--dark-gold, #8F7E48));
+    color: var(--white, #FFFFFF);
+    box-shadow: 0 2px 12px rgba(201, 168, 75, 0.12);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(201, 168, 75, 0.2);
+    color: var(--white, #FFFFFF);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--text-gray, #C8CED8);
+    border: 1px solid rgba(201, 168, 75, 0.04);
+}
+
+.btn-outline:hover {
+    background: rgba(201, 168, 75, 0.04);
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+}
+
+.btn-danger {
+    background: rgba(239, 68, 68, 0.08);
+    color: #EF4444;
+    border: 1px solid rgba(239, 68, 68, 0.04);
+}
+
+.btn-danger:hover {
+    background: #EF4444;
+    color: white;
+}
+
+.btn-sm {
+    padding: 6px 14px;
+    font-size: 0.78rem;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .message-card {
+        padding: 24px 18px 20px;
+    }
+
+    .message-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .message-header .meta {
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .message-header .subject {
+        font-size: 1.05rem;
+    }
+
+    .message-body {
+        font-size: 0.92rem;
+    }
+
+    .reply-item {
+        padding: 12px 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .message-card {
+        padding: 16px 14px 16px;
+        border-radius: var(--radius-sm, 10px);
+    }
+
+    .message-header .subject {
+        font-size: 0.95rem;
+    }
+
+    .message-body {
+        font-size: 0.85rem;
+        padding: 12px 0;
+    }
+
+    .btn {
+        font-size: 0.78rem;
+        padding: 6px 14px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .reply-form .form-actions {
+        flex-direction: column;
+    }
+
+    .reply-item .reply-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* ============================================
+   DARK MODE SUPPORT
+   ============================================ */
+[data-theme="dark"] .message-card {
+    background: var(--secondary-bg, #253449);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .message-header .subject {
+    color: var(--white, #FFFFFF);
+}
+
+[data-theme="dark"] .message-body {
+    color: var(--text-gray, #C8CED8);
+}
+
+[data-theme="dark"] .reply-item {
+    background: var(--primary-bg, #0A1527);
+    border-color: rgba(201, 168, 75, 0.02);
+}
+
+[data-theme="dark"] .reply-item .reply-sender {
+    color: var(--white, #FFFFFF);
+}
+
+[data-theme="dark"] .reply-item .reply-body {
+    color: var(--text-gray, #C8CED8);
+}
+
+[data-theme="dark"] .reply-form textarea {
+    background: var(--primary-bg, #0A1527);
+    border-color: rgba(201, 168, 75, 0.04);
+    color: var(--text-gray, #C8CED8);
+}
+
+[data-theme="dark"] .reply-form textarea:focus {
+    border-color: var(--primary-gold, #C9A84B);
+}
+
+[data-theme="dark"] .btn-outline {
+    color: var(--text-gray, #C8CED8);
+    border-color: rgba(201, 168, 75, 0.04);
+}
+
+[data-theme="dark"] .btn-outline:hover {
+    border-color: var(--primary-gold, #C9A84B);
+    color: var(--primary-gold, #C9A84B);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="message-detail-page">
+    <div class="message-card">
+        <!-- Message Header -->
+        <div class="message-header">
+            <h1 class="subject">{{ message.subject }}</h1>
+            <div class="meta">
+                <span class="sender">
+                    <span class="avatar">{{ message.sender.username[0]|upper }}</span>
+                    <span>From: <strong>{{ message.sender.username }}</strong></span>
+                </span>
+                <span class="time">
+                    <i class="fas fa-clock"></i> {{ message.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                </span>
+                <span class="status {% if message.is_read %}read{% else %}unread{% endif %}">
+                    {% if message.is_read %}
+                        <i class="fas fa-check-circle"></i> Read
+                    {% else %}
+                        <i class="fas fa-envelope"></i> Unread
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- Message Body -->
+        <div class="message-body">
+            {{ message.body|safe }}
+        </div>
+
+        <!-- Message Actions -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; padding-top: 8px; border-top: 1px solid rgba(201, 168, 75, 0.04);">
+            <a href="{{ url_for('student.messages_page') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Messages
+            </a>
+            {% if message.sender_id != current_user.id %}
+            <button class="btn btn-primary" onclick="toggleReply()">
+                <i class="fas fa-reply"></i> Reply
+            </button>
+            {% endif %}
+            <form method="POST" action="{{ url_for('student.delete_message', message_id=message.id) }}" style="display:inline;" onsubmit="return confirm('Delete this message?')">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </form>
+        </div>
+
+        <!-- Replies Section -->
+        {% if replies %}
+        <div class="replies-section">
+            <h3><i class="fas fa-comments"></i> Replies</h3>
+            {% for reply in replies %}
+            <div class="reply-item">
+                <div class="reply-header">
+                    <span class="reply-sender">
+                        <i class="fas fa-user" style="color: var(--primary-gold, #C9A84B);"></i>
+                        {{ reply.sender.username }}
+                    </span>
+                    <span class="reply-time">{{ reply.created_at.strftime('%b %d, %Y at %I:%M %p') }}</span>
+                </div>
+                <div class="reply-body">{{ reply.body }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Reply Form -->
+        {% if message.sender_id != current_user.id %}
+        <div class="reply-form" id="replyForm" style="display: none;">
+            <form method="POST" action="{{ url_for('student.reply_message', message_id=message.id) }}">
+                <textarea name="body" placeholder="Type your reply..." required></textarea>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Send Reply
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="toggleReply()">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function toggleReply() {
+    const form = document.getElementById('replyForm');
+    if (form.style.display === 'none') {
+        form.style.display = 'block';
+        form.querySelector('textarea').focus();
+    } else {
+        form.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}
